@@ -314,5 +314,12 @@
  "cookie ไม่มี SameSite (เสริมการกัน CSRF ได้)": "cookie has no SameSite (would help against CSRF)",
  "ทดสอบแบบไม่ทำลาย: ใส่ ' ดู error, ใส่เครื่องหมายทดสอบดูการ encode, ตรวจ CSRF token — ไม่ใช้ OR 1=1/UNION, ไม่ส่งฟอร์ม POST, ไม่ดึง/แก้ข้อมูล · ใช้กับเป้าฝึกหรือเว็บของตัวเองเท่านั้น": "Non-destructive: a ' to surface errors, a marker to check encoding, a CSRF-token check — no OR 1=1/UNION, no POST submits, no data read or changed · practice targets or your own sites only",
  "ตรวจช่องโหว่เว็บแอป SQLi/XSS/CSRF (เป้าฝึก/เว็บตัวเอง)": "Web-app SQLi/XSS/CSRF checks (practice targets / your own sites)",
- "เว็บแอป": "Web app"
+ "เว็บแอป": "Web app",
+ "ระบุ IP ของอุปกรณ์ เช่น ./seccheck.py iot 192.168.1.50": "Give the device's IP, e.g. ./seccheck.py iot 192.168.1.50",
+ "พอร์ตที่เปิดบนอุปกรณ์": "Ports open on the device",
+ "Chromecast/Cast ตอบข้อมูลโดยไม่ต้องล็อกอิน: {n}": "Chromecast/Cast returns info without login: {n}",
+ "ไม่พบพอร์ต IoT/ทีวีที่คุ้นเปิดบนเป้าหมายนี้": "No familiar IoT/TV ports open on this target",
+ "ตรวจแบบ passive — ไม่สั่งเล่น/หยุด ไม่เปลี่ยนค่า ไม่เดารหัส": "Passive — no play/stop commands, no settings changed, no password guessing",
+ "ตรวจอุปกรณ์ IoT/ทีวี/สมาร์ตโฮม ในวง (passive)": "Audit IoT/TV/smart-home devices on the LAN (passive)",
+ "IoT/ทีวี": "IoT/TV"
 }

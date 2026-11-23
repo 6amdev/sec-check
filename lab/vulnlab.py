@@ -356,6 +356,26 @@ class FakeCamera(BaseHTTPRequestHandler):
         self._send(200, "application/soap+xml", xml.encode())
 
 
+class FakeCast(BaseHTTPRequestHandler):
+    """Chromecast ปลอม: ตอบ /setup/eureka_info โดยไม่ต้องล็อกอิน (ทดสอบโมดูล iot)"""
+    def log_message(self, *a):
+        pass
+
+    def do_GET(self):
+        if self.path.startswith("/setup/eureka_info"):
+            body = json.dumps({"name": "Lab TV", "ssid": "lab-wifi", "cast_build_revision": "1.0"}).encode()
+        else:
+            body = b'{"cast":"lab"}'
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    do_HEAD = do_GET
+
+
 class Docker(JsonAPI):
     payload = {"Version": "20.10.7-lab", "ApiVersion": "1.41", "Os": "linux"}
 
@@ -446,6 +466,7 @@ def main():
         start("apple remote desktop (fake)", TCP, (WEAK, 3283), NoOp),
         start("webapp practice (vulnerable)", ThreadingHTTPServer, (WEAK, 8810), WebappWeak),
         start("webapp practice (hardened)", ThreadingHTTPServer, (SAFE, 8810), WebappSafe),
+        start("chromecast open (fake)", ThreadingHTTPServer, (WEAK, 8008), FakeCast),
     ]
     if not any(servers):
         sys.exit(1)

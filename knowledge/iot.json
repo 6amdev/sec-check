@@ -1,0 +1,26 @@
+{
+  "iot.cast_open": {
+    "severity": "medium", "tag": "CWE-306", "level": 1,
+    "title": {"th": "อุปกรณ์ Cast/ทีวี ควบคุมได้โดยไม่ต้องยืนยันตัวตน", "en": "Cast/TV device controllable without authentication"},
+    "what": {"th": "Chromecast / Google Cast / DIAL ตอบข้อมูลและรับคำสั่งจากใครก็ได้ในวงแลน โดยไม่ต้องรหัส", "en": "Chromecast / Google Cast / DIAL answers and takes commands from anyone on the LAN with no password."},
+    "attack": {"th": "ใครในวง (รวมอุปกรณ์ที่ติดมัลแวร์ หรือเว็บผ่านช่องโหว่ DNS-rebinding) สั่งเล่น/หยุด/เปลี่ยนช่อง หรือยิงคลิปขึ้นทีวีได้ — เคยมีแคมเปญ 'CastHack' สั่งทีวีคนทั้งโลก", "en": "Anyone on the LAN (incl. malware, or a website via DNS-rebinding) can play/stop/switch or push clips to the TV — the 'CastHack' campaign did this to TVs worldwide."},
+    "fix": {"th": "แยกอุปกรณ์ Cast/IoT ไปไว้ Wi-Fi แขก/VLAN ที่เข้าถึงเครื่องหลักไม่ได้ · อัปเดตเฟิร์มแวร์ · ปิดฟีเจอร์ cast ที่ไม่ใช้ · อย่า forward พอร์ตออกเน็ต", "en": "Put Cast/IoT devices on a guest Wi-Fi/VLAN isolated from your main machines · update firmware · disable unused cast features · never port-forward them."},
+    "refs": []
+  },
+  "iot.media_device": {
+    "severity": "info", "tag": "Inventory", "level": 3,
+    "title": {"th": "พบอุปกรณ์มีเดีย/ทีวี/IoT ในวง", "en": "Media/TV/IoT device found on the LAN"},
+    "what": {"th": "พบอุปกรณ์ประเภททีวี/กล่องสตรีม/IoT (เช่น Roku, DLNA, Cast)", "en": "A TV / streaming box / IoT device was found (e.g. Roku, DLNA, Cast)."},
+    "attack": {"th": "ไม่ใช่ช่องโหว่โดยตรง แต่อุปกรณ์พวกนี้อัปเดตน้อยและมักเปิดบริการไว้ — ควรแยกวงและตรวจรหัส default", "en": "Not a vulnerability itself, but these are rarely updated and often leave services open — isolate them and check for default passwords."},
+    "fix": {"th": "แยกไปวง IoT/แขก, อัปเดตเฟิร์มแวร์, ปิดบริการที่ไม่ใช้, ตั้งรหัสถ้ามีหน้า admin", "en": "Isolate on an IoT/guest network, update firmware, disable unused services, set a password if it has an admin page."},
+    "refs": []
+  },
+  "iot.manual_segment": {
+    "severity": "check", "tag": "Checklist", "level": 1,
+    "title": {"th": "แยกอุปกรณ์ IoT/ทีวี ออกจากเครื่องสำคัญหรือยัง", "en": "Are IoT/TV devices separated from important machines?"},
+    "what": {"th": "กล้อง ทีวี ปลั๊กอัจฉริยะ ลำโพง ไม่ควรอยู่วงแลนเดียวกับคอมทำงาน/เซิร์ฟเวอร์/NAS", "en": "Cameras, TVs, smart plugs and speakers shouldn't share a LAN with work PCs/servers/NAS."},
+    "attack": {"th": "IoT อัปเดตน้อยและโดนเจาะง่าย ถ้าอยู่วงเดียวกัน ผู้โจมตีกระโดดจากทีวี/ปลั๊กไปเครื่องสำคัญได้ (lateral movement)", "en": "IoT is rarely patched and easy to compromise; on the same LAN an attacker hops from the TV/plug to important machines (lateral movement)."},
+    "fix": {"th": "เปิด Guest Wi-Fi (ติ๊ก 'แยกจากเครือข่ายภายใน') แล้วย้าย IoT ไปไว้ที่นั่น หรือทำ VLAN แยก", "en": "Enable guest Wi-Fi with 'isolate from LAN' and move IoT there, or set up a separate VLAN."},
+    "refs": []
+  }
+}

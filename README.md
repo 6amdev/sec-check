@@ -25,7 +25,7 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 ## ✨ What it does
 
-Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **137 lessons** — list them with `./seccheck.py lessons`.
+Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **140 lessons** — list them with `./seccheck.py lessons`.
 
 | Module | Checks | Examples |
 |---|---|---|
@@ -39,6 +39,7 @@ Every finding in the report comes with three boxes: **What it is**, **How attack
 | 📷 **camera** | 4 | Non-destructive checks of an IP camera / NVR: **ONVIF** present and whether it returns device info **without authentication**, **RTSP** streams with no auth, exposed **snapshot/MJPEG** URLs viewable without login, and a default-web-password checklist. Read-only requests only — no settings changed, no footage saved. |
 | 🍎 **mac** | 4 | Non-destructive checks of a Mac on your LAN: Screen Sharing (VNC 5900, incl. no-password), AFP (legacy file sharing), Apple Remote Desktop (3283), SMB signing (shared with the windows module), and SSH — plus a firewall checklist. Protocol negotiation only. |
 | 🧪 **webapp** | 3 | Light SQLi/XSS/CSRF checks for **practice targets** (DVWA/Juice Shop on localhost) or your own sites in the allow-list. Non-destructive: a single `'` to surface a SQL error, a harmless marker to detect unencoded reflection, and a form check for CSRF tokens — GET params only, never submits a POST form, never reads or changes data. See note below. |
+| 📺 **iot** | 3 | Passive checks of IoT / TV / smart-home devices: Chromecast/Cast & DIAL controllable without auth, Roku, Telnet (Mirai-class), MQTT, exposed device web pages, and a network-segmentation checklist. No play/stop commands, no settings changed, no guessing. |
 
 **Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
 
@@ -150,11 +151,14 @@ tests/               python3 -m unittest discover -s tests
 
 ## 🧭 Roadmap
 
-- [ ] `diff` two reports: what got fixed, what's new
-- [ ] Scheduled scans + a phone dashboard on the LAN (like disk-check's web app)
+- [x] Web UI (Dashboard · Scan · Network Map · Learn · History) with SQLite history
+- [x] Difficulty levels 1–5 and before/after 🔴→🟢 comparison
+- [x] Device categories: router · wifi · tls · windows · camera · mac · webapp · iot
+- [x] Lab-only web-app demos (SQLi/XSS/CSRF) against the practice lab
 - [ ] Optional wrappers when installed: `nmap -sV`, `nuclei`, `testssl.sh`, `lynis`, merged into the same report
 - [ ] DNS/e-mail checks for your domain: SPF, DKIM, DMARC, DNSSEC, CAA, dangling subdomains
-- [ ] Lab-only "attack demos" (SQL injection, XSS, CSRF) against the practice lab, to see the attack and then the fix
+- [ ] REST API + MCP server (so AI tools can drive scans) — see [docs/DESIGN.md](docs/DESIGN.md)
+- [ ] Scheduled scans + push alerts
 
 ## Requirements
 

@@ -1,0 +1,8 @@
+# ข้อมูลของคุณ — ไม่เก็บใน git / your data — never committed
+scope.json
+reports/
+*.report.html
+
+# Python
+__pycache__/
+*.pyc

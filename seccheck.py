@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+"""
+sec-check — ตรวจหาช่องโหว่ในระบบของตัวเอง เพื่อเรียนรู้และป้องกัน
+sec-check — find weaknesses in systems you own, learn how attacks work, and fix them
+
+  ./seccheck.py scope add 6amdev.com          เพิ่มเป้าหมาย (ต้องยืนยันว่าเป็นเจ้าของ) / add a target you own
+  ./seccheck.py web https://6amdev.com        ตรวจเว็บ / check a website
+  ./seccheck.py lan [192.168.1.0/24]          หาเครื่อง+บริการในวงแลน / scan your LAN
+  ./seccheck.py host                          ตรวจเครื่อง Linux นี้ / audit this Linux machine
+  ./seccheck.py router [192.168.1.1]          ตรวจเราเตอร์/Wi-Fi / check router & Wi-Fi
+  ./seccheck.py all                           host + router + lan + web ทุกเป้าหมายใน scope
+  ./seccheck.py explain web.git_exposed       อ่านคำอธิบายช่องโหว่ / read a lesson
+  ./seccheck.py lessons                       รายการช่องโหว่ทั้งหมดที่ตรวจได้ / list all checks
+
+ทุกการตรวจเป็นแบบไม่ทำลาย (อ่านอย่างเดียว) และทำได้เฉพาะเป้าหมายใน scope.json
+Every check is non-destructive (read-only) and only runs against targets in scope.json.
+"""
+import argparse
+import os
+import sys
+import webbrowser
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+import i18n  # noqa: E402
+from i18n import _  # noqa: E402
+from core import VERSION, kb, report, scope  # noqa: E402
+from core.finding import SEVERITIES, effective_severity, grade, score  # noqa: E402
+
+COLOR = {"critical": "\033[1;97;41m", "high": "\033[1;31m", "medium": "\033[33m", "low": "\033[36m",
+         "info": "\033[90m", "check": "\033[35m"}
+RESET = "\033[0m"
+
+
+def c(sev, text):
+    return f"{COLOR.get(sev, '')}{text}{RESET}" if sys.stdout.isatty() else text
+
+
+def lang():
+    return i18n.get_lang()
+
+
+def summary(results):
+    k = kb.load()
+    for r in results:
+        print(f"\n== {_(report.MODULE_TH[r.module])} · {r.target} ==")
+        fs = sorted(r.findings, key=lambda f: SEVERITIES.index(effective_severity(f, k)))
+        for f in fs:
+            sev = effective_severity(f, k)
+            title = kb.text(kb.get(f.id), "title", lang())
+            print(f"  {c(sev, f'[{report.sev_label(sev, lang()):^8}]')} {title}  ·  {f.target}")
+        if not fs:
+            print("  ✅ " + _("ไม่พบปัญหาในการตรวจนี้"))
+        print("  " + _("ผ่าน {n} ข้อ", n=len(r.passed)) + (f" · {_('ต้องตรวจเอง {n} ข้อ', n=len(r.manual))}"
+                                                           if r.manual else ""))
+    pts = score(results, k)
+    print("\n" + _("คะแนน: {p}/100  เกรด {g}", p=pts, g=grade(pts)))
+
+
+def finish(results, args, name):
+    summary(results)
+    path = report.save(results, args.out, name)
+    print(_("📄 รายงาน: {p}", p=path))
+    if args.open:
+        webbrowser.open(path.as_uri())
+
+
+def run_module(mod, target, args):
+    from checks import host, lan, router, web
+    m = {"web": web, "lan": lan, "host": host, "router": router}[mod]
+    print(_("▶ กำลังตรวจ {m} {t}", m=_(report.MODULE_TH[mod]), t=target or ""), flush=True)
+    return m.run(target, args)
+
+
+def cmd_all(args):
+    from checks import lan, router
+    results = [run_module("host", None, args)]
+    for mod, tgt in [("router", router.gateway())] + [("lan", n) for _i, n in lan.local_networks()]:
+        if not tgt:
+            continue
+        try:
+            scope.check(tgt)
+        except scope.OutOfScope:
+            print(_("⏭  ข้าม {m} {t} — ยังไม่อยู่ใน scope (เพิ่มด้วย ./seccheck.py scope add {t})",
+                    m=mod, t=tgt))
+            continue
+        results.append(run_module(mod, tgt, args))
+    for e in scope.load():
+        if e["kind"] == "url" or (e["kind"] == "host" and not e["target"].startswith("*.")):
+            results.append(run_module("web", e["target"], args))
+    finish(results, args, "all")
+
+
+def cmd_explain(args):
+    e = kb.load().get(args.id)
+    if not e:
+        print(_("ไม่รู้จัก id นี้ — ดูรายการด้วย ./seccheck.py lessons"))
+        return 1
+    L = lang()
+    print(c(e["severity"], f"[{report.sev_label(e['severity'], L)}]") + f" {kb.text(e, 'title', L)}  ({e.get('tag', '')})")
+    for field, label in (("what", "คืออะไร"), ("attack", "ผู้โจมตีใช้ยังไง"), ("fix", "วิธีแก้")):
+        print(f"\n{_(label)}:\n  {kb.text(e, field, L)}")
+    for u in e.get("refs", []):
+        print("  📚 " + u)
+    return 0
+
+
+def cmd_lessons(_args):
+    L = lang()
+    for id, e in kb.load().items():
+        print(f"  {c(e['severity'], f'{report.sev_label(e['severity'], L):<8}')} {id:<34} {kb.text(e, 'title', L)}")
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(prog="seccheck.py", description=_("ตรวจหาช่องโหว่ในระบบของตัวเอง (ไม่ทำลาย)"))
+    p.add_argument("--lang", choices=["th", "en"], default=os.environ.get("SECCHECK_LANG", "th"))
+    p.add_argument("--out", default=str(HERE / "reports"), help=_("โฟลเดอร์เก็บรายงาน"))
+    p.add_argument("--open", action="store_true", help=_("เปิดรายงานในเบราว์เซอร์เมื่อเสร็จ"))
+    p.add_argument("--version", action="version", version=f"sec-check {VERSION}")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    sp = sub.add_parser("scope", help=_("จัดการเป้าหมายที่อนุญาต"))
+    sp.add_argument("action", choices=["list", "add", "remove"])
+    sp.add_argument("target", nargs="?")
+    sp.add_argument("--note", default="")
+    sp.add_argument("--yes", action="store_true", help=_("ยืนยันว่าเป็นเจ้าของ (ไม่ถาม)"))
+
+    w = sub.add_parser("web", help=_("ตรวจเว็บไซต์"))
+    w.add_argument("target")
+    w.add_argument("--delay", type=float, default=0.15, help=_("หน่วงระหว่าง request (วินาที)"))
+
+    ln = sub.add_parser("lan", help=_("หาเครื่องและบริการในวงแลน"))
+    ln.add_argument("target", nargs="?")
+    ln.add_argument("--timeout", type=float, default=0.8)
+    ln.add_argument("--max-hosts", type=int, default=1024)
+
+    sub.add_parser("host", help=_("ตรวจเครื่อง Linux นี้"))
+    r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
+    r.add_argument("target", nargs="?")
+    r.add_argument("--timeout", type=float, default=1.5)
+    a = sub.add_parser("all", help=_("ตรวจทุกอย่างที่อยู่ใน scope"))
+    a.add_argument("--delay", type=float, default=0.15)
+    a.add_argument("--timeout", type=float, default=0.8)
+    a.add_argument("--max-hosts", type=int, default=1024)
+    e = sub.add_parser("explain", help=_("อ่านคำอธิบายช่องโหว่"))
+    e.add_argument("id")
+    sub.add_parser("lessons", help=_("รายการช่องโหว่ทั้งหมดที่ตรวจได้"))
+
+    pre = argparse.ArgumentParser(add_help=False)
+    pre.add_argument("--lang", default=os.environ.get("SECCHECK_LANG", "th"))
+    i18n.set_default(pre.parse_known_args(argv)[0].lang)
+    args = p.parse_args(argv)
+    i18n.set_default(args.lang)
+
+    try:
+        if args.cmd == "scope":
+            if args.action == "list":
+                scope.show()
+            elif not args.target:
+                p.error(_("ต้องระบุเป้าหมาย"))
+            elif args.action == "add":
+                scope.add(args.target, args.note, args.yes)
+            else:
+                scope.remove(args.target)
+        elif args.cmd == "explain":
+            return cmd_explain(args)
+        elif args.cmd == "lessons":
+            cmd_lessons(args)
+        elif args.cmd == "all":
+            cmd_all(args)
+        else:
+            res = run_module(args.cmd, getattr(args, "target", None), args)
+            name = f"{args.cmd}_{res.target.split('://')[-1]}"
+            finish([res], args, name)
+    except scope.OutOfScope as ex:
+        print("⛔ " + str(ex))
+        return 2
+    except KeyboardInterrupt:
+        print("\n" + _("ยกเลิก"))
+        return 130
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

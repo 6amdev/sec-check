@@ -1,0 +1,242 @@
+{
+  "web.no_https": {
+    "severity": "high", "tag": "OWASP A02 · CWE-319",
+    "title": {"th": "เว็บไม่มี HTTPS", "en": "No HTTPS"},
+    "what": {"th": "ต่อ HTTPS (พอร์ต 443) ไม่ได้ ข้อมูลทุกอย่างวิ่งเป็นข้อความธรรมดา", "en": "HTTPS (port 443) is not reachable, so everything travels as plain text."},
+    "attack": {"th": "ใครก็ตามที่อยู่ในเส้นทาง (Wi-Fi ร้านกาแฟ, ISP, เราเตอร์ที่ถูกเจาะ) อ่านรหัสผ่าน/cookie ได้ และแก้หน้าเว็บระหว่างทางได้ (ใส่โฆษณา/มัลแวร์) — เรียกว่า man-in-the-middle", "en": "Anyone on the path (café Wi-Fi, ISP, a hacked router) can read passwords and cookies and modify pages in transit (inject ads/malware) — a man-in-the-middle attack."},
+    "fix": {"th": "ขอใบรับรองฟรีจาก Let's Encrypt: `sudo apt install certbot python3-certbot-nginx` แล้ว `sudo certbot --nginx -d example.com` หรือใช้ Cloudflare/โฮสต์ที่เปิด HTTPS ให้อัตโนมัติ", "en": "Get a free certificate from Let's Encrypt: `sudo apt install certbot python3-certbot-nginx` then `sudo certbot --nginx -d example.com`, or use Cloudflare / a host with automatic HTTPS."},
+    "refs": ["https://letsencrypt.org/getting-started/", "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/"]
+  },
+  "web.cert_invalid": {
+    "severity": "high", "tag": "CWE-295",
+    "title": {"th": "ใบรับรอง HTTPS ไม่ถูกต้อง", "en": "Invalid HTTPS certificate"},
+    "what": {"th": "เบราว์เซอร์จะขึ้นคำเตือน — ใบรับรองหมดอายุ, ออกเอง (self-signed), ชื่อไม่ตรงโดเมน หรือขาด intermediate", "en": "Browsers will show a warning — the certificate is expired, self-signed, for another name, or missing its intermediate chain."},
+    "attack": {"th": "ผู้ใช้ชินกับการกด 'ดำเนินการต่อ' พอโดนปลอมใบรับรองจริง ก็จะกดผ่านเหมือนเดิม การเข้ารหัสจึงไม่ช่วยอะไร", "en": "Users learn to click through warnings; when an attacker presents a fake certificate they click through too, so encryption no longer protects them."},
+    "fix": {"th": "ดูข้อความ error ในหลักฐาน: หมดอายุ → ต่ออายุ (`sudo certbot renew`); ชื่อไม่ตรง → ออกใบใหม่ให้ครอบคลุมทุกชื่อ (รวม www); ขาด chain → ใช้ไฟล์ fullchain.pem แทน cert.pem", "en": "Read the error in the evidence: expired → renew (`sudo certbot renew`); wrong name → reissue covering every name (incl. www); missing chain → serve fullchain.pem instead of cert.pem."},
+    "refs": ["https://www.ssllabs.com/ssltest/", "https://cwe.mitre.org/data/definitions/295.html"]
+  },
+  "web.cert_expiring": {
+    "severity": "medium", "tag": "Ops",
+    "title": {"th": "ใบรับรองใกล้หมดอายุ", "en": "Certificate expires soon"},
+    "what": {"th": "ใบรับรองจะหมดอายุเร็วๆ นี้ ถ้าไม่ต่อ เว็บจะใช้ไม่ได้และขึ้นคำเตือน", "en": "The certificate expires soon; once it does, browsers block the site with a warning."},
+    "attack": {"th": "ไม่ใช่การโจมตีโดยตรง แต่ทำให้เว็บล่ม (ลูกค้าเข้าร้านไม่ได้) และฝึกให้ผู้ใช้กดผ่านคำเตือน", "en": "Not an attack by itself, but it takes the site down and trains users to ignore warnings."},
+    "fix": {"th": "เช็กว่าต่ออายุอัตโนมัติทำงาน: `systemctl list-timers | grep certbot` และทดสอบ `sudo certbot renew --dry-run`", "en": "Make sure auto-renewal works: `systemctl list-timers | grep certbot` and test with `sudo certbot renew --dry-run`."},
+    "refs": ["https://eff-certbot.readthedocs.io/en/stable/using.html#automated-renewals"]
+  },
+  "web.tls_old": {
+    "severity": "medium", "tag": "OWASP A02 · CWE-327",
+    "title": {"th": "รองรับ TLS รุ่นเก่า (1.0/1.1)", "en": "Old TLS versions accepted (1.0/1.1)"},
+    "what": {"th": "เซิร์ฟเวอร์ยังยอมคุยด้วย TLS 1.0/1.1 ซึ่งเลิกใช้แล้วตั้งแต่ 2021 (RFC 8996)", "en": "The server still speaks TLS 1.0/1.1, deprecated since 2021 (RFC 8996)."},
+    "attack": {"th": "รุ่นเก่ามีจุดอ่อนที่รู้จักกันดี (BEAST, POODLE ฯลฯ) ผู้โจมตีอาจบังคับให้ลดรุ่น (downgrade) เพื่อถอดรหัสบางส่วน", "en": "Old versions have well-known weaknesses (BEAST, POODLE …); an attacker may force a downgrade to break parts of the encryption."},
+    "fix": {"th": "nginx: `ssl_protocols TLSv1.2 TLSv1.3;` · Apache: `SSLProtocol -all +TLSv1.2 +TLSv1.3` แล้ว reload ใช้ Mozilla SSL Config Generator ช่วยได้", "en": "nginx: `ssl_protocols TLSv1.2 TLSv1.3;` · Apache: `SSLProtocol -all +TLSv1.2 +TLSv1.3`, then reload. The Mozilla SSL Config Generator helps."},
+    "refs": ["https://ssl-config.mozilla.org/", "https://datatracker.ietf.org/doc/html/rfc8996"]
+  },
+  "web.http_no_redirect": {
+    "severity": "medium", "tag": "CWE-319",
+    "title": {"th": "HTTP ไม่พาไป HTTPS", "en": "HTTP does not redirect to HTTPS"},
+    "what": {"th": "เข้า http:// แล้วได้หน้าเว็บเลย ไม่ถูกส่งต่อไป https://", "en": "Visiting http:// serves the page instead of redirecting to https://."},
+    "attack": {"th": "คนที่พิมพ์ชื่อเว็บเฉยๆ จะเข้าแบบไม่เข้ารหัส ผู้โจมตีใช้เทคนิค SSL stripping ดักให้ผู้ใช้อยู่บน HTTP ตลอด", "en": "People who just type the domain land on unencrypted HTTP; SSL-stripping keeps them there so traffic can be read."},
+    "fix": {"th": "nginx: ใน server ของพอร์ต 80 ใส่ `return 301 https://$host$request_uri;` แล้วเพิ่ม HSTS", "en": "nginx: in the port-80 server block add `return 301 https://$host$request_uri;`, then add HSTS."},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections"]
+  },
+  "web.no_hsts": {
+    "severity": "medium", "tag": "OWASP A05 · CWE-523",
+    "title": {"th": "ไม่มี HSTS", "en": "Missing HSTS"},
+    "what": {"th": "ไม่มี header Strict-Transport-Security ที่สั่งเบราว์เซอร์ให้ใช้ HTTPS เสมอ", "en": "No Strict-Transport-Security header telling browsers to always use HTTPS."},
+    "attack": {"th": "แม้มี redirect ครั้งแรกที่เข้าแบบ http ก็ยังโดนดักได้ (SSL stripping) HSTS ทำให้เบราว์เซอร์ไม่ยอมใช้ http อีกเลย", "en": "Even with a redirect, the first http request can be intercepted (SSL stripping). HSTS makes the browser refuse plain http entirely."},
+    "fix": {"th": "`add_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always;` (เริ่มจาก max-age น้อยๆ ก่อนถ้ายังมี subdomain ที่ไม่มี HTTPS)", "en": "`add_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always;` (start with a small max-age if some subdomains lack HTTPS)."},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security", "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html"]
+  },
+  "web.hsts_short": {
+    "severity": "low", "tag": "CWE-523",
+    "title": {"th": "HSTS อายุสั้นเกินไป", "en": "HSTS max-age too short"},
+    "what": {"th": "มี HSTS แต่ max-age น้อยกว่า 180 วัน", "en": "HSTS is present but max-age is under 180 days."},
+    "attack": {"th": "ถ้าผู้ใช้ไม่ได้เข้าเว็บนานกว่า max-age การป้องกันจะหมด และกลับไปโดนดัก http ได้อีก", "en": "If a user stays away longer than max-age, protection lapses and the http interception window reopens."},
+    "fix": {"th": "ตั้ง `max-age=31536000` (1 ปี) เมื่อแน่ใจว่า HTTPS ใช้ได้ทุกหน้า", "en": "Use `max-age=31536000` (1 year) once HTTPS works everywhere."},
+    "refs": ["https://hstspreload.org/"]
+  },
+  "web.no_csp": {
+    "severity": "medium", "tag": "OWASP A03 · CWE-1021",
+    "title": {"th": "ไม่มี Content-Security-Policy", "en": "Missing Content-Security-Policy"},
+    "what": {"th": "ไม่มี CSP บอกเบราว์เซอร์ว่าโหลดสคริปต์ได้จากที่ไหนบ้าง", "en": "No CSP telling the browser where scripts may be loaded from."},
+    "attack": {"th": "ถ้ามีช่องโหว่ XSS สักจุด ผู้โจมตีฝังสคริปต์ขโมย cookie/ข้อมูลบัตรได้ทันที (เช่น Magecart บนหน้า checkout) CSP คือเกราะชั้นที่สองที่ทำให้สคริปต์แปลกปลอมไม่ทำงาน", "en": "With any XSS bug an attacker can inject a script that steals cookies or card data (e.g. Magecart on checkout pages). CSP is the second layer that blocks foreign scripts."},
+    "fix": {"th": "เริ่มแบบรายงานอย่างเดียว: `Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' data: https:; script-src 'self'` ดู console ว่าอะไรโดนบล็อก แล้วค่อยเปลี่ยนเป็น Content-Security-Policy", "en": "Start in report-only mode: `Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' data: https:; script-src 'self'`, check the console for what would break, then switch to Content-Security-Policy."},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP", "https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html"]
+  },
+  "web.csp_weak": {
+    "severity": "low", "tag": "CWE-1021",
+    "title": {"th": "CSP ยอมให้สคริปต์ inline", "en": "CSP allows inline scripts"},
+    "what": {"th": "CSP มี 'unsafe-inline' หรือ * ใน script-src/default-src", "en": "The CSP contains 'unsafe-inline' or * in script-src/default-src."},
+    "attack": {"th": "XSS ส่วนใหญ่คือการฝัง <script> inline — ถ้ายอม unsafe-inline CSP ก็กันแทบไม่ได้", "en": "Most XSS injects inline <script>; allowing unsafe-inline makes the CSP almost useless against it."},
+    "fix": {"th": "ย้ายสคริปต์ไปไฟล์ .js หรือใช้ nonce/hash: `script-src 'self' 'nonce-<สุ่มทุก request>'`", "en": "Move scripts into .js files or use nonces/hashes: `script-src 'self' 'nonce-<random per request>'`."},
+    "refs": ["https://csp-evaluator.withgoogle.com/"]
+  },
+  "web.no_clickjack": {
+    "severity": "medium", "tag": "CWE-1021",
+    "title": {"th": "ไม่ป้องกัน clickjacking", "en": "No clickjacking protection"},
+    "what": {"th": "ไม่มี X-Frame-Options หรือ CSP frame-ancestors เว็บอื่นจึงฝังหน้าเราใน iframe ได้", "en": "No X-Frame-Options or CSP frame-ancestors, so other sites can embed your pages in an iframe."},
+    "attack": {"th": "ผู้โจมตีวางหน้าเว็บเราแบบโปร่งใสทับปุ่มหลอก ('กดรับรางวัล') ผู้ใช้คิดว่ากดปุ่มหลอก แต่จริงๆ กด 'ยืนยันสั่งซื้อ/เปลี่ยนอีเมล' บนเว็บเรา", "en": "An attacker overlays your page invisibly on a decoy button ('claim prize'); the user thinks they click the decoy but actually clicks 'confirm order / change email' on your site."},
+    "fix": {"th": "`add_header X-Frame-Options \"SAMEORIGIN\" always;` หรือใน CSP: `frame-ancestors 'self'`", "en": "`add_header X-Frame-Options \"SAMEORIGIN\" always;` or in CSP: `frame-ancestors 'self'`."},
+    "refs": ["https://owasp.org/www-community/attacks/Clickjacking"]
+  },
+  "web.no_nosniff": {
+    "severity": "low", "tag": "CWE-693",
+    "title": {"th": "ไม่มี X-Content-Type-Options", "en": "Missing X-Content-Type-Options"},
+    "what": {"th": "เบราว์เซอร์อาจเดาชนิดไฟล์เอง (MIME sniffing)", "en": "Browsers may guess file types themselves (MIME sniffing)."},
+    "attack": {"th": "ไฟล์ที่ผู้ใช้อัปโหลด (เช่น รูปที่ซ่อนโค้ด) อาจถูกเบราว์เซอร์ตีความเป็นสคริปต์/HTML และรันได้", "en": "A user-uploaded file (e.g. an image hiding code) may be interpreted as script/HTML and executed."},
+    "fix": {"th": "`add_header X-Content-Type-Options \"nosniff\" always;`", "en": "`add_header X-Content-Type-Options \"nosniff\" always;`"},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options"]
+  },
+  "web.no_referrer_policy": {
+    "severity": "low", "tag": "CWE-200",
+    "title": {"th": "ไม่มี Referrer-Policy", "en": "Missing Referrer-Policy"},
+    "what": {"th": "ตอนผู้ใช้กดลิงก์ออกไปเว็บอื่น URL เต็มของหน้าเราอาจถูกส่งไปด้วย", "en": "When users follow a link to another site, the full URL of your page may be sent along."},
+    "attack": {"th": "ถ้า URL มี token รีเซ็ตรหัส, เลขออเดอร์ หรือ session จะรั่วไปยังเว็บภายนอก/ระบบโฆษณา", "en": "If URLs contain reset tokens, order numbers or session ids, they leak to third-party sites and ad networks."},
+    "fix": {"th": "`add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;`", "en": "`add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;`"},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy"]
+  },
+  "web.no_permissions_policy": {
+    "severity": "info", "tag": "Hardening",
+    "title": {"th": "ไม่มี Permissions-Policy", "en": "Missing Permissions-Policy"},
+    "what": {"th": "ไม่ได้จำกัดว่าหน้าเว็บ (และสคริปต์ภายนอก) ใช้กล้อง/ไมค์/ตำแหน่งได้หรือไม่", "en": "Nothing limits whether the page (and third-party scripts) may use camera, microphone or location."},
+    "attack": {"th": "ถ้าสคริปต์ภายนอกถูกแฮก อาจขอสิทธิ์อุปกรณ์ในนามเว็บเรา", "en": "A compromised third-party script could request device permissions in your site's name."},
+    "fix": {"th": "`add_header Permissions-Policy \"camera=(), microphone=(), geolocation=()\" always;`", "en": "`add_header Permissions-Policy \"camera=(), microphone=(), geolocation=()\" always;`"},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy"]
+  },
+  "web.version_leak": {
+    "severity": "low", "tag": "OWASP A05 · CWE-200",
+    "title": {"th": "บอกเวอร์ชันซอฟต์แวร์ใน header", "en": "Software versions disclosed in headers"},
+    "what": {"th": "header เช่น Server / X-Powered-By บอกชื่อและเวอร์ชันโปรแกรม", "en": "Headers such as Server / X-Powered-By reveal software names and versions."},
+    "attack": {"th": "ขั้นแรกของการโจมตีคือการสำรวจ (reconnaissance) — รู้เวอร์ชันแล้วก็ค้นหา CVE ของเวอร์ชันนั้นได้ทันที บอทสแกนทั้งอินเทอร์เน็ตหาเวอร์ชันที่มีช่องโหว่", "en": "Attacks start with reconnaissance — a version number maps straight to known CVEs. Bots sweep the internet for vulnerable versions."},
+    "fix": {"th": "nginx: `server_tokens off;` · Apache: `ServerTokens Prod` + `ServerSignature Off` · PHP: `expose_php = Off` · Express: `app.disable('x-powered-by')` (และอัปเดตซอฟต์แวร์ — ซ่อนเวอร์ชันไม่ได้แทนการอัปเดต)", "en": "nginx: `server_tokens off;` · Apache: `ServerTokens Prod` + `ServerSignature Off` · PHP: `expose_php = Off` · Express: `app.disable('x-powered-by')` (and keep updating — hiding is not patching)."},
+    "refs": ["https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server"]
+  },
+  "web.cookie_flags": {
+    "severity": "medium", "tag": "OWASP A05 · CWE-1004 · CWE-614",
+    "title": {"th": "cookie ไม่ได้ตั้งค่าความปลอดภัย", "en": "Cookie missing security flags"},
+    "what": {"th": "cookie ขาด HttpOnly (JavaScript อ่านได้), Secure (ส่งผ่าน http ได้) หรือ SameSite (ส่งไปกับ request จากเว็บอื่นได้)", "en": "The cookie lacks HttpOnly (readable by JavaScript), Secure (sent over http) or SameSite (sent with cross-site requests)."},
+    "attack": {"th": "ไม่มี HttpOnly → XSS ขโมย session แล้วสวมรอยเป็นผู้ใช้ได้; ไม่มี Secure → โดนดักบน Wi-Fi; ไม่มี SameSite → เสี่ยง CSRF (เว็บอื่นสั่งให้เบราว์เซอร์ผู้ใช้ทำรายการบนเว็บเรา)", "en": "No HttpOnly → XSS steals the session and impersonates the user; no Secure → sniffed on Wi-Fi; no SameSite → CSRF risk (another site makes the user's browser act on yours)."},
+    "fix": {"th": "ตั้งเป็น `Set-Cookie: session=...; HttpOnly; Secure; SameSite=Lax; Path=/` · PHP: `session.cookie_httponly=1`, `session.cookie_secure=1`, `session.cookie_samesite=Lax`", "en": "Use `Set-Cookie: session=...; HttpOnly; Secure; SameSite=Lax; Path=/` · PHP: `session.cookie_httponly=1`, `session.cookie_secure=1`, `session.cookie_samesite=Lax`."},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#security", "https://owasp.org/www-community/HttpOnly"]
+  },
+  "web.cors_reflect": {
+    "severity": "high", "tag": "OWASP A01 · CWE-942",
+    "title": {"th": "CORS ยอมรับทุกเว็บ (สะท้อน Origin)", "en": "CORS reflects any Origin"},
+    "what": {"th": "เราส่ง Origin: https://evil.example ไป เซิร์ฟเวอร์ตอบกลับว่ายอมให้เว็บนั้นอ่านข้อมูลได้", "en": "We sent Origin: https://evil.example and the server replied that this site may read responses."},
+    "attack": {"th": "ถ้ามี Allow-Credentials: true ด้วย เว็บของผู้โจมตีจะอ่านข้อมูลส่วนตัวของผู้ใช้ที่ล็อกอินอยู่ได้ (ที่อยู่ ออเดอร์ API key) ผ่านเบราว์เซอร์ของเหยื่อเอง", "en": "With Allow-Credentials: true, an attacker's page can read a logged-in user's private data (address, orders, API keys) through the victim's own browser."},
+    "fix": {"th": "อย่าก๊อป Origin กลับไปตรงๆ ให้เทียบกับรายการโดเมนที่อนุญาต (allow-list) เท่านั้น และเปิด credentials เฉพาะ origin ที่เชื่อถือ", "en": "Never echo the Origin back; compare it against an explicit allow-list and only allow credentials for trusted origins."},
+    "refs": ["https://portswigger.net/web-security/cors", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"]
+  },
+  "web.cors_wildcard": {
+    "severity": "low", "tag": "CWE-942",
+    "title": {"th": "CORS เปิดให้ทุกเว็บ (*)", "en": "CORS allows any origin (*)"},
+    "what": {"th": "Access-Control-Allow-Origin: * — ทุกเว็บอ่าน response นี้ได้ (แต่ไม่ส่ง cookie)", "en": "Access-Control-Allow-Origin: * — any site can read this response (without cookies)."},
+    "attack": {"th": "ปลอดภัยสำหรับข้อมูลสาธารณะ แต่ถ้า endpoint นั้นอยู่หลัง IP/เครือข่ายภายใน เว็บภายนอกจะใช้เบราว์เซอร์ของพนักงานดึงข้อมูลภายในได้", "en": "Fine for public data, but if the endpoint is protected only by IP/internal network, outside sites can use an employee's browser to pull internal data."},
+    "fix": {"th": "ใช้ * เฉพาะ API สาธารณะจริงๆ ที่เหลือระบุโดเมนที่อนุญาต", "en": "Use * only for genuinely public APIs; list allowed origins everywhere else."},
+    "refs": ["https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin"]
+  },
+  "web.risky_methods": {
+    "severity": "low", "tag": "CWE-650",
+    "title": {"th": "เปิด HTTP method ที่ไม่จำเป็น", "en": "Unneeded HTTP methods enabled"},
+    "what": {"th": "OPTIONS บอกว่ารองรับ TRACE / PUT / DELETE / PROPFIND", "en": "OPTIONS advertises TRACE / PUT / DELETE / PROPFIND."},
+    "attack": {"th": "TRACE ใช้ร่วมกับช่องโหว่อื่นเพื่ออ่าน header ลับได้ (Cross-Site Tracing); PUT/DELETE/WebDAV ที่ตั้งผิดอาจให้คนนอกอัปโหลดหรือลบไฟล์", "en": "TRACE can help read secret headers (Cross-Site Tracing); misconfigured PUT/DELETE/WebDAV may let outsiders upload or delete files."},
+    "fix": {"th": "nginx: `if ($request_method !~ ^(GET|HEAD|POST)$) { return 405; }` · Apache: `TraceEnable off` (ทดสอบ PUT ด้วยตัวเองใน lab ก่อน — sec-check ไม่ลอง PUT จริง)", "en": "nginx: `if ($request_method !~ ^(GET|HEAD|POST)$) { return 405; }` · Apache: `TraceEnable off` (sec-check never actually sends PUT; test that yourself in the lab)."},
+    "refs": ["https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods"]
+  },
+  "web.debug_errors": {
+    "severity": "medium", "tag": "OWASP A05 · CWE-209",
+    "title": {"th": "หน้า error เผยรายละเอียดภายใน", "en": "Verbose error / debug page"},
+    "what": {"th": "หน้า 404/error แสดง stack trace หรือข้อความ debug ของเฟรมเวิร์ก", "en": "The 404/error page shows a stack trace or framework debug output."},
+    "attack": {"th": "stack trace บอก path ไฟล์, เวอร์ชัน, ชื่อตาราง, บางทีถึงตัวแปรลับ — เป็นแผนที่ให้ผู้โจมตี; โหมด debug บางตัว (เช่น Werkzeug) ถึงขั้นรันโค้ดได้", "en": "Stack traces reveal file paths, versions, table names and sometimes secrets — a map for the attacker; some debug consoles (e.g. Werkzeug) even allow running code."},
+    "fix": {"th": "ปิด debug บน production: Django `DEBUG = False`, Laravel `APP_DEBUG=false`, Flask อย่ารัน `debug=True` · ทำหน้า error ของตัวเองที่ไม่มีรายละเอียด และเก็บรายละเอียดลง log แทน", "en": "Disable debug in production: Django `DEBUG = False`, Laravel `APP_DEBUG=false`, Flask never `debug=True`. Show a plain custom error page and log the details instead."},
+    "refs": ["https://cwe.mitre.org/data/definitions/209.html"]
+  },
+  "web.git_exposed": {
+    "severity": "critical", "tag": "OWASP A05 · CWE-527",
+    "title": {"th": "โฟลเดอร์ .git โหลดได้จากเว็บ", "en": "Exposed .git folder"},
+    "what": {"th": "ไฟล์ใน /.git/ เปิดให้ดาวน์โหลด — แปลว่าทั้ง repository (โค้ดทุกไฟล์ + ประวัติ) ถูกดูดได้", "en": "Files under /.git/ are downloadable — the whole repository (all code + history) can be pulled."},
+    "attack": {"th": "เครื่องมืออย่าง git-dumper กู้โค้ดทั้งหมดได้ในไม่กี่นาที รวมรหัสผ่านฐานข้อมูล/API key ที่เคย commit แม้จะลบไปแล้วในประวัติ แล้วอ่านโค้ดหาช่องโหว่อื่นต่อ", "en": "Tools like git-dumper rebuild the full source in minutes, including database passwords / API keys ever committed (even if later deleted), then the code is read for more bugs."},
+    "fix": {"th": "1) บล็อกทันที nginx: `location ~ /\\.(?!well-known) { deny all; }` 2) อย่า deploy ด้วยการ git clone ลงโฟลเดอร์เว็บโดยตรง 3) ถือว่าความลับใน repo รั่วแล้ว — เปลี่ยนรหัส/คีย์ทั้งหมด", "en": "1) Block now, nginx: `location ~ /\\.(?!well-known) { deny all; }` 2) don't deploy by cloning into the web root 3) treat every secret in the repo as leaked — rotate them all."},
+    "refs": ["https://cwe.mitre.org/data/definitions/527.html"]
+  },
+  "web.env_exposed": {
+    "severity": "critical", "tag": "OWASP A05 · CWE-538",
+    "title": {"th": "ไฟล์ .env (ความลับ) โหลดได้จากเว็บ", "en": "Exposed .env file (secrets)"},
+    "what": {"th": "ไฟล์ตั้งค่า .env ดาวน์โหลดได้ ปกติมีรหัสฐานข้อมูล, APP_KEY, คีย์ payment/อีเมล (sec-check ซ่อนค่าไว้ แสดงแค่ชื่อตัวแปร)", "en": "The .env config file is downloadable; it usually holds database passwords, APP_KEY, payment/email keys (sec-check hides the values and shows only variable names)."},
+    "attack": {"th": "บอทสแกนหา /.env ทั่วโลกตลอดเวลา ได้คีย์แล้วเข้าฐานข้อมูล ส่งอีเมลสแปมด้วยบัญชีเรา หรือใช้ APP_KEY ปลอม session/รันโค้ดได้", "en": "Bots probe /.env worldwide all day. With the keys they log into the database, spam through your mail account, or forge sessions / run code with APP_KEY."},
+    "fix": {"th": "1) ย้าย .env ออกนอก web root (เช่น Laravel ต้องชี้ document root ไปที่ /public) 2) บล็อก dotfiles ใน nginx 3) เปลี่ยนทุกรหัส/คีย์ในไฟล์ทันที", "en": "1) keep .env outside the web root (e.g. point Laravel's document root at /public) 2) block dotfiles in nginx 3) rotate every password/key in the file now."},
+    "refs": ["https://cwe.mitre.org/data/definitions/538.html"]
+  },
+  "web.svn_exposed": {
+    "severity": "high", "tag": "CWE-527",
+    "title": {"th": "โฟลเดอร์ .svn โหลดได้จากเว็บ", "en": "Exposed .svn folder"},
+    "what": {"th": "ข้อมูล Subversion เปิดให้โหลด — ดูดซอร์สโค้ดได้", "en": "Subversion metadata is downloadable — source code can be recovered."},
+    "attack": {"th": "เหมือน .git: กู้โค้ดแล้วหาความลับและช่องโหว่", "en": "Same as .git: recover the code, then hunt for secrets and bugs."},
+    "fix": {"th": "บล็อก dotfiles และ deploy ด้วย export แทน checkout", "en": "Block dotfiles and deploy with an export instead of a checkout."},
+    "refs": ["https://cwe.mitre.org/data/definitions/527.html"]
+  },
+  "web.ds_store": {
+    "severity": "low", "tag": "CWE-538",
+    "title": {"th": "ไฟล์ .DS_Store เปิดเผยรายชื่อไฟล์", "en": ".DS_Store reveals file names"},
+    "what": {"th": "ไฟล์ของ macOS ที่มีรายชื่อไฟล์/โฟลเดอร์ในโฟลเดอร์นั้น หลุดขึ้นเว็บ", "en": "A macOS metadata file listing the folder's files was uploaded to the site."},
+    "attack": {"th": "บอกชื่อไฟล์ที่ไม่มีลิงก์ถึง (เช่น backup-old.zip) ให้ผู้โจมตีไปลองโหลด", "en": "It lists unlinked files (e.g. backup-old.zip) for an attacker to try downloading."},
+    "fix": {"th": "ลบไฟล์ออก ใส่ .DS_Store ใน .gitignore และบล็อก dotfiles", "en": "Delete it, add .DS_Store to .gitignore, block dotfiles."},
+    "refs": []
+  },
+  "web.backup_exposed": {
+    "severity": "high", "tag": "OWASP A05 · CWE-530",
+    "title": {"th": "ไฟล์สำรอง/ฐานข้อมูลโหลดได้จากเว็บ", "en": "Backup / database dump downloadable"},
+    "what": {"th": "พบไฟล์ backup (zip/tar/sql/.bak) ที่ดาวน์โหลดได้ ตรวจจากเนื้อหาไฟล์จริง ไม่ใช่แค่ชื่อ", "en": "A backup file (zip/tar/sql/.bak) can be downloaded — confirmed by its content, not just the name."},
+    "attack": {"th": "ไฟล์ .sql = ข้อมูลลูกค้าทั้งหมด (ชื่อ ที่อยู่ เบอร์ hash รหัสผ่าน) รั่วในคลิกเดียว — ผิด PDPA ด้วย; ไฟล์ .php.bak ไม่ถูกรันเป็น PHP จึงโชว์รหัสฐานข้อมูลเป็นข้อความ", "en": "A .sql file is every customer record (names, addresses, phones, password hashes) in one click — a PDPA/GDPR breach; a .php.bak is served as text, showing the DB password."},
+    "fix": {"th": "เก็บ backup นอก web root (เช่น /var/backups) ลบไฟล์ที่หลุด และเปลี่ยนรหัสที่อยู่ในไฟล์", "en": "Keep backups outside the web root (e.g. /var/backups), delete the exposed file, rotate any credentials inside it."},
+    "refs": ["https://cwe.mitre.org/data/definitions/530.html"]
+  },
+  "web.phpinfo": {
+    "severity": "medium", "tag": "CWE-200",
+    "title": {"th": "หน้า phpinfo() เปิดอยู่", "en": "phpinfo() page exposed"},
+    "what": {"th": "หน้า phpinfo แสดงการตั้งค่า PHP, path, โมดูล, ตัวแปรสภาพแวดล้อม", "en": "phpinfo shows PHP settings, paths, modules and environment variables."},
+    "attack": {"th": "ให้ข้อมูลครบสำหรับวางแผนโจมตี และบางครั้งมีรหัส/คีย์ในตัวแปรสภาพแวดล้อม", "en": "It gives a full picture for planning an attack, sometimes including secrets in environment variables."},
+    "fix": {"th": "ลบไฟล์ phpinfo.php / info.php ออกจากเซิร์ฟเวอร์", "en": "Delete phpinfo.php / info.php from the server."},
+    "refs": []
+  },
+  "web.status_page": {
+    "severity": "medium", "tag": "CWE-200",
+    "title": {"th": "หน้าสถานะเซิร์ฟเวอร์เปิดสาธารณะ", "en": "Server status page public"},
+    "what": {"th": "/server-status หรือ /nginx_status เข้าได้จากภายนอก", "en": "/server-status or /nginx_status is reachable from outside."},
+    "attack": {"th": "Apache server-status โชว์ URL ที่ผู้ใช้กำลังเปิดแบบ real-time รวม token ใน URL และ IP ลูกค้า", "en": "Apache server-status shows URLs being requested in real time, including tokens in URLs and client IPs."},
+    "fix": {"th": "จำกัดให้เข้าได้จาก localhost เท่านั้น: `Require local` (Apache) หรือ `allow 127.0.0.1; deny all;` (nginx)", "en": "Restrict to localhost: `Require local` (Apache) or `allow 127.0.0.1; deny all;` (nginx)."},
+    "refs": []
+  },
+  "web.admin_panel": {
+    "severity": "medium", "tag": "OWASP A01 · A07",
+    "title": {"th": "หน้าจัดการฐานข้อมูลเปิดสาธารณะ", "en": "Database admin panel public"},
+    "what": {"th": "phpMyAdmin / Adminer เข้าได้จากอินเทอร์เน็ต", "en": "phpMyAdmin / Adminer is reachable from the internet."},
+    "attack": {"th": "บอทเดารหัสผ่านตลอด (brute force) และเครื่องมือพวกนี้มีประวัติช่องโหว่บ่อย หลุดครั้งเดียว = ได้ฐานข้อมูลทั้งหมด", "en": "Bots brute-force these logins constantly and the tools have a long CVE history; one break-in = the whole database."},
+    "fix": {"th": "อย่าเปิดสาธารณะ: จำกัด IP, ใส่ basic auth ซ้อน, หรือเข้าผ่าน SSH tunnel: `ssh -L 8080:localhost:80 server`", "en": "Don't expose it: restrict by IP, add an extra basic-auth layer, or reach it through an SSH tunnel: `ssh -L 8080:localhost:80 server`."},
+    "refs": []
+  },
+  "web.dir_listing": {
+    "severity": "medium", "tag": "OWASP A01 · CWE-548",
+    "title": {"th": "เปิด directory listing", "en": "Directory listing enabled"},
+    "what": {"th": "เข้าโฟลเดอร์แล้วเห็นรายชื่อไฟล์ทั้งหมด", "en": "Opening the folder shows a list of every file in it."},
+    "attack": {"th": "ผู้โจมตีไล่ดูไฟล์ที่ไม่ได้ตั้งใจเผยแพร่ (ใบเสร็จลูกค้า, backup, ไฟล์ทดสอบ) ได้ง่ายๆ", "en": "Attackers browse files never meant to be public (customer receipts, backups, test files)."},
+    "fix": {"th": "nginx: `autoindex off;` · Apache: `Options -Indexes` · Python http.server ไม่ควรใช้บน production", "en": "nginx: `autoindex off;` · Apache: `Options -Indexes` · don't run Python http.server in production."},
+    "refs": ["https://cwe.mitre.org/data/definitions/548.html"]
+  },
+  "web.robots_hint": {
+    "severity": "info", "tag": "Recon",
+    "title": {"th": "robots.txt ชี้ไปยัง path ที่น่าสนใจ", "en": "robots.txt points at interesting paths"},
+    "what": {"th": "robots.txt บอกบอทค้นหาว่าห้ามเข้า path เหล่านี้ — แต่ใครก็อ่านไฟล์นี้ได้", "en": "robots.txt asks search engines to skip these paths — but anyone can read the file."},
+    "attack": {"th": "ผู้โจมตีอ่าน robots.txt เป็นอย่างแรก เพื่อหาหน้า admin/backup ที่ซ่อนไว้", "en": "Attackers read robots.txt first to find hidden admin/backup paths."},
+    "fix": {"th": "robots.txt ไม่ใช่การป้องกัน — path ลับต้องมีการล็อกอิน/จำกัด IP จริง และไม่จำเป็นต้องใส่ใน robots.txt", "en": "robots.txt is not access control — protect secret paths with real auth/IP limits and leave them out of robots.txt."},
+    "refs": []
+  },
+  "web.no_security_txt": {
+    "severity": "info", "tag": "RFC 9116",
+    "title": {"th": "ไม่มี security.txt", "en": "No security.txt"},
+    "what": {"th": "ไม่มีไฟล์ /.well-known/security.txt บอกช่องทางแจ้งช่องโหว่", "en": "No /.well-known/security.txt telling researchers how to report a vulnerability."},
+    "attack": {"th": "ไม่ใช่ช่องโหว่ แต่คนที่เจอปัญหาโดยบังเอิญจะไม่รู้จะแจ้งใคร", "en": "Not a vulnerability, but well-meaning finders won't know whom to tell."},
+    "fix": {"th": "สร้างไฟล์ที่มี `Contact: mailto:security@example.com` และ `Expires: 2027-12-31T00:00:00Z`", "en": "Create a file with `Contact: mailto:security@example.com` and `Expires: 2027-12-31T00:00:00Z`."},
+    "refs": ["https://securitytxt.org/"]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "targets": [
+    {"target": "https://example.com", "kind": "url", "note": "my shop (example)", "confirmed": "2026-01-01 12:00"},
+    {"target": "*.example.com", "kind": "host", "note": "all my subdomains", "confirmed": "2026-01-01 12:00"},
+    {"target": "192.168.1.0/24", "kind": "net", "note": "home LAN", "confirmed": "2026-01-01 12:00"},
+    {"target": "192.168.1.1/32", "kind": "net", "note": "home router", "confirmed": "2026-01-01 12:00"}
+  ]
+}

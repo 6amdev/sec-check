@@ -81,7 +81,7 @@ To check your real systems, add them to the allow-list first (you must type `yes
 
 Run `./seccheck.py host` with `sudo` to also check empty-password accounts; without it, those checks are skipped and the command to run yourself is printed.
 
-Reports are saved to `reports/` as HTML (switchable Thai/English, light/dark) and JSON. The folder is git-ignored. The HTML describes your systems, so don't publish it.
+Reports are saved to `reports/` as HTML (switchable Thai/English, light/dark) and JSON. Add `--pdf` to also export a PDF (via chromium/`wkhtmltopdf` if installed) and `--org "Shop Name"` to put a name on top — e.g. `./seccheck.py --org "6amdev" --pdf host`. The folder is git-ignored. The HTML describes your systems, so don't publish it.
 
 ### Web UI
 

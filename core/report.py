@@ -183,18 +183,51 @@ def body(results, lang):
     return "\n".join(out)
 
 
-def render(results):
+def render(results, org=""):
     with using("th"):
         th = body(results, "th")
     with using("en"):
         en = body(results, "en")
+    banner = (f'<div style="text-align:center;padding:14px;font-weight:700;font-size:18px;'
+              f'border-bottom:1px solid var(--line);margin-bottom:8px">{E(org)}</div>' if org else "")
     return f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>sec-check report</title>
-<style>{CSS}</style></head><body><div class="wrap"><div class="L th">{th}</div><div class="L en">{en}</div></div>
+<style>{CSS}</style></head><body><div class="wrap">{banner}<div class="L th">{th}</div><div class="L en">{en}</div></div>
 <script>{JS}</script></body></html>"""
 
 
-def save(results, outdir, name):
+def to_pdf(html_path):
+    """แปลงรายงาน HTML เป็น PDF ด้วย chrome/chromium หรือ wkhtmltopdf (ถ้ามี) / HTML report → PDF, if a tool exists"""
+    import shutil
+    import subprocess
+    import tempfile
+    html_path = Path(html_path)
+    pdf = str(html_path)[:-5] + ".pdf" if str(html_path).endswith(".html") else str(html_path) + ".pdf"
+    chrome = next((shutil.which(c) for c in ("google-chrome", "chromium", "chromium-browser", "chrome")
+                   if shutil.which(c)), None)
+    if chrome:
+        prof = tempfile.mkdtemp(prefix="seccheck-pdf-")
+        try:
+            subprocess.run([chrome, "--headless=new", "--disable-gpu", "--no-first-run", "--no-sandbox",
+                            f"--user-data-dir={prof}", "--no-pdf-header-footer",
+                            f"--print-to-pdf={pdf}", html_path.as_uri()],
+                           capture_output=True, timeout=90, check=True)
+            if Path(pdf).exists():
+                return pdf
+        except (OSError, subprocess.SubprocessError):
+            pass
+    wk = shutil.which("wkhtmltopdf")
+    if wk:
+        try:
+            subprocess.run([wk, "-q", str(html_path), pdf], capture_output=True, timeout=90, check=True)
+            if Path(pdf).exists():
+                return pdf
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return None
+
+
+def save(results, outdir, name, org="", pdf=False):
     outdir = Path(outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -207,5 +240,9 @@ def save(results, outdir, name):
         for f in r["findings"]:
             f["severity"] = f["severity"] or k.get(f["id"], {}).get("severity", "info")
     Path(base + ".json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    Path(base + ".html").write_text(render(results), encoding="utf-8")
-    return Path(base + ".html")
+    html_path = Path(base + ".html")
+    html_path.write_text(render(results, org), encoding="utf-8")
+    if pdf:
+        p = to_pdf(html_path)
+        save.last_pdf = p                 # ให้ CLI อ่านได้ว่าออก PDF สำเร็จไหม
+    return html_path

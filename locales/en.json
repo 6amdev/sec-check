@@ -335,5 +335,9 @@
  "ตรวจ DNS/อีเมลของโดเมน (SPF/DKIM/DMARC/DNSSEC)": "Check a domain's DNS/email (SPF/DKIM/DMARC/DNSSEC)",
  "ตรวจความปลอดภัยอีเมลของโดเมน (SPF/DKIM/DMARC)": "Check a domain's email security (SPF/DKIM/DMARC)",
  "DNS/อีเมล": "DNS/email",
- "DMARC บังคับจริง": "DMARC enforced"
+ "DMARC บังคับจริง": "DMARC enforced",
+ "📑 PDF: {p}": "📑 PDF: {p}",
+ "⚠️  ออก PDF ไม่ได้ — ติดตั้ง chromium/google-chrome หรือ wkhtmltopdf ก่อน": "⚠️  Couldn't make a PDF — install chromium/google-chrome or wkhtmltopdf first",
+ "ออกรายงานเป็น PDF ด้วย (ถ้ามี chromium/wkhtmltopdf)": "Also export the report as PDF (if chromium/wkhtmltopdf is present)",
+ "ใส่ชื่อองค์กร/ร้านบนหัวรายงาน": "Put an org/shop name at the top of the report"
 }

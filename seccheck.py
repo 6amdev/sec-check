@@ -65,8 +65,16 @@ def finish(results, args, name):
     if lvl < 5:
         print(_("(กรองที่ระดับความยาก ≤ {l})", l=lvl))
     summary(results)
-    path = report.save(results, args.out, name)
+    want_pdf = getattr(args, "pdf", False)
+    report.save.last_pdf = None
+    path = report.save(results, args.out, name, org=getattr(args, "org", "") or "", pdf=want_pdf)
     print(_("📄 รายงาน: {p}", p=path))
+    if want_pdf:
+        pdf = getattr(report.save, "last_pdf", None)
+        if pdf:
+            print(_("📑 PDF: {p}", p=pdf))
+        else:
+            print(_("⚠️  ออก PDF ไม่ได้ — ติดตั้ง chromium/google-chrome หรือ wkhtmltopdf ก่อน"))
     if args.open:
         webbrowser.open(path.as_uri())
 
@@ -122,6 +130,8 @@ def main(argv=None):
     p.add_argument("--lang", choices=["th", "en"], default=os.environ.get("SECCHECK_LANG", "th"))
     p.add_argument("--out", default=str(HERE / "reports"), help=_("โฟลเดอร์เก็บรายงาน"))
     p.add_argument("--open", action="store_true", help=_("เปิดรายงานในเบราว์เซอร์เมื่อเสร็จ"))
+    p.add_argument("--pdf", action="store_true", help=_("ออกรายงานเป็น PDF ด้วย (ถ้ามี chromium/wkhtmltopdf)"))
+    p.add_argument("--org", default="", help=_("ใส่ชื่อองค์กร/ร้านบนหัวรายงาน"))
     p.add_argument("--version", action="version", version=f"sec-check {VERSION}")
     sub = p.add_subparsers(dest="cmd", required=True)
 

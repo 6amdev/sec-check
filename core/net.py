@@ -93,7 +93,8 @@ def unverified_ctx():
     return ctx
 
 
-def request(url, method="GET", headers=None, timeout=8.0, max_bytes=65536, verify=True, byte_range=None):
+def request(url, method="GET", headers=None, timeout=8.0, max_bytes=65536, verify=True, byte_range=None,
+            data=None):
     """ส่ง HTTP 1 ครั้ง ไม่ตาม redirect / one HTTP request, redirects are NOT followed"""
     u = urllib.parse.urlsplit(url)
     path = (u.path or "/") + (f"?{u.query}" if u.query else "")
@@ -101,6 +102,7 @@ def request(url, method="GET", headers=None, timeout=8.0, max_bytes=65536, verif
     if byte_range:
         hdrs["Range"] = f"bytes=0-{byte_range - 1}"
     hdrs.update(headers or {})
+    body = data.encode() if isinstance(data, str) else data
     r = Resp(url)
     try:
         if u.scheme == "https":
@@ -108,7 +110,7 @@ def request(url, method="GET", headers=None, timeout=8.0, max_bytes=65536, verif
             conn = http.client.HTTPSConnection(u.hostname, u.port or 443, timeout=timeout, context=ctx)
         else:
             conn = http.client.HTTPConnection(u.hostname, u.port or 80, timeout=timeout)
-        conn.request(method, path, headers=hdrs)
+        conn.request(method, path, body=body, headers=hdrs)
         resp = conn.getresponse()
         r.status, r.headers = resp.status, resp.getheaders()
         if method != "HEAD":

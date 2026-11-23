@@ -72,8 +72,8 @@ def finish(results, args, name):
 
 
 def run_module(mod, target, args):
-    from checks import host, lan, router, tls, web, wifi, windows
-    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows}[mod]
+    from checks import camera, host, lan, router, tls, web, wifi, windows
+    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera}[mod]
     print(_("▶ กำลังตรวจ {m} {t}", m=_(report.MODULE_TH[mod]), t=target or ""), flush=True)
     return m.run(target, args)
 
@@ -160,6 +160,9 @@ def main(argv=None):
     wn = sub.add_parser("windows", help=_("ตรวจเครื่อง Windows ในวง (SMB/RDP)"))
     wn.add_argument("target")
     wn.add_argument("--level", **lvl)
+    cm = sub.add_parser("camera", help=_("ตรวจกล้อง IP / NVR ในวง (ONVIF/RTSP)"))
+    cm.add_argument("target")
+    cm.add_argument("--level", **lvl)
     r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
     r.add_argument("target", nargs="?")
     r.add_argument("--timeout", type=float, default=1.5)

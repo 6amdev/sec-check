@@ -246,6 +246,48 @@ def recv_nbss_req(sock, timeout=4):
         return None
 
 
+class FakeCamera(BaseHTTPRequestHandler):
+    """กล้องปลอม: ONVIF ตอบ GetDeviceInformation โดยไม่ต้องล็อกอิน + snapshot เปิดดูได้ (ทดสอบโมดูล camera)"""
+    server_version = "Camera"
+    sys_version = ""
+
+    def log_message(self, *a):
+        pass
+
+    def _send(self, code, ctype, body):
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    def do_GET(self):
+        path = self.path.split("?")[0]
+        if path in ("/snapshot.jpg", "/cgi-bin/snapshot.cgi"):
+            self._send(200, "image/jpeg", b"\xff\xd8\xff\xe0lab-fake-jpeg" + b"\x00" * 64)   # ❌ ไม่ถามรหัส
+        else:
+            self._send(200, "text/html", b"<html><title>IP Camera</title><body>Lab camera</body></html>")
+
+    do_HEAD = do_GET
+
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length).decode("utf-8", "replace")
+        ns = 'xmlns:tds="http://www.onvif.org/ver10/device/wsdl"'
+        if "GetDeviceInformation" in body:          # ❌ ตอบข้อมูลโดยไม่ต้องล็อกอิน
+            xml = (f'<?xml version="1.0"?><s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">'
+                   f'<s:Body><tds:GetDeviceInformationResponse {ns}>'
+                   f'<tds:Manufacturer>LabCam</tds:Manufacturer><tds:Model>LC-9000</tds:Model>'
+                   f'<tds:SerialNumber>LAB-0001</tds:SerialNumber></tds:GetDeviceInformationResponse>'
+                   f'</s:Body></s:Envelope>')
+        else:
+            xml = (f'<?xml version="1.0"?><s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">'
+                   f'<s:Body><tds:GetSystemDateAndTimeResponse {ns}>'
+                   f'<tds:SystemDateAndTime/></tds:GetSystemDateAndTimeResponse></s:Body></s:Envelope>')
+        self._send(200, "application/soap+xml", xml.encode())
+
+
 class Docker(JsonAPI):
     payload = {"Version": "20.10.7-lab", "ApiVersion": "1.41", "Os": "linux"}
 
@@ -323,6 +365,7 @@ def main():
         start_https("https self-signed (fake)", (WEAK, 8443), Weak, self_signed_cert()),
         start("smbv1+nosigning (fake)", TCP, (WEAK, 10445), FakeSMB),   # 445 ต้อง root จึงใช้พอร์ตสูง
         start("rdp no-NLA (fake)", TCP, (WEAK, 3389), FakeRDP),
+        start("camera onvif+snapshot (fake)", ThreadingHTTPServer, (WEAK, 8899), FakeCamera),
     ]
     if not any(servers):
         sys.exit(1)

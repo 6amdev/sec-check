@@ -291,5 +291,13 @@
  "RDP เปิดอยู่แต่ไม่ตอบการเจรจา X.224 — ตรวจ NLA เองในเครื่อง": "RDP is open but didn't answer the X.224 negotiation — check NLA on the host",
  "ไม่พบพอร์ต Windows (139/445/3389) เปิดบนเครื่องนี้": "No Windows ports (139/445/3389) open on this host",
  "ตรวจแบบเจรจาโปรโตคอลเท่านั้น — ไม่ล็อกอิน ไม่เดารหัส ไม่ส่ง exploit": "Protocol negotiation only — no login, no password guessing, no exploit",
- "ตรวจเครื่อง Windows ในวง (SMB/RDP)": "Audit a Windows host on the LAN (SMB/RDP)"
+ "ตรวจเครื่อง Windows ในวง (SMB/RDP)": "Audit a Windows host on the LAN (SMB/RDP)",
+ "ระบุ IP หรือ URL ของกล้อง เช่น ./seccheck.py camera 192.168.1.30": "Give the camera's IP or URL, e.g. ./seccheck.py camera 192.168.1.30",
+ "อ่านข้อมูลอุปกรณ์ได้โดยไม่ต้องล็อกอิน: {m}": "device info readable without login: {m}",
+ "ONVIF บังคับยืนยันตัวตนสำหรับข้อมูลอุปกรณ์": "ONVIF requires authentication for device info",
+ "พบหน้าเว็บบนกล้อง/อุปกรณ์": "Web page found on the camera/device",
+ "ไม่พบพอร์ตกล้องที่คุ้น (RTSP 554/8554, HTTP 80/8080/8899) บนเป้าหมายนี้": "No familiar camera ports (RTSP 554/8554, HTTP 80/8080/8899) on this target",
+ "ตรวจแบบอ่านอย่างเดียว — ไม่เปลี่ยนค่า ไม่บันทึกภาพ ไม่ยิง exploit": "Read-only — no settings changed, no footage saved, no exploit",
+ "ตรวจกล้อง IP / NVR ในวง (ONVIF/RTSP)": "Audit an IP camera / NVR on the LAN (ONVIF/RTSP)",
+ "กล้อง/NVR": "Camera/NVR"
 }

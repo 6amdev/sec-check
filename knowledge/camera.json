@@ -1,0 +1,34 @@
+{
+  "camera.onvif_exposed": {
+    "severity": "info", "tag": "Inventory", "level": 3,
+    "title": {"th": "พบบริการ ONVIF (กล้อง/NVR)", "en": "ONVIF service found (camera/NVR)"},
+    "what": {"th": "อุปกรณ์ตอบโปรโตคอล ONVIF — เป็นมาตรฐานควบคุมกล้อง IP/NVR", "en": "The device answers ONVIF — the standard protocol for controlling IP cameras/NVRs."},
+    "attack": {"th": "ไม่ใช่ช่องโหว่โดยตรง แต่บอกว่าเป็นกล้อง ควรตรวจต่อว่าตั้งรหัสและปิดการเข้าถึงที่ไม่จำเป็นหรือยัง", "en": "Not a vulnerability itself, but it marks a camera — check next that it has a password and unneeded access is closed."},
+    "fix": {"th": "ตั้งรหัสผ่านที่แข็งแรง, อัปเดตเฟิร์มแวร์, แยกกล้องไว้ VLAN/Wi-Fi แขก, ห้าม forward พอร์ตออกเน็ต", "en": "Set a strong password, update firmware, isolate cameras on a VLAN/guest Wi-Fi, never port-forward them."},
+    "refs": []
+  },
+  "camera.onvif_noauth": {
+    "severity": "high", "tag": "CWE-306", "level": 1,
+    "title": {"th": "ONVIF ให้ข้อมูลอุปกรณ์โดยไม่ต้องยืนยันตัวตน", "en": "ONVIF returns device info without authentication"},
+    "what": {"th": "คำสั่ง ONVIF ที่ควรต้องล็อกอิน (เช่น GetDeviceInformation) ตอบข้อมูลกลับมาโดยไม่ขอรหัส", "en": "An ONVIF call that should require login (e.g. GetDeviceInformation) returns data with no credentials."},
+    "attack": {"th": "ถ้าอ่านข้อมูลได้โดยไม่ต้องล็อกอิน มักแปลว่าดึง stream/สร้างผู้ใช้/ตั้งค่าได้โดยไม่ต้องรหัสด้วย — ผู้โจมตีดูภาพหรือยึดกล้องได้", "en": "Reading data without login usually means streams, user creation or settings are open too — an attacker can watch the feed or take over the camera."},
+    "fix": {"th": "เปิดบังคับ authentication ในกล้อง (ONVIF user + WS-Security), เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์", "en": "Enforce authentication on the camera (ONVIF user + WS-Security), change default passwords, update firmware."},
+    "refs": []
+  },
+  "camera.snapshot_exposed": {
+    "severity": "high", "tag": "CWE-306", "level": 1,
+    "title": {"th": "ดูภาพกล้องได้โดยไม่ต้องล็อกอิน", "en": "Camera snapshot/stream viewable without login"},
+    "what": {"th": "URL ภาพนิ่ง/สตรีมของกล้องเปิดดูได้โดยไม่ต้องรหัส", "en": "A camera snapshot/stream URL is viewable without a password."},
+    "attack": {"th": "ใครในวง (หรือคนนอกถ้า forward พอร์ตไว้) เปิดดูภาพในบ้าน/ออฟฟิศได้ตลอด — เป็นการละเมิดความเป็นส่วนตัวร้ายแรง", "en": "Anyone on the LAN (or outside if port-forwarded) can watch your home/office feed any time — a serious privacy breach."},
+    "fix": {"th": "เปิดบังคับล็อกอินสำหรับภาพ/สตรีมทุก URL, เปลี่ยนรหัส default, อย่า forward พอร์ตกล้องออกเน็ต", "en": "Require login for every snapshot/stream URL, change default passwords, never port-forward the camera."},
+    "refs": []
+  },
+  "camera.web_login": {
+    "severity": "check", "tag": "Checklist", "level": 1,
+    "title": {"th": "เปลี่ยนรหัสหน้าเว็บกล้อง/NVR แล้วหรือยัง", "en": "Changed the camera/NVR web password?"},
+    "what": {"th": "หน้าเว็บของกล้อง/NVR ที่ยังใช้รหัสโรงงาน (เช่น admin/admin, admin/12345)", "en": "The camera/NVR web page may still use a factory password (admin/admin, admin/12345 …)."},
+    "attack": {"th": "รหัส default ของกล้องทุกยี่ห้อหาได้ในเน็ต และ botnet อย่าง Mirai ยึดกล้องผ่านรหัส default เป็นล้านตัว", "en": "Default camera passwords for every brand are online, and botnets like Mirai hijacked millions of cameras via them."},
+    "fix": {"th": "เข้าหน้าเว็บกล้อง เปลี่ยนรหัส admin เป็นรหัสยาวไม่ซ้ำ · ตรวจรหัส Basic auth อัตโนมัติด้วย `--default-creds` ได้", "en": "Open the camera page and set a long unique admin password · the `--default-creds` flag can test Basic-auth defaults automatically."},
+    "refs": ["https://www.cloudflare.com/learning/ddos/glossary/mirai-botnet/"]
+  }
+}

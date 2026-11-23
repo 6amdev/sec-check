@@ -102,7 +102,39 @@ Every check has a **difficulty level (1–5)** — level 1 is the wide-open, eas
 
 *(The network map above uses example devices in the documentation IP range — the real page builds it from your own scan.)*
 
-This is **Phase 1** of the [design](docs/DESIGN.md); a REST API and an MCP server (so AI tools can drive scans) are planned for a later phase.
+This is the web UI; sec-check also exposes a **REST API** and an **MCP server** so scripts and AI tools can drive scans (see below).
+
+### REST API
+
+Start the server with an API key to expose a read-only-by-default JSON API at `/api/*` (requests send an `X-API-Key` header). Scans still go through the **same allow-list** — the API cannot scan anything not in `scope.json`.
+
+```bash
+./web.sh --api-key "$(openssl rand -hex 16)"       # or SECCHECK_API_KEY=...
+```
+
+| Endpoint | |
+|---|---|
+| `GET /api/targets` | the allow-list |
+| `GET /api/lessons` · `GET /api/lesson/<id>` | the knowledge base (bilingual) |
+| `POST /api/scan` `{"target":"host\|wifi\|lan:<cidr>\|web:<url>\|...","level":1-5}` | start a scan → `{job}` |
+| `GET /api/scan/<job\|id>` | live status, then the stored scan |
+| `GET /api/findings?scan=&severity=` | findings (🔴 only) |
+| `GET /api/report/<id>` · `GET /api/compare/<a>/<b>` · `GET /api/map` | report JSON · before/after diff · network map |
+
+### MCP server
+
+An MCP server (stdio) lets an AI assistant like Claude drive scans and read results — still gated by the allow-list and non-destructive. Tools: `list_targets`, `scan`, `get_findings`, `explain_finding`, `get_report`, `compare_scans`.
+
+```bash
+./seccheck.py mcp        # speaks JSON-RPC over stdin/stdout
+```
+
+Example entry for an MCP client config (e.g. Claude Desktop / Claude Code):
+
+```json
+{ "mcpServers": { "sec-check": { "command": "python3",
+  "args": ["/path/to/sec-check/seccheck.py", "mcp"] } } }
+```
 
 ### Learn
 
@@ -160,7 +192,7 @@ tests/               python3 -m unittest discover -s tests
 - [x] Lab-only web-app demos (SQLi/XSS/CSRF) against the practice lab
 - [ ] Optional wrappers when installed: `nmap -sV`, `nuclei`, `testssl.sh`, `lynis`, merged into the same report
 - [ ] DNS/e-mail checks for your domain: SPF, DKIM, DMARC, DNSSEC, CAA, dangling subdomains
-- [ ] REST API + MCP server (so AI tools can drive scans) — see [docs/DESIGN.md](docs/DESIGN.md)
+- [x] REST API + MCP server (so AI tools can drive scans) — allow-list enforced on both
 - [ ] Scheduled scans + push alerts
 
 ## Requirements

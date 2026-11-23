@@ -13,6 +13,7 @@ Phase 1 ตามดีไซน์ (docs/DESIGN.md): Dashboard/Scan/Map + SQLit
 import argparse
 import html
 import io
+import json
 import threading
 import time
 import urllib.parse
@@ -38,6 +39,14 @@ JOBS = {}                      # job_id -> dict(status, log, scan_id, error, mod
 SCAN_LOCK = threading.Lock()   # สแกนทีละงาน / one scan at a time
 SESSIONS = set()
 PIN = None
+API_KEY = None
+
+
+def _int(s):
+    try:
+        return int(s)
+    except (TypeError, ValueError):
+        return None
 
 PAGE_CSS = report.CSS + """
 .nav{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 20px}
@@ -379,9 +388,93 @@ class App(BaseHTTPRequestHandler):
     def _page(self, title, active, body, lang):
         self._send(layout(title, active, body, lang))
 
+    # ---- REST API (/api/*) — ต้องมี API key · อ่านอย่างเดียวเป็นค่าเริ่มต้น · ไม่ข้าม allow-list ----
+    def _json(self, obj, code=200):
+        self._send(json.dumps(obj, ensure_ascii=False, default=str), code, "application/json; charset=utf-8",
+                   {"Access-Control-Allow-Origin": "*"})
+
+    def _api_auth(self):
+        if not API_KEY:
+            return False
+        key = self.headers.get("X-API-Key") or urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query).get("key", [""])[0]
+        return bool(key) and key == API_KEY
+
+    def _api_get(self, path, qs):
+        if not self._api_auth():
+            return self._json({"error": "api key required (set --api-key and send X-API-Key)"}, 401)
+        parts = path.strip("/").split("/")          # ['api', ...]
+        sub = parts[1] if len(parts) > 1 else ""
+        k = kb.load()
+        if sub == "targets":
+            return self._json({"always_allowed": ["127.0.0.0/8", "::1", "localhost"], "targets": scope.load()})
+        if sub == "lessons":
+            return self._json([{"id": i, "severity": e.get("severity"), "level": e.get("level", 3),
+                                "tag": e.get("tag", ""), "title": e.get("title", {})} for i, e in k.items()])
+        if sub == "lesson" and len(parts) > 2:
+            e = k.get(parts[2])
+            return self._json(e or {"error": "unknown lesson id"}, 200 if e else 404)
+        if sub == "scan" and len(parts) > 2:
+            jid = parts[2]
+            if jid in JOBS:
+                j = JOBS[jid]
+                return self._json({"job": jid, "status": j["status"], "scan_id": j.get("scan_id"),
+                                   "error": j.get("error", ""), "log": j.get("log", "")})
+            row = db.get(_int(jid))
+            if not row:
+                return self._json({"error": "scan not found"}, 404)
+            return self._json({"scan": dict(row, report_json=None), "counts": db.counts(int(jid))})
+        if sub == "report" and len(parts) > 2:
+            row = db.get(_int(parts[2]))
+            return self._json(json.loads(row["report_json"]) if row else {"error": "not found"}, 200 if row else 404)
+        if sub == "findings":
+            scan = _int(qs.get("scan", [""])[0]) or (db.latest() or {}).get("id")
+            sev = qs.get("severity", [""])[0]
+            rows = db.findings(scan, "VULNERABLE") if scan else []
+            if sev:
+                rows = [r for r in rows if r["severity"] == sev]
+            return self._json({"scan_id": scan, "findings": rows})
+        if sub == "compare" and len(parts) > 3:
+            return self._json(db.compare(_int(parts[2]), _int(parts[3])))
+        if sub == "map":
+            con = db.connect()
+            try:
+                r = con.execute("SELECT report_json FROM scans WHERE modules LIKE '%lan%' ORDER BY id DESC LIMIT 1").fetchone()
+            finally:
+                con.close()
+            if not r:
+                return self._json({"hosts": []})
+            data = json.loads(r["report_json"])
+            res = next((Result.from_dict(x) for x in data["results"] if x["module"] == "lan"), None)
+            return self._json({"hosts": netmap.hosts_from(res) if res else []})
+        return self._json({"error": "unknown endpoint", "endpoints": [
+            "GET /api/targets", "GET /api/lessons", "GET /api/lesson/<id>", "POST /api/scan",
+            "GET /api/scan/<job|id>", "GET /api/report/<id>", "GET /api/findings?scan=&severity=",
+            "GET /api/compare/<a>/<b>", "GET /api/map"]}, 404)
+
+    def _api_post(self, path, form_bytes):
+        if not self._api_auth():
+            return self._json({"error": "api key required"}, 401)
+        if path.strip("/").split("/")[1:2] != ["scan"]:
+            return self._json({"error": "unknown endpoint"}, 404)
+        try:
+            body = json.loads(form_bytes or b"{}")
+        except ValueError:
+            return self._json({"error": "invalid JSON body"}, 400)
+        if any(j["status"] == "running" for j in JOBS.values()):
+            return self._json({"error": "a scan is already running"}, 429)
+        pick = body.get("target") or body.get("pick") or "host"
+        level = max(1, min(5, int(body.get("level", 5))))
+        creds = bool(body.get("default_creds"))
+        job_id = secrets.token_hex(6)
+        JOBS[job_id] = {"status": "queued", "log": "", "scan_id": None, "error": "", "module": pick, "target": pick}
+        threading.Thread(target=run_job, args=(job_id, pick, creds, level), daemon=True).start()
+        return self._json({"job": job_id, "poll": f"/api/scan/{job_id}"}, 202)
+
     def do_GET(self):
         u = urllib.parse.urlsplit(self.path)
         qs = urllib.parse.parse_qs(u.query)
+        if u.path.startswith("/api/"):
+            return self._api_get(u.path, qs)
         lang = self._lang(qs)
         i18n.set_lang(lang)
         path = u.path
@@ -438,10 +531,13 @@ class App(BaseHTTPRequestHandler):
     def do_POST(self):
         u = urllib.parse.urlsplit(self.path)
         qs = urllib.parse.parse_qs(u.query)
+        length = int(self.headers.get("Content-Length", 0))
+        raw = self.rfile.read(length)
+        if u.path.startswith("/api/"):
+            return self._api_post(u.path, raw)
         lang = self._lang(qs)
         i18n.set_lang(lang)
-        length = int(self.headers.get("Content-Length", 0))
-        form = urllib.parse.parse_qs(self.rfile.read(length).decode())
+        form = urllib.parse.parse_qs(raw.decode())
         if u.path == "/login":
             if PIN and form.get("pin", [""])[0] == PIN:
                 tok = secrets.token_hex(16)
@@ -489,19 +585,23 @@ class App(BaseHTTPRequestHandler):
 
 
 def main(argv=None):
-    global PIN
-    p = argparse.ArgumentParser(description="sec-check web UI")
+    global PIN, API_KEY
+    p = argparse.ArgumentParser(description="sec-check web UI + REST API")
     p.add_argument("--host", default="127.0.0.1", help="ที่อยู่ที่ฟัง (0.0.0.0 = เปิดให้ทั้งวงแลน)")
     p.add_argument("--port", type=int, default=8770)
     p.add_argument("--pin", default=os.environ.get("SECCHECK_PIN"), help="ตั้ง PIN ก่อนเข้าเว็บ")
+    p.add_argument("--api-key", default=os.environ.get("SECCHECK_API_KEY"),
+                   help="เปิด REST API ที่ /api/* (ต้องส่ง header X-API-Key)")
     p.add_argument("--lang", default="th")
     args = p.parse_args(argv)
     PIN = args.pin
+    API_KEY = args.api_key
     i18n.set_default(args.lang)
     kb.load()
     srv = ThreadingHTTPServer((args.host, args.port), App)
     where = f"http://{args.host}:{args.port}"
-    print(f"sec-check web · {where}" + (f"  (PIN {'ตั้งแล้ว' if PIN else 'ไม่ได้ตั้ง'})"))
+    print(f"sec-check web · {where}" + (f"  (PIN {'ตั้งแล้ว' if PIN else 'ไม่ได้ตั้ง'})")
+          + ("  · REST API เปิด (/api/*)" if API_KEY else "  · REST API ปิด (ตั้ง --api-key เพื่อเปิด)"))
     if args.host == "0.0.0.0":
         print(_("เปิดให้ทั้งวงแลนเข้าถึง — แนะนำให้ตั้ง --pin"))
     try:

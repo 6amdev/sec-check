@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sec-check": {
+      "command": "python3",
+      "args": ["/absolute/path/to/sec-check/seccheck.py", "mcp"]
+    }
+  }
+}

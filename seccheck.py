@@ -212,6 +212,8 @@ def main(argv=None):
     sv.add_argument("--host", default="127.0.0.1")
     sv.add_argument("--port", type=int, default=8770)
     sv.add_argument("--pin", default=os.environ.get("SECCHECK_PIN"))
+    sv.add_argument("--api-key", default=os.environ.get("SECCHECK_API_KEY"))
+    sub.add_parser("mcp", help=_("เปิด MCP server (stdio) ให้ AI สั่งสแกนได้"))
 
     pre = argparse.ArgumentParser(add_help=False)
     pre.add_argument("--lang", default=os.environ.get("SECCHECK_LANG", "th"))
@@ -233,10 +235,14 @@ def main(argv=None):
             return cmd_explain(args)
         elif args.cmd == "lessons":
             cmd_lessons(args)
+        elif args.cmd == "mcp":
+            import mcpserver
+            mcpserver.main()
         elif args.cmd == "serve":
             import webapp
             webapp.main(["--host", args.host, "--port", str(args.port), "--lang", args.lang]
-                        + (["--pin", args.pin] if args.pin else []))
+                        + (["--pin", args.pin] if args.pin else [])
+                        + (["--api-key", args.api_key] if args.api_key else []))
         elif args.cmd == "all":
             cmd_all(args)
         else:

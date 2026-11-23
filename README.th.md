@@ -97,7 +97,14 @@ python3 lab/vulnlab.py &               # เปิดสนามฝึก (ฟ�
 
 *(แผนที่ด้านบนเป็นอุปกรณ์ตัวอย่างในช่วง IP สำหรับเอกสาร — หน้าจริงสร้างจากการสแกนของคุณเอง)*
 
-นี่คือ **เฟส 1** ตาม[ดีไซน์](docs/DESIGN.md) · REST API และ MCP server (ให้เครื่องมือ AI สั่งสแกนได้) อยู่ในเฟสถัดไป
+นอกจากหน้าเว็บ sec-check ยังมี **REST API** และ **MCP server** ให้สคริปต์/เครื่องมือ AI สั่งสแกนและอ่านผลได้:
+
+```bash
+./web.sh --api-key "$(openssl rand -hex 16)"    # เปิด REST API ที่ /api/* (ส่ง header X-API-Key)
+./seccheck.py mcp                                # เปิด MCP server (stdio) ให้ AI อย่าง Claude สั่งได้
+```
+
+ทั้ง API และ MCP ยัง **ไม่ข้าม allow-list และไม่ทำลาย** — สแกนได้เฉพาะเป้าหมายใน `scope.json` เท่านั้น
 
 ### เรียนรู้
 

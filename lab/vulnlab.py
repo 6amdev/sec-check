@@ -205,6 +205,47 @@ class Rtsp(socketserver.BaseRequestHandler):
                              b"Public: DESCRIBE, SETUP, PLAY, OPTIONS\r\n\r\n")
 
 
+class FakeSMB(socketserver.BaseRequestHandler):
+    """SMB ปลอม: ตอบ SMB1 negotiate (SMBv1 เปิด) และ SMB2 แบบไม่บังคับ signing (ไว้ทดสอบโมดูล windows)"""
+    def handle(self):
+        import struct as _s
+        data = recv_nbss_req(self.request)
+        if data and data[:4] == b"\xffSMB":          # SMB1 negotiate → ตอบ SMB1 (SMBv1 เปิด)
+            body = _s.pack("<B", 17) + _s.pack("<H", 0) + b"\x00" * 30   # wordcount + DialectIndex=0 + rest
+            smb = b"\xffSMB\x72" + b"\x00" * 4 + b"\x88" + b"\x01\x00" + b"\x00" * 18 + \
+                b"\x00\x00\x00\x00\x00\x00\x00\x00" + body + b"\x00\x00"
+            self.request.sendall(b"\x00" + _s.pack(">I", len(smb))[1:] + smb)
+        elif data and data[:4] == b"\xfeSMB":        # SMB2 negotiate → SecurityMode=0x0001 (enabled, NOT required)
+            hdr = b"\xfeSMB" + b"\x00" * 60
+            resp = _s.pack("<H", 65) + _s.pack("<H", 0x0001) + b"\x00" * 60
+            smb = hdr + resp
+            self.request.sendall(b"\x00" + _s.pack(">I", len(smb))[1:] + smb)
+
+
+class FakeRDP(socketserver.BaseRequestHandler):
+    """RDP ปลอม: ตอบ rdpNegRsp selectedProtocol=0 (ไม่บังคับ NLA) ไว้ทดสอบโมดูล windows"""
+    def handle(self):
+        import struct as _s
+        self.request.recv(512)
+        neg_rsp = b"\x02\x00\x08\x00" + _s.pack("<I", 0)          # type=2, flags, len=8, selected=PROTOCOL_RDP
+        cc = b"\x0e\xd0\x00\x00\x12\x34\x00" + neg_rsp            # X.224 CC header (7) + rdpNegRsp (8)
+        tpkt = b"\x03\x00" + _s.pack(">H", 4 + len(cc)) + cc
+        self.request.sendall(tpkt)
+
+
+def recv_nbss_req(sock, timeout=4):
+    import struct as _s
+    sock.settimeout(timeout)
+    try:
+        hdr = sock.recv(4)
+        if len(hdr) < 4:
+            return None
+        length = _s.unpack(">I", b"\x00" + hdr[1:4])[0]
+        return sock.recv(length)
+    except OSError:
+        return None
+
+
 class Docker(JsonAPI):
     payload = {"Version": "20.10.7-lab", "ApiVersion": "1.41", "Os": "linux"}
 
@@ -280,6 +321,8 @@ def main():
         start("router admin+default (fake)", ThreadingHTTPServer, (WEAK, 8081), BasicAuth),
         start("rtsp no-auth (fake)", TCP, (WEAK, 8554), Rtsp),
         start_https("https self-signed (fake)", (WEAK, 8443), Weak, self_signed_cert()),
+        start("smbv1+nosigning (fake)", TCP, (WEAK, 10445), FakeSMB),   # 445 ต้อง root จึงใช้พอร์ตสูง
+        start("rdp no-NLA (fake)", TCP, (WEAK, 3389), FakeRDP),
     ]
     if not any(servers):
         sys.exit(1)

@@ -25,7 +25,7 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 ## ✨ What it does
 
-Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **120 lessons** — list them with `./seccheck.py lessons`.
+Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **126 lessons** — list them with `./seccheck.py lessons`.
 
 | Module | Checks | Examples |
 |---|---|---|
@@ -35,6 +35,7 @@ Every finding in the report comes with three boxes: **What it is**, **How attack
 | 📶 **router** | 9 + 6 checklist | Open ports on the router, admin page over HTTP, UPnP, Wi-Fi encryption (open/WEP/WPA1/WPA2/WPA3), DNS in use, plus a hand-check list: admin password, WPS, firmware, remote management, guest/IoT network, port forwards |
 | 📡 **wifi** | 7 + 4 checklist | Passive audit of the Wi-Fi you're on: encryption (Open/WEP/WPA1/mixed/WPA2/WPA3), rogue/evil-twin (same SSID on another BSSID), plus a local **passphrase-strength** check (`--passphrase`, never stored or shown) and a checklist for WPS, PMF, and router admin. **Passive only — it never deauths, captures handshakes, or cracks anything** (see note below). |
 | 🔐 **tls** | 10 | Deep TLS/SSL audit of a service (`host:port` or URL): protocol versions (SSLv3/TLS 1.0/1.1/1.2/1.3), weak ciphers (RC4/3DES/DES/NULL/EXPORT/MD5), certificate expiry/self-signed/hostname-mismatch/untrusted-chain, and key size + SHA-1 signature when `openssl` is present. Normal handshakes only — no attack payloads. |
+| 🪟 **windows** | 6 | Non-destructive SMB/RDP checks of a Windows host on your LAN: **SMBv1 enabled** (EternalBlue/WannaCry class), **SMB signing not required** (NTLM relay), NetBIOS exposure, RDP exposure and **RDP without NLA**. Protocol negotiation only — no login, no guessing, no exploit. |
 
 **Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
 

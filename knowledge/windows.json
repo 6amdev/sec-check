@@ -1,0 +1,50 @@
+{
+  "windows.smbv1": {
+    "severity": "critical", "tag": "CWE-477 · MS17-010", "level": 2,
+    "title": {"th": "เปิด SMBv1 (โปรโตคอลแชร์ไฟล์รุ่นเก่า)", "en": "SMBv1 enabled (legacy file-sharing protocol)"},
+    "what": {"th": "เครื่องยังรับการเชื่อมต่อด้วย SMBv1 ซึ่ง Microsoft เลิกใช้แล้วและแนะนำให้ปิด", "en": "The host still accepts SMBv1, which Microsoft has deprecated and recommends disabling."},
+    "attack": {"th": "ช่องโหว่ EternalBlue (MS17-010) บน SMBv1 ยึดเครื่องได้โดยไม่ต้องรหัส — เป็นช่องที่ WannaCry/NotPetya ใช้แพร่จากเครื่องหนึ่งไปทั้งวงในปี 2017", "en": "The EternalBlue flaw (MS17-010) in SMBv1 takes over a host with no credentials — the path WannaCry/NotPetya used to spread across networks in 2017."},
+    "fix": {"th": "ปิด SMBv1: PowerShell (admin) `Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol` แล้วรีบูต · อัปเดต Windows ให้ครบ", "en": "Disable SMBv1: PowerShell (admin) `Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol`, then reboot · keep Windows fully patched."},
+    "refs": ["https://learn.microsoft.com/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3"]
+  },
+  "windows.smb_signing": {
+    "severity": "medium", "tag": "CWE-308 · CWE-345", "level": 4,
+    "title": {"th": "SMB ไม่บังคับการเซ็น (signing not required)", "en": "SMB signing not required"},
+    "what": {"th": "เครื่องยอมคุย SMB โดยไม่บังคับให้เซ็นข้อความ (message signing)", "en": "The host allows SMB without requiring message signing."},
+    "attack": {"th": "เปิดช่องให้โจมตีแบบ relay (NTLM relay) และ man-in-the-middle — ผู้โจมตีในวงดักและส่งต่อการยืนยันตัวตนไปเครื่องอื่นเพื่อเข้าถึงในนามเหยื่อ", "en": "Enables NTLM relay and man-in-the-middle attacks — an attacker on the LAN intercepts and forwards authentication to another host to act as the victim."},
+    "fix": {"th": "บังคับ SMB signing ผ่าน Group Policy: 'Microsoft network server: Digitally sign communications (always)' = Enabled (และฝั่ง client ด้วย)", "en": "Require SMB signing via Group Policy: 'Microsoft network server: Digitally sign communications (always)' = Enabled (and on the client side too)."},
+    "refs": ["https://learn.microsoft.com/windows/security/threat-protection/security-policy-settings/microsoft-network-server-digitally-sign-communications-always"]
+  },
+  "windows.smb_exposed": {
+    "severity": "medium", "tag": "Attack surface", "level": 1,
+    "title": {"th": "เปิดแชร์ไฟล์ SMB สู่เครือข่าย", "en": "SMB file sharing exposed to the network"},
+    "what": {"th": "พอร์ต SMB (445) เปิดรับการเชื่อมต่อ", "en": "The SMB port (445) accepts connections."},
+    "attack": {"th": "SMB เป็นเป้ายอดนิยมของ ransomware และหนอน (worm) · ยิ่งเปิดให้เครือข่ายกว้าง ยิ่งเสี่ยง โดยเฉพาะถ้า forward ออกอินเทอร์เน็ต", "en": "SMB is a top target for ransomware and worms; the wider it's exposed the riskier, especially if port-forwarded to the internet."},
+    "fix": {"th": "จำกัดด้วย Windows Firewall ให้เฉพาะวง/เครื่องที่ต้องใช้ · ห้าม forward 445 ออกเน็ต · ปิดการแชร์ถ้าไม่ได้ใช้", "en": "Restrict with Windows Firewall to the subnets/hosts that need it; never forward 445 to the internet; disable sharing if unused."},
+    "refs": []
+  },
+  "windows.rdp_exposed": {
+    "severity": "medium", "tag": "Attack surface", "level": 1,
+    "title": {"th": "เปิด Remote Desktop (RDP)", "en": "Remote Desktop (RDP) exposed"},
+    "what": {"th": "พอร์ต RDP (3389) เปิดรับการเชื่อมต่อ", "en": "The RDP port (3389) accepts connections."},
+    "attack": {"th": "RDP เป็นช่องทางอันดับต้นของ ransomware: เดารหัส/ใช้รหัสที่รั่ว และมีช่องโหว่อย่าง BlueKeep (CVE-2019-0708) ที่ยึดเครื่องได้โดยไม่ต้องล็อกอิน", "en": "RDP is a leading ransomware entry point: password guessing, leaked credentials, and bugs like BlueKeep (CVE-2019-0708) that take over a host without logging in."},
+    "fix": {"th": "อย่าเปิด RDP ออกอินเทอร์เน็ต — เข้าผ่าน VPN เท่านั้น · จำกัด IP ด้วย firewall · รหัสยาว + เปิด 2FA · อัปเดต Windows", "en": "Don't expose RDP to the internet — reach it over a VPN only; restrict by IP with the firewall; long passwords + 2FA; keep Windows patched."},
+    "refs": ["https://learn.microsoft.com/security/engineering/identifying-and-mitigating-rdp"]
+  },
+  "windows.rdp_no_nla": {
+    "severity": "high", "tag": "CWE-287 · CWE-306", "level": 4,
+    "title": {"th": "RDP ไม่บังคับ NLA (Network Level Authentication)", "en": "RDP without NLA (Network Level Authentication)"},
+    "what": {"th": "เซิร์ฟเวอร์ RDP ยอมให้เชื่อมต่อแบบไม่ต้องยืนยันตัวตนก่อน (ไม่บังคับ NLA/CredSSP)", "en": "The RDP server allows connections without pre-authentication (NLA/CredSSP not enforced)."},
+    "attack": {"th": "ไม่มี NLA = ใครก็เปิดหน้าล็อกอินของเครื่องได้ (กิน resource, โดนเดารหัสง่าย) และช่องโหว่ก่อนยืนยันตัวตนอย่าง BlueKeep ใช้ได้ · NLA บังคับให้ยืนยันตัวตนก่อนถึงจะเปิด session", "en": "Without NLA anyone can reach the login screen (resource drain, easier guessing) and pre-auth bugs like BlueKeep apply; NLA forces authentication before a session opens."},
+    "fix": {"th": "เปิด NLA: System Properties → Remote → 'Allow connections only from computers running Remote Desktop with Network Level Authentication' · หรือ Group Policy 'Require user authentication for remote connections by using Network Level Authentication' = Enabled", "en": "Enable NLA: System Properties → Remote → 'Allow connections only from computers running Remote Desktop with Network Level Authentication' · or Group Policy 'Require user authentication for remote connections by using Network Level Authentication' = Enabled."},
+    "refs": []
+  },
+  "windows.netbios": {
+    "severity": "low", "tag": "CWE-200", "level": 2,
+    "title": {"th": "เปิด NetBIOS (139)", "en": "NetBIOS exposed (139)"},
+    "what": {"th": "พอร์ต NetBIOS (139) เปิดอยู่ — โปรโตคอลเก่าสำหรับแชร์ไฟล์/ชื่อเครื่อง", "en": "The NetBIOS port (139) is open — an old protocol for file/name sharing."},
+    "attack": {"th": "NetBIOS รั่วชื่อเครื่อง/ผู้ใช้/โดเมน และใช้ร่วมกับการโจมตี SMB/NTLM relay ได้", "en": "NetBIOS leaks machine/user/domain names and feeds SMB/NTLM-relay attacks."},
+    "fix": {"th": "ปิด NetBIOS over TCP/IP ที่การ์ดเครือข่าย (ใช้ SMB over TCP 445 อย่างเดียว) และจำกัดด้วย firewall", "en": "Disable NetBIOS over TCP/IP on the adapter (use SMB over TCP 445 only) and restrict with the firewall."},
+    "refs": []
+  }
+}

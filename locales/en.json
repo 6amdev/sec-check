@@ -282,5 +282,14 @@
  "ไม่พบ cipher อ่อนที่ทดสอบ (RC4/3DES/DES/NULL/EXPORT/MD5)": "No weak ciphers among those tested (RC4/3DES/DES/NULL/EXPORT/MD5)",
  "ใบรับรองถูกต้องและเชื่อถือได้": "Certificate is valid and trusted",
  "ขนาดกุญแจเพียงพอ": "Key size is adequate",
- "ตรวจ TLS/SSL ของบริการ (host:port หรือ URL)": "Audit a service's TLS/SSL (host:port or URL)"
+ "ตรวจ TLS/SSL ของบริการ (host:port หรือ URL)": "Audit a service's TLS/SSL (host:port or URL)",
+ "ระบุ IP ของเครื่อง Windows เช่น ./seccheck.py windows 192.168.1.20": "Give the Windows host's IP, e.g. ./seccheck.py windows 192.168.1.20",
+ "ปิด SMBv1 แล้ว (ตอบด้วย SMB2)": "SMBv1 disabled (answered with SMB2)",
+ "SMB บังคับการเซ็น (signing required)": "SMB signing required",
+ "RDP บังคับ TLS/NLA": "RDP requires TLS/NLA",
+ "RDP ปฏิเสธการเชื่อมต่อแบบไม่มี NLA (บังคับ NLA)": "RDP refuses non-NLA connections (NLA enforced)",
+ "RDP เปิดอยู่แต่ไม่ตอบการเจรจา X.224 — ตรวจ NLA เองในเครื่อง": "RDP is open but didn't answer the X.224 negotiation — check NLA on the host",
+ "ไม่พบพอร์ต Windows (139/445/3389) เปิดบนเครื่องนี้": "No Windows ports (139/445/3389) open on this host",
+ "ตรวจแบบเจรจาโปรโตคอลเท่านั้น — ไม่ล็อกอิน ไม่เดารหัส ไม่ส่ง exploit": "Protocol negotiation only — no login, no password guessing, no exploit",
+ "ตรวจเครื่อง Windows ในวง (SMB/RDP)": "Audit a Windows host on the LAN (SMB/RDP)"
 }

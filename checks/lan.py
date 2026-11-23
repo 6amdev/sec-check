@@ -11,6 +11,7 @@ Discovery without root: the local ARP table plus TCP connects to popular ports (
 still proves a host is there — same idea as nmap -sT). Then ~40 common ports per host, and a read-only
 "hello" for a few services. No password guessing, no logins, no commands that change anything.
 """
+import base64
 import ipaddress
 import json
 import re
@@ -28,8 +29,9 @@ PORTS = {
     631: "IPP", 873: "rsync", 1433: "MSSQL", 1883: "MQTT", 2049: "NFS", 2323: "Telnet-alt",
     2375: "Docker API", 2376: "Docker TLS", 3000: "HTTP-dev", 3306: "MySQL", 3389: "RDP",
     5000: "HTTP-alt", 5432: "PostgreSQL", 5900: "VNC", 5901: "VNC", 6379: "Redis", 7547: "TR-069",
-    8000: "HTTP-alt", 8080: "HTTP-alt", 8443: "HTTPS-alt", 8888: "HTTP-alt", 9000: "HTTP-alt",
-    9100: "JetDirect", 9200: "Elasticsearch", 11211: "memcached", 27017: "MongoDB",
+    8000: "HTTP-alt", 8080: "HTTP-alt", 8081: "HTTP-alt", 8443: "HTTPS-alt", 8554: "RTSP-alt",
+    8888: "HTTP-alt", 9000: "HTTP-alt", 9100: "JetDirect", 9200: "Elasticsearch",
+    11211: "memcached", 27017: "MongoDB",
 }
 SIMPLE = {  # port -> kb id (เปิดอยู่ก็ควรรู้ / just being open is worth knowing)
     21: "lan.ftp", 23: "lan.telnet", 2323: "lan.telnet", 139: "lan.smb", 445: "lan.smb",
@@ -38,8 +40,13 @@ SIMPLE = {  # port -> kb id (เปิดอยู่ก็ควรรู้ / 
     2049: "lan.nfs", 111: "lan.nfs", 873: "lan.rsync", 7547: "lan.tr069",
 }
 RISKY = {"lan.telnet", "lan.redis_noauth", "lan.docker_api", "lan.vnc_noauth", "lan.vnc",
-         "lan.elasticsearch", "lan.memcached", "lan.mongodb"}
-HTTP_PORTS = [80, 8080, 8000, 8888, 3000, 5000, 9000]
+         "lan.elasticsearch", "lan.memcached", "lan.mongodb", "lan.rtsp_noauth", "lan.default_creds"}
+HTTP_PORTS = [80, 8080, 8000, 8888, 3000, 5000, 9000, 8081, 8090]
+# ชุดรหัส default ที่ใช้ทดสอบ (เฉพาะ HTTP Basic auth, เป็น GET อ่านอย่างเดียว ไม่เปลี่ยนค่า, ต้องเปิดด้วย --default-creds)
+# well-known default credentials, tried ONLY via HTTP Basic auth (a GET — read-only), opt-in with --default-creds
+DEFAULT_CREDS = [("admin", "admin"), ("admin", "password"), ("admin", ""), ("admin", "1234"),
+                 ("admin", "12345"), ("root", "root"), ("root", "admin"), ("user", "user"),
+                 ("admin", "admin1234"), ("admin", "9999")]
 
 
 def local_networks():
@@ -81,9 +88,46 @@ def scan_host(ip, timeout):
     return sorted(p for p, s in states.items() if s == "open")
 
 
+def rtsp_needs_auth(ip, port, timeout=3):
+    """ส่ง RTSP OPTIONS — กล้องที่ปลอดภัยจะตอบ 401 ขอ auth / does the camera challenge for auth?
+    คืน (ตอบไหม, ต้อง auth ไหม, บรรทัดแรก) — ไม่ส่งรหัสผ่าน ไม่ขอสตรีม"""
+    req = (f"OPTIONS rtsp://{ip}:{port}/ RTSP/1.0\r\nCSeq: 1\r\n"
+           f"User-Agent: {net.UA}\r\n\r\n").encode()
+    b = net.banner(ip, port, send=req, timeout=timeout) or b""
+    if not b.startswith(b"RTSP/"):
+        return False, True, ""
+    text = b.decode("latin-1", "replace")
+    line0 = text.splitlines()[0] if text else ""
+    code = line0.split()[1] if len(line0.split()) > 1 else ""
+    needs = code in ("401", "403") or "www-authenticate" in text.lower()
+    return True, needs, line0
+
+
+def http_default_creds(base, res, t):
+    """ลองรหัส default เฉพาะหน้า Basic auth (ส่ง GET พร้อม Authorization — อ่านอย่างเดียว) / Basic-auth only, GET"""
+    import time as _time
+    for user, pw in DEFAULT_CREDS:
+        token = base64.b64encode(f"{user}:{pw}".encode()).decode()
+        r = net.request(base, headers={"Authorization": f"Basic {token}"}, timeout=4, max_bytes=2048)
+        if r.status and r.status not in (401, 403, 0):
+            res.add("lan.default_creds", base, T("รหัส default ใช้ได้: {u} / {p}  (HTTP {s})",
+                                                 u=user, p=pw or "(ว่าง)", s=r.status))
+            return True
+        _time.sleep(0.4)        # จำกัดอัตรา / rate-limit so nothing gets locked or overwhelmed
+    res.ok("ลองรหัส default แล้วใช้ไม่ได้ (Basic auth)", base, T("{n} ชุด", n=len(DEFAULT_CREDS)))
+    return False
+
+
 # --- read-only service probes ------------------------------------------------------------------
-def probe(ip, port, res):
+def probe(ip, port, res, opts=None):
     t = f"{ip}:{port}"
+    if port == 554:
+        answered, needs, line0 = rtsp_needs_auth(ip, port)
+        if answered and not needs:
+            res.add("lan.rtsp_noauth", t, line0 or "RTSP OPTIONS → 200 OK, no auth challenge")
+        else:
+            res.add("lan.rtsp", t, line0 or PORTS.get(port, ""))
+        return "RTSP"
     if port == 22:
         b = (net.banner(ip, port) or b"").decode("latin-1").strip()
         res.add("lan.ssh", t, b[:80])
@@ -130,11 +174,20 @@ def probe(ip, port, res):
         res.add(SIMPLE[port], t, PORTS.get(port, ""))
         return ""
     if port in HTTP_PORTS:
-        r = net.request(f"http://{ip}:{port}/", timeout=4, max_bytes=8192)
+        base = f"http://{ip}:{port}/"
+        r = net.request(base, timeout=4, max_bytes=8192)
         title = re.search(rb"<title[^>]*>(.*?)</title>", r.body, re.I | re.S)
-        info = " · ".join(x for x in (r.h("server"), title.group(1).decode("utf-8", "replace").strip()[:60]
-                                       if title else "") if x)
-        res.add("lan.http_service", f"http://{ip}:{port}/", info or f"HTTP {r.status}")
+        titletxt = title.group(1).decode("utf-8", "replace").strip()[:60] if title else ""
+        info = " · ".join(x for x in (r.h("server"), titletxt) if x)
+        res.add("lan.http_service", base, info or f"HTTP {r.status}")
+        auth = r.h("www-authenticate")
+        if r.status == 401 and auth.lower().startswith("basic"):
+            res.add("lan.http_basic", base, auth[:80])          # รหัสผ่านส่งแบบ base64 ไม่เข้ารหัส
+            if getattr(opts, "default_creds", False):
+                http_default_creds(base, res, t)
+        elif getattr(opts, "default_creds", False) and r.status in (200, 403) and \
+                re.search(r"login|password|sign in|เข้าสู่ระบบ|รหัสผ่าน", r.text, re.I):
+            res.manual.append("lan.login_form")               # ฟอร์มล็อกอิน — ไม่ลองอัตโนมัติ (ดูหมายเหตุ)
         return info
     return ""
 
@@ -170,6 +223,9 @@ def run(target, opts):
             raise SystemExit(_("หาวงแลนของเครื่องนี้ไม่เจอ — ระบุเองได้ เช่น ./seccheck.py lan 192.168.1.0/24"))
         target = nets[0][1]
     netw = ipaddress.ip_network(target, strict=False)
+    if not (netw.is_private or netw.is_loopback):
+        raise SystemExit(_("สแกน LAN ได้เฉพาะวงเครือข่ายส่วนตัว (RFC1918: 10/8, 172.16/12, 192.168/16) หรือ loopback\n"
+                           "เป้าหมายที่เป็น IP สาธารณะ ({n}) ตรวจไม่ได้ด้วยโมดูลนี้", n=netw))
     scope.check(str(netw))
     limit = int(getattr(opts, "max_hosts", 1024) or 1024)
     if netw.num_addresses > limit:
@@ -189,12 +245,36 @@ def run(target, opts):
         ports = open_ports[ip]
         details = []
         for p in ports:
-            info = probe(ip, p, res)
+            info = probe(ip, p, res, opts)
             details.append(f"{p}/{PORTS.get(p, '?')}" + (f" ({info})" if info else ""))
-        rows.append([ip, net.rdns(ip), arp.get(ip, ""), "\n".join(details) or "-"])
-    res.table("เครื่องที่พบ", ["IP", "ชื่อ", "MAC", "พอร์ตที่เปิด"], rows)
+        rows.append([ip, net.rdns(ip), guess_device(ports, arp.get(ip, "")), arp.get(ip, ""),
+                     "\n".join(details) or "-"])
+    res.table("เครื่องที่พบ", ["IP", "ชื่อ", "น่าจะเป็น", "MAC", "พอร์ตที่เปิด"], rows)
     if not any(f.id in RISKY for f in res.findings):
         res.ok("ไม่พบบริการเสี่ยงสูงที่เปิดโล่ง", str(netw), T("{n} เครื่อง", n=len(up)))
     res.note("ตรวจเฉพาะพอร์ต TCP ยอดนิยม — เครื่องที่มี firewall บล็อกทุกพอร์ตอาจไม่ปรากฏ",
              f"{len(PORTS)} ports")
+    if not getattr(opts, "default_creds", False):
+        res.note("ยังไม่ได้ลองรหัส default — เพิ่ม --default-creds เพื่อทดสอบรหัสที่ตั้งมาจากโรงงาน "
+                 "(เฉพาะหน้า Basic auth, อ่านอย่างเดียว, จำกัดอัตรา)")
     return res.done()
+
+
+def guess_device(ports, mac):
+    """เดาชนิดอุปกรณ์จากพอร์ต/บริการ / rough device guess from open ports"""
+    s = set(ports)
+    if 554 in s or 8554 in s:
+        return "กล้อง/NVR (camera)"
+    if 7547 in s or (53 in s and 80 in s):
+        return "เราเตอร์ (router)"
+    if 3389 in s or (445 in s and 139 in s and 5900 in s):
+        return "Windows PC"
+    if 9100 in s or 631 in s:
+        return "เครื่องพิมพ์ (printer)"
+    if 548 in s:
+        return "Mac/NAS"
+    if 22 in s:
+        return "Linux/เซิร์ฟเวอร์"
+    if 8009 in s or 8008 in s or 8443 in s:
+        return "ทีวี/Chromecast"
+    return ""

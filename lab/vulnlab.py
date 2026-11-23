@@ -171,6 +171,39 @@ class JsonAPI(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
 
+class BasicAuth(BaseHTTPRequestHandler):
+    """อุปกรณ์ที่ยังใช้รหัส default admin/admin ผ่าน HTTP Basic / fake device with default creds"""
+    server_version = "HTTPD"
+    sys_version = ""
+
+    def log_message(self, *a):
+        pass
+
+    def do_GET(self):
+        import base64 as _b64
+        want = "Basic " + _b64.b64encode(b"admin:admin").decode()
+        if self.headers.get("Authorization") == want:
+            body = b"<html><title>Router Admin</title><body>Welcome admin</body></html>"
+            self.send_response(200)
+        else:
+            body = b"<html><body>401</body></html>"
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", 'Basic realm="USER LOGIN"')
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    do_HEAD = do_GET
+
+
+class Rtsp(socketserver.BaseRequestHandler):
+    """กล้องที่ตอบ OPTIONS 200 OK โดยไม่ขอ auth / camera answering with no auth challenge"""
+    def handle(self):
+        self.request.recv(1024)
+        self.request.sendall(b"RTSP/1.0 200 OK\r\nCSeq: 1\r\n"
+                             b"Public: DESCRIBE, SETUP, PLAY, OPTIONS\r\n\r\n")
+
+
 class Docker(JsonAPI):
     payload = {"Version": "20.10.7-lab", "ApiVersion": "1.41", "Os": "linux"}
 
@@ -207,6 +240,8 @@ def main():
         start("memcached (fake)", TCP, (WEAK, 11211), Memcached),
         start("docker api (fake)", ThreadingHTTPServer, (WEAK, 2375), Docker),
         start("elasticsearch (fake)", ThreadingHTTPServer, (WEAK, 9200), Elastic),
+        start("router admin+default (fake)", ThreadingHTTPServer, (WEAK, 8081), BasicAuth),
+        start("rtsp no-auth (fake)", TCP, (WEAK, 8554), Rtsp),
     ]
     if not any(servers):
         sys.exit(1)

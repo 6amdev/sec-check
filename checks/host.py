@@ -7,21 +7,33 @@ Checks that need root (e.g. real firewall rules) print the command for you to ru
 """
 import base64
 import glob
+import grp
 import json
 import os
+import pwd
 import re
 import shutil
 import socket
 import stat
 import subprocess
+import time
 from pathlib import Path
 
 from core.finding import Result, T
 from i18n import _
 
+ROOT = os.geteuid() == 0
 RISKY_LISTEN = {21: "FTP", 23: "Telnet", 139: "NetBIOS", 445: "SMB", 2375: "Docker API", 3306: "MySQL",
                 5432: "PostgreSQL", 5900: "VNC", 6379: "Redis", 9200: "Elasticsearch",
                 11211: "memcached", 27017: "MongoDB"}
+# SUID ที่มากับระบบตามปกติ / SUID binaries that ship with a normal Ubuntu
+KNOWN_SUID = {"sudo", "su", "passwd", "chsh", "chfn", "newgrp", "gpasswd", "mount", "umount", "pkexec",
+              "fusermount", "fusermount3", "ping", "ping6", "pmount", "pumount", "ntfs-3g", "dbus-daemon-launch-helper",
+              "vmware-user-suid-wrapper", "Xorg.wrap", "snap-confine", "polkit-agent-helper-1", "unix_chkpwd",
+              "ssh-keysign", "mount.nfs", "chrome-sandbox", "exim4", "pppd", "dmcrypt-get-device",
+              "vmware-authd", "sg", "expiry", "write"}
+SUID_DIRS = ["/usr/bin", "/bin", "/usr/sbin", "/sbin", "/usr/local/bin", "/usr/local/sbin", "/usr/libexec"]
+WW_DIRS = ["/etc", "/usr/local", "/opt", "/srv", "/var/www"]
 
 
 def sh(*cmd, timeout=20):
@@ -245,14 +257,133 @@ def check_desktop(res):
         res.add("host.samba_guest", "/etc/samba/smb.conf", "guest ok = yes")
 
 
+def check_accounts(res):
+    # บัญชีที่มีสิทธิ์ root (UID 0) / accounts with UID 0
+    uid0 = sorted(p.pw_name for p in pwd.getpwall() if p.pw_uid == 0)
+    if uid0 != ["root"]:
+        res.add("host.extra_root_account", "/etc/passwd", ", ".join(uid0))
+    else:
+        res.ok("มีบัญชี UID 0 เดียว (root)", "/etc/passwd")
+    # สมาชิกกลุ่ม sudo/admin/wheel / who can use sudo
+    admins = set()
+    for g in ("sudo", "admin", "wheel"):
+        try:
+            admins.update(grp.getgrnam(g).gr_mem)
+        except KeyError:
+            pass
+    for p in pwd.getpwall():          # ผู้ใช้ที่ตั้งกลุ่มหลักเป็น sudo ด้วย
+        try:
+            if grp.getgrgid(p.pw_gid).gr_name in ("sudo", "admin", "wheel"):
+                admins.add(p.pw_name)
+        except KeyError:
+            pass
+    if admins:
+        res.ok("บัญชีที่ใช้ sudo ได้", "sudo group", ", ".join(sorted(admins)))
+        res.note("บัญชีที่ใช้ sudo ได้ (ยืนยันว่าทุกชื่อเป็นของคุณ)", ", ".join(sorted(admins)))
+    # รหัสผ่านว่าง — ต้องใช้ root อ่าน /etc/shadow / empty passwords need root
+    sh = read("/etc/shadow")
+    if sh is None:
+        if not ROOT:
+            res.note("ตรวจบัญชีรหัสผ่านว่างต้องใช้ root — รันเองใน Terminal:",
+                     "sudo awk -F: '($2==\"\"){print $1}' /etc/shadow")
+    else:
+        empty = [l.split(":")[0] for l in sh.splitlines() if l.count(":") >= 1 and l.split(":")[1] == ""]
+        if empty:
+            res.add("host.empty_password", "/etc/shadow", ", ".join(empty))
+        else:
+            res.ok("ไม่มีบัญชีที่ตั้งรหัสผ่านว่าง", "/etc/shadow")
+
+
+def check_password_policy(res):
+    defs = read("/etc/login.defs") or ""
+    enc = re.search(r"(?mi)^ENCRYPT_METHOD\s+(\w+)", defs)
+    if enc and enc.group(1).upper() in ("SHA512", "YESCRYPT"):
+        res.ok("เก็บรหัสผ่านด้วยอัลกอริทึมที่แข็งแรง", "/etc/login.defs", enc.group(1))
+    elif enc:
+        res.add("host.weak_hash", "/etc/login.defs", f"ENCRYPT_METHOD {enc.group(1)}")
+    pam = (read("/etc/pam.d/common-password") or "") + (read("/etc/pam.d/system-auth") or "")
+    if "pam_pwquality" in pam or "pam_cracklib" in pam:
+        res.ok("บังคับความแข็งแรงของรหัสผ่าน (pwquality)", "/etc/pam.d/common-password")
+    else:
+        res.add("host.no_pwquality", "/etc/pam.d/common-password")
+
+
+def check_world_writable(res):
+    # sticky bit บน /tmp / sticky bit on world-writable temp dirs
+    for d in ("/tmp", "/var/tmp"):
+        try:
+            m = os.stat(d).st_mode
+        except OSError:
+            continue
+        if (m & stat.S_IWOTH) and not (m & stat.S_ISVTX):
+            res.add("host.tmp_no_sticky", d, oct(m & 0o7777))
+    # ไฟล์ world-writable ในไดเรกทอรีระบบ / world-writable files in system dirs
+    hits, scanned, deadline = [], 0, time.time() + 6
+    for base in WW_DIRS:
+        for root, dirs, files in os.walk(base, onerror=lambda e: None):
+            if time.time() > deadline or scanned > 60000:
+                break
+            dirs[:] = [d for d in dirs if not os.path.islink(os.path.join(root, d))]
+            for name in files:
+                scanned += 1
+                p = os.path.join(root, name)
+                try:
+                    st = os.lstat(p)
+                except OSError:
+                    continue
+                if stat.S_ISLNK(st.st_mode):
+                    continue
+                if st.st_mode & stat.S_IWOTH:
+                    hits.append(p)
+                    if len(hits) >= 40:
+                        break
+            if len(hits) >= 40 or time.time() > deadline:
+                break
+    if hits:
+        res.add("host.world_writable", ", ".join(WW_DIRS),
+                T("{n} ไฟล์: {f}", n=len(hits), f=", ".join(hits[:12])))
+    else:
+        res.ok("ไม่พบไฟล์ที่ใครก็เขียนได้ในไดเรกทอรีระบบ", ", ".join(WW_DIRS))
+
+
+def check_suid(res):
+    found, extra = [], []
+    for d in SUID_DIRS:
+        for name in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+            p = os.path.join(d, name)
+            try:
+                st = os.lstat(p)
+            except OSError:
+                continue
+            if stat.S_ISLNK(st.st_mode) or not (st.st_mode & stat.S_ISUID):
+                continue
+            found.append(p)
+            if name not in KNOWN_SUID:
+                extra.append(p)
+    if found:
+        res.table("ไฟล์ SUID (รันด้วยสิทธิ์เจ้าของไฟล์)", ["path", "สถานะ"],
+                  [[p, "\u26a0 review" if p in extra else "ok"] for p in found])
+    if extra:
+        res.add("host.suid_unexpected", ", ".join(SUID_DIRS), ", ".join(extra[:15]))
+    else:
+        res.ok("ไฟล์ SUID ทั้งหมดเป็นของที่มากับระบบตามปกติ", ", ".join(SUID_DIRS), T("{n} ไฟล์", n=len(found)))
+
+
 def run(target, opts):
     res = Result("host", socket.gethostname())
+    if not ROOT:
+        res.note("รันโดยไม่ใช้ root — บางข้อตรวจได้ไม่ครบ (จะบอกคำสั่ง sudo ให้รันเอง)",
+                 "sudo ./seccheck.py host")
     exposed = check_listen(res)
     rows = listeners()
     check_firewall(res, exposed)
     check_ssh(res, rows)
+    check_accounts(res)
+    check_password_policy(res)
     check_updates(res)
     check_files(res)
+    check_world_writable(res)
+    check_suid(res)
     check_kernel(res)
     check_desktop(res)
     res.note("ตรวจเพิ่มแบบละเอียด (ต้องใช้ root) ด้วย Lynis:", "sudo apt install lynis && sudo lynis audit system")

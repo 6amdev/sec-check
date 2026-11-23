@@ -135,6 +135,8 @@ def main(argv=None):
     ln.add_argument("target", nargs="?")
     ln.add_argument("--timeout", type=float, default=0.8)
     ln.add_argument("--max-hosts", type=int, default=1024)
+    ln.add_argument("--default-creds", action="store_true",
+                    help=_("ลองรหัส default บนหน้า Basic auth (อ่านอย่างเดียว จำกัดอัตรา)"))
 
     sub.add_parser("host", help=_("ตรวจเครื่อง Linux นี้"))
     r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
@@ -144,6 +146,7 @@ def main(argv=None):
     a.add_argument("--delay", type=float, default=0.15)
     a.add_argument("--timeout", type=float, default=0.8)
     a.add_argument("--max-hosts", type=int, default=1024)
+    a.add_argument("--default-creds", action="store_true")
     e = sub.add_parser("explain", help=_("อ่านคำอธิบายช่องโหว่"))
     e.add_argument("id")
     sub.add_parser("lessons", help=_("รายการช่องโหว่ทั้งหมดที่ตรวจได้"))

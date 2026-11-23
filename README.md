@@ -25,16 +25,18 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 ## ✨ What it does
 
-Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **87 lessons** — list them with `./seccheck.py lessons`.
+Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **98 lessons** — list them with `./seccheck.py lessons`.
 
 | Module | Checks | Examples |
 |---|---|---|
 | 🌐 **web** | 30 | HTTPS & certificate, TLS 1.0/1.1, HTTP→HTTPS, HSTS, CSP, clickjacking, cookies (HttpOnly/Secure/SameSite), CORS origin reflection, version leaks, exposed `.git` / `.env` / SQL dumps / backups, `phpinfo()`, directory listing, debug error pages, robots.txt hints, security.txt |
-| 🖧 **lan** | 22 | Host discovery without root, ~40 common ports per host, plus read-only probes: Redis with no auth, VNC with no password, open Docker API, Elasticsearch, memcached, Telnet, FTP, SMB, RDP, databases, MQTT, IP cameras (RTSP), printers, NFS, TR-069 |
-| 🐧 **host** | 20 | Services listening on the network, ufw firewall, sshd config (root login, passwords), pending security updates, unattended-upgrades, reboot needed, `/etc/shadow` permissions, `~/.ssh` permissions & keys without a passphrase, ASLR, disk encryption, auto-login, screen lock, Samba guest shares |
+| 🖧 **lan** | 26 | Host discovery without root, device-type guess, ~40 common ports per host, plus read-only probes: Redis with no auth, VNC with no password, open Docker API, Elasticsearch, memcached, Telnet, FTP, SMB, RDP, databases, MQTT, **IP cameras with unauthenticated RTSP**, **HTTP Basic auth over plain HTTP**, **opt-in default-credential check**, printers, NFS, TR-069 |
+| 🐧 **host** | 27 | Services listening on the network, ufw firewall, sshd config (root login, passwords), **UID-0 & sudo accounts, empty passwords, password hashing & pwquality, world-writable files, SUID binaries**, pending security updates, unattended-upgrades, reboot needed, `/etc/shadow` & `~/.ssh` permissions, keys without a passphrase, ASLR, disk encryption, auto-login, screen lock, Samba guest shares |
 | 📶 **router** | 9 + 6 checklist | Open ports on the router, admin page over HTTP, UPnP, Wi-Fi encryption (open/WEP/WPA1/WPA2/WPA3), DNS in use, plus a hand-check list: admin password, WPS, firmware, remote management, guest/IoT network, port forwards |
 
-**Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never guesses or tries passwords (not even router defaults), never logs in, never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
+**Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
+
+The one exception, **off by default**, is `--default-creds`: when you pass it, the LAN module tries a tiny list of well-known factory passwords (admin/admin …) **against allow-listed targets only**, using HTTP **Basic auth** (a read-only `GET` — nothing is changed), one credential at a time, rate-limited, stopping at the first that works. It never touches form-based logins (a form `POST` could lock an account), and needs root for nothing. This is for auditing **your own** routers, cameras and NAS.
 
 ## 🚀 Quick start
 
@@ -60,9 +62,12 @@ To check your real systems, add them to the allow-list first (you must type `yes
 
 ./seccheck.py web https://example.com
 ./seccheck.py lan                      # defaults to this machine's network
+./seccheck.py lan --default-creds      # also try factory passwords on your own devices (see Safety model)
 ./seccheck.py router                   # defaults to the default gateway
 ./seccheck.py all                      # host + router + LAN + every web target in scope → one report
 ```
+
+Run `./seccheck.py host` with `sudo` to also check empty-password accounts; without it, those checks are skipped and the command to run yourself is printed.
 
 Reports are saved to `reports/` as HTML (switchable Thai/English, light/dark) and JSON. The folder is git-ignored. The HTML describes your systems, so don't publish it.
 
@@ -82,7 +87,7 @@ Reports are saved to `reports/` as HTML (switchable Thai/English, light/dark) an
 |---|---|
 | `http://127.0.0.2:8808` | Weak web shop: exposed `.git`, `.env` (fake values), `backup.sql`, `phpinfo`, directory listing, stack traces, reflected CORS with credentials, cookie without flags, version headers, TRACE/PUT |
 | `http://127.0.0.3:8808` | The same shop with every fix applied — diff the two reports |
-| `127.0.0.2` : 2323 / 6379 / 5900 / 11211 / 2375 / 9200 | Fake Telnet, Redis (no auth), VNC (no auth), memcached, Docker API, Elasticsearch |
+| `127.0.0.2` : 2323 / 6379 / 5900 / 11211 / 2375 / 9200 / 8081 / 8554 | Fake Telnet, Redis (no auth), VNC (no auth), memcached, Docker API, Elasticsearch, a router admin page with default `admin/admin` (Basic auth), and an unauthenticated RTSP camera |
 
 **Suggested path:** scan the weak site → read each lesson → open `lab/vulnlab.py`, find the `Weak` handler line that causes it → compare with the `Safe` handler → apply the same fix to your real server → re-scan.
 
@@ -92,6 +97,8 @@ Reports are saved to `reports/` as HTML (switchable Thai/English, light/dark) an
 
 - **Allow-list (`scope.json`, git-ignored).** Every web/LAN/router check calls `scope.check()` first. Targets are added only through `scope add`, which asks you to type `yes`. Loopback (`127.0.0.0/8`, `::1`, `localhost`) is always allowed. The host module audits only the local machine.
 - **Matching is strict:** `*.example.com` covers subdomains; a CIDR covers only addresses inside it; a bigger network than you added is refused. Redirects to hosts outside the scope are not followed. See `tests/test_scope.py`.
+- **LAN scans are private-only:** the `lan` module refuses any target that isn't an RFC1918 range (10/8, 172.16/12, 192.168/16) or loopback, as a second layer on top of the allow-list.
+- **Default-credential checks are opt-in, read-only and small:** `--default-creds` tries ~10 well-known defaults via Basic auth (a `GET`), rate-limited, first-match-stop, allow-list only. No brute force, no form logins, nothing that could lock an account or knock a device offline.
 - **Gentle:** web checks send about 40 requests with a 0.15 s delay (`--delay`). LAN scans are capped at 1024 addresses (`--max-hosts`).
 - **No root needed.** Anything that needs root is printed as a command for you to run yourself (e.g. `sudo ufw status verbose`, `sudo lynis audit system`).
 

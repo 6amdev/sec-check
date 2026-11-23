@@ -1,162 +1,577 @@
 {
   "host.listen_risky": {
-    "severity": "high", "tag": "Attack surface",
-    "title": {"th": "บริการเสี่ยงเปิดรับจากเครือข่าย", "en": "Risky service listening on the network"},
-    "what": {"th": "ฐานข้อมูล/cache/รีโมต (เช่น Redis, MySQL, VNC, Docker) ฟังบน 0.0.0.0 — เครื่องอื่นต่อเข้ามาได้", "en": "A database/cache/remote service (Redis, MySQL, VNC, Docker …) listens on 0.0.0.0 — other machines can connect."},
-    "attack": {"th": "บริการพวกนี้ออกแบบให้ใช้ภายในเครื่อง ถ้าเปิดออกไป เครื่องอื่นที่ติดมัลแวร์ใน Wi-Fi เดียวกันจะเข้าถึงได้ทันที", "en": "These are meant for local use; exposed, any infected device on the same Wi-Fi can reach them."},
-    "fix": {"th": "ตั้งให้ฟังแค่ 127.0.0.1 ในไฟล์ config ของบริการนั้น และ/หรือ `sudo ufw enable` (ufw บล็อกขาเข้าเป็นค่าเริ่มต้น) · ถ้าเป็น Docker `-p 6379:6379` ให้เปลี่ยนเป็น `-p 127.0.0.1:6379:6379`", "en": "Bind it to 127.0.0.1 in its config and/or `sudo ufw enable` (ufw denies incoming by default) · for Docker change `-p 6379:6379` to `-p 127.0.0.1:6379:6379`."},
+    "severity": "high",
+    "tag": "Attack surface",
+    "title": {
+      "th": "บริการเสี่ยงเปิดรับจากเครือข่าย",
+      "en": "Risky service listening on the network"
+    },
+    "what": {
+      "th": "ฐานข้อมูล/cache/รีโมต (เช่น Redis, MySQL, VNC, Docker) ฟังบน 0.0.0.0 — เครื่องอื่นต่อเข้ามาได้",
+      "en": "A database/cache/remote service (Redis, MySQL, VNC, Docker …) listens on 0.0.0.0 — other machines can connect."
+    },
+    "attack": {
+      "th": "บริการพวกนี้ออกแบบให้ใช้ภายในเครื่อง ถ้าเปิดออกไป เครื่องอื่นที่ติดมัลแวร์ใน Wi-Fi เดียวกันจะเข้าถึงได้ทันที",
+      "en": "These are meant for local use; exposed, any infected device on the same Wi-Fi can reach them."
+    },
+    "fix": {
+      "th": "ตั้งให้ฟังแค่ 127.0.0.1 ในไฟล์ config ของบริการนั้น และ/หรือ `sudo ufw enable` (ufw บล็อกขาเข้าเป็นค่าเริ่มต้น) · ถ้าเป็น Docker `-p 6379:6379` ให้เปลี่ยนเป็น `-p 127.0.0.1:6379:6379`",
+      "en": "Bind it to 127.0.0.1 in its config and/or `sudo ufw enable` (ufw denies incoming by default) · for Docker change `-p 6379:6379` to `-p 127.0.0.1:6379:6379`."
+    },
     "refs": []
   },
   "host.listen_exposed": {
-    "severity": "info", "tag": "Attack surface",
-    "title": {"th": "พอร์ตที่เปิดรับจากเครือข่าย", "en": "Ports open to the network"},
-    "what": {"th": "รายการบริการที่ฟังบนทุก interface (ดูตารางด้านบน)", "en": "Services listening on all interfaces (see the table above)."},
-    "attack": {"th": "ทุกพอร์ตที่เปิด = ประตูให้ลองเคาะ ยิ่งน้อยยิ่งดี (ลด attack surface)", "en": "Every open port is a door to knock on; fewer is better (smaller attack surface)."},
-    "fix": {"th": "ปิดบริการที่ไม่ใช้: `systemctl disable --now <ชื่อ>` · ดูว่าใครเปิดพอร์ต: `sudo ss -tlnp`", "en": "Disable what you don't use: `systemctl disable --now <name>` · see who owns a port: `sudo ss -tlnp`."},
+    "severity": "info",
+    "tag": "Attack surface",
+    "title": {
+      "th": "พอร์ตที่เปิดรับจากเครือข่าย",
+      "en": "Ports open to the network"
+    },
+    "what": {
+      "th": "รายการบริการที่ฟังบนทุก interface (ดูตารางด้านบน)",
+      "en": "Services listening on all interfaces (see the table above)."
+    },
+    "attack": {
+      "th": "ทุกพอร์ตที่เปิด = ประตูให้ลองเคาะ ยิ่งน้อยยิ่งดี (ลด attack surface)",
+      "en": "Every open port is a door to knock on; fewer is better (smaller attack surface)."
+    },
+    "fix": {
+      "th": "ปิดบริการที่ไม่ใช้: `systemctl disable --now <ชื่อ>` · ดูว่าใครเปิดพอร์ต: `sudo ss -tlnp`",
+      "en": "Disable what you don't use: `systemctl disable --now <name>` · see who owns a port: `sudo ss -tlnp`."
+    },
     "refs": []
   },
   "host.firewall_off": {
-    "severity": "medium", "tag": "Hardening",
-    "title": {"th": "ไม่ได้เปิด firewall", "en": "Firewall is off"},
-    "what": {"th": "ufw ปิดอยู่หรือไม่ได้ติดตั้ง — ทุกพอร์ตที่โปรแกรมเปิดจะเข้าถึงได้จากเครือข่าย", "en": "ufw is disabled or missing — every port a program opens is reachable from the network."},
-    "attack": {"th": "โปรแกรมบางตัวเปิดพอร์ตโดยไม่บอก (dev server, Docker, แชร์ไฟล์) firewall คือตาข่ายกันพลาด", "en": "Programs open ports quietly (dev servers, Docker, file sharing); a firewall is the safety net."},
-    "fix": {"th": "`sudo ufw default deny incoming` · `sudo ufw allow ssh` (ถ้าใช้) · `sudo ufw enable` · ดูผล `sudo ufw status verbose` (หมายเหตุ: Docker เปิดพอร์ตข้าม ufw ได้ ให้ bind 127.0.0.1)", "en": "`sudo ufw default deny incoming` · `sudo ufw allow ssh` (if used) · `sudo ufw enable` · check `sudo ufw status verbose` (note: Docker-published ports bypass ufw — bind them to 127.0.0.1)."},
-    "refs": ["https://help.ubuntu.com/community/UFW"]
+    "severity": "medium",
+    "tag": "Hardening",
+    "title": {
+      "th": "ไม่ได้เปิด firewall",
+      "en": "Firewall is off"
+    },
+    "what": {
+      "th": "ufw ปิดอยู่หรือไม่ได้ติดตั้ง — ทุกพอร์ตที่โปรแกรมเปิดจะเข้าถึงได้จากเครือข่าย",
+      "en": "ufw is disabled or missing — every port a program opens is reachable from the network."
+    },
+    "attack": {
+      "th": "โปรแกรมบางตัวเปิดพอร์ตโดยไม่บอก (dev server, Docker, แชร์ไฟล์) firewall คือตาข่ายกันพลาด",
+      "en": "Programs open ports quietly (dev servers, Docker, file sharing); a firewall is the safety net."
+    },
+    "fix": {
+      "th": "`sudo ufw default deny incoming` · `sudo ufw allow ssh` (ถ้าใช้) · `sudo ufw enable` · ดูผล `sudo ufw status verbose` (หมายเหตุ: Docker เปิดพอร์ตข้าม ufw ได้ ให้ bind 127.0.0.1)",
+      "en": "`sudo ufw default deny incoming` · `sudo ufw allow ssh` (if used) · `sudo ufw enable` · check `sudo ufw status verbose` (note: Docker-published ports bypass ufw — bind them to 127.0.0.1)."
+    },
+    "refs": [
+      "https://help.ubuntu.com/community/UFW"
+    ]
   },
   "host.ssh_root_login": {
-    "severity": "high", "tag": "CWE-250",
-    "title": {"th": "SSH ยอมให้ root ล็อกอิน", "en": "SSH allows root login"},
-    "what": {"th": "PermitRootLogin yes — ล็อกอินเป็น root ด้วยรหัสผ่านได้โดยตรง", "en": "PermitRootLogin yes — root can log in directly with a password."},
-    "attack": {"th": "บอทเดารหัส 'root' เป็นอันดับแรกเสมอ เดาถูกครั้งเดียวได้ทั้งเครื่อง และไม่มี log ว่าใครเป็นคนทำ", "en": "Bots always try 'root' first; one right guess owns the box, with no trace of which person did it."},
-    "fix": {"th": "ใน /etc/ssh/sshd_config.d/hardening.conf: `PermitRootLogin no` แล้ว `sudo systemctl reload ssh` (ใช้ผู้ใช้ปกติ + sudo)", "en": "In /etc/ssh/sshd_config.d/hardening.conf: `PermitRootLogin no`, then `sudo systemctl reload ssh` (log in as a user, then sudo)."},
+    "severity": "high",
+    "tag": "CWE-250",
+    "title": {
+      "th": "SSH ยอมให้ root ล็อกอิน",
+      "en": "SSH allows root login"
+    },
+    "what": {
+      "th": "PermitRootLogin yes — ล็อกอินเป็น root ด้วยรหัสผ่านได้โดยตรง",
+      "en": "PermitRootLogin yes — root can log in directly with a password."
+    },
+    "attack": {
+      "th": "บอทเดารหัส 'root' เป็นอันดับแรกเสมอ เดาถูกครั้งเดียวได้ทั้งเครื่อง และไม่มี log ว่าใครเป็นคนทำ",
+      "en": "Bots always try 'root' first; one right guess owns the box, with no trace of which person did it."
+    },
+    "fix": {
+      "th": "ใน /etc/ssh/sshd_config.d/hardening.conf: `PermitRootLogin no` แล้ว `sudo systemctl reload ssh` (ใช้ผู้ใช้ปกติ + sudo)",
+      "en": "In /etc/ssh/sshd_config.d/hardening.conf: `PermitRootLogin no`, then `sudo systemctl reload ssh` (log in as a user, then sudo)."
+    },
     "refs": []
   },
   "host.ssh_password": {
-    "severity": "medium", "tag": "OWASP A07",
-    "title": {"th": "SSH ยอมล็อกอินด้วยรหัสผ่าน", "en": "SSH password login enabled"},
-    "what": {"th": "PasswordAuthentication yes (ค่าเริ่มต้น)", "en": "PasswordAuthentication yes (the default)."},
-    "attack": {"th": "เซิร์ฟเวอร์ที่เปิด SSH บนอินเทอร์เน็ตโดนเดารหัสหลายพันครั้งต่อวัน; กุญแจ SSH เดาไม่ได้ในทางปฏิบัติ", "en": "Internet-facing SSH sees thousands of guesses a day; SSH keys are practically unguessable."},
-    "fix": {"th": "1) `ssh-keygen -t ed25519` บนเครื่องเรา 2) `ssh-copy-id user@server` 3) ทดสอบล็อกอินด้วย key 4) ตั้ง `PasswordAuthentication no` แล้ว reload (อย่าปิด session เดิมจนกว่าจะทดสอบผ่าน)", "en": "1) `ssh-keygen -t ed25519` locally 2) `ssh-copy-id user@server` 3) test key login 4) set `PasswordAuthentication no` and reload (keep your current session open until tested)."},
+    "severity": "medium",
+    "tag": "OWASP A07",
+    "title": {
+      "th": "SSH ยอมล็อกอินด้วยรหัสผ่าน",
+      "en": "SSH password login enabled"
+    },
+    "what": {
+      "th": "PasswordAuthentication yes (ค่าเริ่มต้น)",
+      "en": "PasswordAuthentication yes (the default)."
+    },
+    "attack": {
+      "th": "เซิร์ฟเวอร์ที่เปิด SSH บนอินเทอร์เน็ตโดนเดารหัสหลายพันครั้งต่อวัน; กุญแจ SSH เดาไม่ได้ในทางปฏิบัติ",
+      "en": "Internet-facing SSH sees thousands of guesses a day; SSH keys are practically unguessable."
+    },
+    "fix": {
+      "th": "1) `ssh-keygen -t ed25519` บนเครื่องเรา 2) `ssh-copy-id user@server` 3) ทดสอบล็อกอินด้วย key 4) ตั้ง `PasswordAuthentication no` แล้ว reload (อย่าปิด session เดิมจนกว่าจะทดสอบผ่าน)",
+      "en": "1) `ssh-keygen -t ed25519` locally 2) `ssh-copy-id user@server` 3) test key login 4) set `PasswordAuthentication no` and reload (keep your current session open until tested)."
+    },
     "refs": []
   },
   "host.ssh_empty_password": {
-    "severity": "critical", "tag": "CWE-521",
-    "title": {"th": "SSH ยอมรหัสผ่านว่าง", "en": "SSH permits empty passwords"},
-    "what": {"th": "PermitEmptyPasswords yes", "en": "PermitEmptyPasswords yes."},
-    "attack": {"th": "บัญชีที่ไม่มีรหัสผ่านล็อกอินจากระยะไกลได้ทันที", "en": "Any account without a password can log in remotely."},
-    "fix": {"th": "`PermitEmptyPasswords no` แล้ว reload ssh", "en": "`PermitEmptyPasswords no`, then reload ssh."},
+    "severity": "critical",
+    "tag": "CWE-521",
+    "title": {
+      "th": "SSH ยอมรหัสผ่านว่าง",
+      "en": "SSH permits empty passwords"
+    },
+    "what": {
+      "th": "PermitEmptyPasswords yes",
+      "en": "PermitEmptyPasswords yes."
+    },
+    "attack": {
+      "th": "บัญชีที่ไม่มีรหัสผ่านล็อกอินจากระยะไกลได้ทันที",
+      "en": "Any account without a password can log in remotely."
+    },
+    "fix": {
+      "th": "`PermitEmptyPasswords no` แล้ว reload ssh",
+      "en": "`PermitEmptyPasswords no`, then reload ssh."
+    },
     "refs": []
   },
   "host.updates_security": {
-    "severity": "high", "tag": "OWASP A06",
-    "title": {"th": "มีอัปเดตความปลอดภัยค้างอยู่", "en": "Pending security updates"},
-    "what": {"th": "แพ็กเกจที่มีแพตช์ความปลอดภัยแล้วแต่ยังไม่ได้ติดตั้ง", "en": "Packages with released security fixes are not installed yet."},
-    "attack": {"th": "พอแพตช์ออก รายละเอียดช่องโหว่ก็เป็นสาธารณะ ผู้โจมตีเทียบแพตช์ทำ exploit ได้ภายในไม่กี่วัน — เครื่องที่ไม่อัปเดตคือเป้าง่ายที่สุด", "en": "Once a patch ships the bug is public; attackers diff the patch and have exploits within days — unpatched machines are the easiest targets."},
-    "fix": {"th": "`sudo apt update && sudo apt upgrade` แล้วรีบูตถ้าระบบขอ", "en": "`sudo apt update && sudo apt upgrade`, reboot if asked."},
-    "refs": ["https://ubuntu.com/security/notices"]
+    "severity": "high",
+    "tag": "OWASP A06",
+    "title": {
+      "th": "มีอัปเดตความปลอดภัยค้างอยู่",
+      "en": "Pending security updates"
+    },
+    "what": {
+      "th": "แพ็กเกจที่มีแพตช์ความปลอดภัยแล้วแต่ยังไม่ได้ติดตั้ง",
+      "en": "Packages with released security fixes are not installed yet."
+    },
+    "attack": {
+      "th": "พอแพตช์ออก รายละเอียดช่องโหว่ก็เป็นสาธารณะ ผู้โจมตีเทียบแพตช์ทำ exploit ได้ภายในไม่กี่วัน — เครื่องที่ไม่อัปเดตคือเป้าง่ายที่สุด",
+      "en": "Once a patch ships the bug is public; attackers diff the patch and have exploits within days — unpatched machines are the easiest targets."
+    },
+    "fix": {
+      "th": "`sudo apt update && sudo apt upgrade` แล้วรีบูตถ้าระบบขอ",
+      "en": "`sudo apt update && sudo apt upgrade`, reboot if asked."
+    },
+    "refs": [
+      "https://ubuntu.com/security/notices"
+    ]
   },
   "host.updates_pending": {
-    "severity": "low", "tag": "OWASP A06",
-    "title": {"th": "มีแพ็กเกจรออัปเดต", "en": "Package updates pending"},
-    "what": {"th": "มีอัปเดตทั่วไป (ไม่ใช่ความปลอดภัย) รอติดตั้ง", "en": "Regular (non-security) updates are waiting."},
-    "attack": {"th": "ความเสี่ยงต่ำ แต่การอัปเดตสม่ำเสมอทำให้อัปเดตความปลอดภัยง่ายเมื่อจำเป็น", "en": "Low risk, but regular updating keeps security updates painless."},
-    "fix": {"th": "`sudo apt upgrade`", "en": "`sudo apt upgrade`"},
+    "severity": "low",
+    "tag": "OWASP A06",
+    "title": {
+      "th": "มีแพ็กเกจรออัปเดต",
+      "en": "Package updates pending"
+    },
+    "what": {
+      "th": "มีอัปเดตทั่วไป (ไม่ใช่ความปลอดภัย) รอติดตั้ง",
+      "en": "Regular (non-security) updates are waiting."
+    },
+    "attack": {
+      "th": "ความเสี่ยงต่ำ แต่การอัปเดตสม่ำเสมอทำให้อัปเดตความปลอดภัยง่ายเมื่อจำเป็น",
+      "en": "Low risk, but regular updating keeps security updates painless."
+    },
+    "fix": {
+      "th": "`sudo apt upgrade`",
+      "en": "`sudo apt upgrade`"
+    },
     "refs": []
   },
   "host.no_auto_updates": {
-    "severity": "medium", "tag": "Hardening",
-    "title": {"th": "ไม่ได้เปิดอัปเดตความปลอดภัยอัตโนมัติ", "en": "Automatic security updates off"},
-    "what": {"th": "unattended-upgrades ไม่ได้ทำงาน", "en": "unattended-upgrades is not enabled."},
-    "attack": {"th": "เราลืมอัปเดตได้ แต่บอทไม่ลืมสแกน", "en": "You may forget to update; bots never forget to scan."},
-    "fix": {"th": "`sudo apt install unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades`", "en": "`sudo apt install unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades`"},
-    "refs": ["https://help.ubuntu.com/community/AutomaticSecurityUpdates"]
+    "severity": "medium",
+    "tag": "Hardening",
+    "title": {
+      "th": "ไม่ได้เปิดอัปเดตความปลอดภัยอัตโนมัติ",
+      "en": "Automatic security updates off"
+    },
+    "what": {
+      "th": "unattended-upgrades ไม่ได้ทำงาน",
+      "en": "unattended-upgrades is not enabled."
+    },
+    "attack": {
+      "th": "เราลืมอัปเดตได้ แต่บอทไม่ลืมสแกน",
+      "en": "You may forget to update; bots never forget to scan."
+    },
+    "fix": {
+      "th": "`sudo apt install unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades`",
+      "en": "`sudo apt install unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades`"
+    },
+    "refs": [
+      "https://help.ubuntu.com/community/AutomaticSecurityUpdates"
+    ]
   },
   "host.reboot_required": {
-    "severity": "low", "tag": "Ops",
-    "title": {"th": "ต้องรีบูตเพื่อให้อัปเดตมีผล", "en": "Reboot required"},
-    "what": {"th": "ติดตั้งอัปเดต (มักเป็น kernel/libc) แล้ว แต่ยังใช้ของเก่าอยู่จนกว่าจะรีบูต", "en": "Updates (often kernel/libc) are installed but the old code runs until reboot."},
-    "attack": {"th": "แพตช์ยังไม่ทำงานจริง ช่องโหว่ยังเปิดอยู่", "en": "The patch is not active yet; the hole is still open."},
-    "fix": {"th": "รีบูตเมื่อสะดวก: `sudo reboot`", "en": "Reboot when convenient: `sudo reboot`."},
+    "severity": "low",
+    "tag": "Ops",
+    "title": {
+      "th": "ต้องรีบูตเพื่อให้อัปเดตมีผล",
+      "en": "Reboot required"
+    },
+    "what": {
+      "th": "ติดตั้งอัปเดต (มักเป็น kernel/libc) แล้ว แต่ยังใช้ของเก่าอยู่จนกว่าจะรีบูต",
+      "en": "Updates (often kernel/libc) are installed but the old code runs until reboot."
+    },
+    "attack": {
+      "th": "แพตช์ยังไม่ทำงานจริง ช่องโหว่ยังเปิดอยู่",
+      "en": "The patch is not active yet; the hole is still open."
+    },
+    "fix": {
+      "th": "รีบูตเมื่อสะดวก: `sudo reboot`",
+      "en": "Reboot when convenient: `sudo reboot`."
+    },
     "refs": []
   },
   "host.shadow_readable": {
-    "severity": "critical", "tag": "CWE-732",
-    "title": {"th": "ไฟล์ hash รหัสผ่านอ่านได้ทุกคน", "en": "Password hash file world-readable"},
-    "what": {"th": "/etc/shadow อ่านได้โดยผู้ใช้ทั่วไป", "en": "/etc/shadow is readable by ordinary users."},
-    "attack": {"th": "เอา hash ไปเดารหัสแบบออฟไลน์ (hashcat) ได้ไม่จำกัดครั้ง", "en": "Hashes can be cracked offline (hashcat) without limits."},
-    "fix": {"th": "`sudo chmod 640 /etc/shadow && sudo chown root:shadow /etc/shadow`", "en": "`sudo chmod 640 /etc/shadow && sudo chown root:shadow /etc/shadow`"},
+    "severity": "critical",
+    "tag": "CWE-732",
+    "title": {
+      "th": "ไฟล์ hash รหัสผ่านอ่านได้ทุกคน",
+      "en": "Password hash file world-readable"
+    },
+    "what": {
+      "th": "/etc/shadow อ่านได้โดยผู้ใช้ทั่วไป",
+      "en": "/etc/shadow is readable by ordinary users."
+    },
+    "attack": {
+      "th": "เอา hash ไปเดารหัสแบบออฟไลน์ (hashcat) ได้ไม่จำกัดครั้ง",
+      "en": "Hashes can be cracked offline (hashcat) without limits."
+    },
+    "fix": {
+      "th": "`sudo chmod 640 /etc/shadow && sudo chown root:shadow /etc/shadow`",
+      "en": "`sudo chmod 640 /etc/shadow && sudo chown root:shadow /etc/shadow`"
+    },
     "refs": []
   },
   "host.home_open": {
-    "severity": "low", "tag": "CWE-276",
-    "title": {"th": "โฟลเดอร์ home ผู้ใช้อื่นเปิดดูได้", "en": "Home folder readable by others"},
-    "what": {"th": "ผู้ใช้อื่นในเครื่อง (และบริการที่รันเป็นผู้ใช้อื่น) เข้าไปดูไฟล์ใน home ได้", "en": "Other local users (and services running as them) can browse your home."},
-    "attack": {"th": "ถ้าบริการอย่างเว็บเซิร์ฟเวอร์ถูกเจาะ ผู้โจมตีอ่านไฟล์ส่วนตัว/กุญแจ/config ใน home ได้", "en": "If a service such as a web server is compromised, the attacker can read your files, keys and configs."},
-    "fix": {"th": "`chmod 750 ~` (Ubuntu 21.04+ ตั้งเป็น 750 ให้ผู้ใช้ใหม่อยู่แล้ว)", "en": "`chmod 750 ~` (Ubuntu 21.04+ already uses 750 for new users)."},
+    "severity": "low",
+    "tag": "CWE-276",
+    "title": {
+      "th": "โฟลเดอร์ home ผู้ใช้อื่นเปิดดูได้",
+      "en": "Home folder readable by others"
+    },
+    "what": {
+      "th": "ผู้ใช้อื่นในเครื่อง (และบริการที่รันเป็นผู้ใช้อื่น) เข้าไปดูไฟล์ใน home ได้",
+      "en": "Other local users (and services running as them) can browse your home."
+    },
+    "attack": {
+      "th": "ถ้าบริการอย่างเว็บเซิร์ฟเวอร์ถูกเจาะ ผู้โจมตีอ่านไฟล์ส่วนตัว/กุญแจ/config ใน home ได้",
+      "en": "If a service such as a web server is compromised, the attacker can read your files, keys and configs."
+    },
+    "fix": {
+      "th": "`chmod 750 ~` (Ubuntu 21.04+ ตั้งเป็น 750 ให้ผู้ใช้ใหม่อยู่แล้ว)",
+      "en": "`chmod 750 ~` (Ubuntu 21.04+ already uses 750 for new users)."
+    },
     "refs": []
   },
   "host.ssh_dir_perms": {
-    "severity": "medium", "tag": "CWE-276",
-    "title": {"th": "สิทธิ์โฟลเดอร์ ~/.ssh กว้างเกินไป", "en": "~/.ssh permissions too open"},
-    "what": {"th": "~/.ssh ควรเป็น 700", "en": "~/.ssh should be 700."},
-    "attack": {"th": "ผู้ใช้อื่นอาจอ่านกุญแจหรือแก้ authorized_keys เพื่อฝังทางเข้า", "en": "Others may read keys or edit authorized_keys to plant a backdoor."},
-    "fix": {"th": "`chmod 700 ~/.ssh && chmod 600 ~/.ssh/*` (ยกเว้น *.pub ที่ 644 ได้)", "en": "`chmod 700 ~/.ssh && chmod 600 ~/.ssh/*` (*.pub may be 644)."},
+    "severity": "medium",
+    "tag": "CWE-276",
+    "title": {
+      "th": "สิทธิ์โฟลเดอร์ ~/.ssh กว้างเกินไป",
+      "en": "~/.ssh permissions too open"
+    },
+    "what": {
+      "th": "~/.ssh ควรเป็น 700",
+      "en": "~/.ssh should be 700."
+    },
+    "attack": {
+      "th": "ผู้ใช้อื่นอาจอ่านกุญแจหรือแก้ authorized_keys เพื่อฝังทางเข้า",
+      "en": "Others may read keys or edit authorized_keys to plant a backdoor."
+    },
+    "fix": {
+      "th": "`chmod 700 ~/.ssh && chmod 600 ~/.ssh/*` (ยกเว้น *.pub ที่ 644 ได้)",
+      "en": "`chmod 700 ~/.ssh && chmod 600 ~/.ssh/*` (*.pub may be 644)."
+    },
     "refs": []
   },
   "host.ssh_key_perms": {
-    "severity": "medium", "tag": "CWE-732",
-    "title": {"th": "กุญแจ SSH ส่วนตัวอ่านได้โดยผู้อื่น", "en": "Private SSH key readable by others"},
-    "what": {"th": "ไฟล์กุญแจส่วนตัวมีสิทธิ์กว้างกว่า 600", "en": "The private key file is more open than 600."},
-    "attack": {"th": "ใครได้ไฟล์นี้ก็ล็อกอินทุกเซิร์ฟเวอร์ที่ใช้กุญแจนี้ได้ (และ ssh จะปฏิเสธใช้กุญแจนี้ด้วย)", "en": "Whoever gets it logs into every server that trusts it (and ssh refuses to use such keys)."},
-    "fix": {"th": "`chmod 600 ~/.ssh/id_*` (ยกเว้น .pub)", "en": "`chmod 600 ~/.ssh/id_*` (not the .pub files)."},
+    "severity": "medium",
+    "tag": "CWE-732",
+    "title": {
+      "th": "กุญแจ SSH ส่วนตัวอ่านได้โดยผู้อื่น",
+      "en": "Private SSH key readable by others"
+    },
+    "what": {
+      "th": "ไฟล์กุญแจส่วนตัวมีสิทธิ์กว้างกว่า 600",
+      "en": "The private key file is more open than 600."
+    },
+    "attack": {
+      "th": "ใครได้ไฟล์นี้ก็ล็อกอินทุกเซิร์ฟเวอร์ที่ใช้กุญแจนี้ได้ (และ ssh จะปฏิเสธใช้กุญแจนี้ด้วย)",
+      "en": "Whoever gets it logs into every server that trusts it (and ssh refuses to use such keys)."
+    },
+    "fix": {
+      "th": "`chmod 600 ~/.ssh/id_*` (ยกเว้น .pub)",
+      "en": "`chmod 600 ~/.ssh/id_*` (not the .pub files)."
+    },
     "refs": []
   },
   "host.ssh_key_no_passphrase": {
-    "severity": "low", "tag": "CWE-522",
-    "title": {"th": "กุญแจ SSH ไม่มี passphrase", "en": "SSH key without passphrase"},
-    "what": {"th": "กุญแจส่วนตัวไม่ได้เข้ารหัสด้วย passphrase (ตรวจจากหัวไฟล์ ไม่ได้ส่งกุญแจไปไหน)", "en": "The private key is not protected by a passphrase (checked from the file header; the key never leaves the machine)."},
-    "attack": {"th": "ถ้าเครื่องหาย/โดนมัลแวร์ขโมยไฟล์ กุญแจใช้ได้ทันที — ข้ามไปเครื่อง/เซิร์ฟเวอร์อื่นต่อ (lateral movement)", "en": "If the laptop is lost or malware copies the file, the key works immediately for hopping to other servers (lateral movement)."},
-    "fix": {"th": "`ssh-keygen -p -f ~/.ssh/id_ed25519` ตั้ง passphrase แล้วใช้ ssh-agent ช่วยไม่ต้องพิมพ์บ่อย", "en": "`ssh-keygen -p -f ~/.ssh/id_ed25519` to add a passphrase; ssh-agent saves retyping it."},
+    "severity": "low",
+    "tag": "CWE-522",
+    "title": {
+      "th": "กุญแจ SSH ไม่มี passphrase",
+      "en": "SSH key without passphrase"
+    },
+    "what": {
+      "th": "กุญแจส่วนตัวไม่ได้เข้ารหัสด้วย passphrase (ตรวจจากหัวไฟล์ ไม่ได้ส่งกุญแจไปไหน)",
+      "en": "The private key is not protected by a passphrase (checked from the file header; the key never leaves the machine)."
+    },
+    "attack": {
+      "th": "ถ้าเครื่องหาย/โดนมัลแวร์ขโมยไฟล์ กุญแจใช้ได้ทันที — ข้ามไปเครื่อง/เซิร์ฟเวอร์อื่นต่อ (lateral movement)",
+      "en": "If the laptop is lost or malware copies the file, the key works immediately for hopping to other servers (lateral movement)."
+    },
+    "fix": {
+      "th": "`ssh-keygen -p -f ~/.ssh/id_ed25519` ตั้ง passphrase แล้วใช้ ssh-agent ช่วยไม่ต้องพิมพ์บ่อย",
+      "en": "`ssh-keygen -p -f ~/.ssh/id_ed25519` to add a passphrase; ssh-agent saves retyping it."
+    },
     "refs": []
   },
   "host.aslr_off": {
-    "severity": "medium", "tag": "Hardening",
-    "title": {"th": "ASLR ไม่ได้เปิดเต็ม", "en": "ASLR not fully enabled"},
-    "what": {"th": "kernel.randomize_va_space ไม่ใช่ 2", "en": "kernel.randomize_va_space is not 2."},
-    "attack": {"th": "ASLR สุ่มตำแหน่งหน่วยความจำ ทำให้ exploit แบบ buffer overflow ยากขึ้นมาก ปิดไว้ = ง่ายขึ้น", "en": "ASLR randomises memory layout and makes memory-corruption exploits much harder; off makes them easier."},
-    "fix": {"th": "`echo 'kernel.randomize_va_space=2' | sudo tee /etc/sysctl.d/99-aslr.conf && sudo sysctl --system`", "en": "`echo 'kernel.randomize_va_space=2' | sudo tee /etc/sysctl.d/99-aslr.conf && sudo sysctl --system`"},
+    "severity": "medium",
+    "tag": "Hardening",
+    "title": {
+      "th": "ASLR ไม่ได้เปิดเต็ม",
+      "en": "ASLR not fully enabled"
+    },
+    "what": {
+      "th": "kernel.randomize_va_space ไม่ใช่ 2",
+      "en": "kernel.randomize_va_space is not 2."
+    },
+    "attack": {
+      "th": "ASLR สุ่มตำแหน่งหน่วยความจำ ทำให้ exploit แบบ buffer overflow ยากขึ้นมาก ปิดไว้ = ง่ายขึ้น",
+      "en": "ASLR randomises memory layout and makes memory-corruption exploits much harder; off makes them easier."
+    },
+    "fix": {
+      "th": "`echo 'kernel.randomize_va_space=2' | sudo tee /etc/sysctl.d/99-aslr.conf && sudo sysctl --system`",
+      "en": "`echo 'kernel.randomize_va_space=2' | sudo tee /etc/sysctl.d/99-aslr.conf && sudo sysctl --system`"
+    },
     "refs": []
   },
   "host.no_disk_encryption": {
-    "severity": "low", "tag": "Physical",
-    "title": {"th": "ดิสก์ไม่ได้เข้ารหัส", "en": "Disk not encrypted"},
-    "what": {"th": "ไม่พบพาร์ทิชันที่เข้ารหัส (LUKS)", "en": "No encrypted (LUKS) partition found."},
-    "attack": {"th": "ถ้าโน้ตบุ๊ก/ดิสก์หายหรือส่งซ่อม ถอดดิสก์ไปเสียบเครื่องอื่นก็อ่านไฟล์ทั้งหมดได้ (รวมกุญแจ/รหัสที่เบราว์เซอร์จำไว้)", "en": "If the laptop/disk is lost or sent for repair, plugging the disk into another PC reveals every file (keys, saved browser passwords)."},
-    "fix": {"th": "ติดตั้ง Ubuntu ใหม่โดยเลือก 'Encrypt the new Ubuntu installation' หรือเข้ารหัสดิสก์ข้อมูลด้วย LUKS/VeraCrypt (เครื่องเซิร์ฟเวอร์ในตู้ล็อกอาจไม่จำเป็น)", "en": "Reinstall with 'Encrypt the new Ubuntu installation', or encrypt data disks with LUKS/VeraCrypt (may be unnecessary for servers in a locked rack)."},
+    "severity": "low",
+    "tag": "Physical",
+    "title": {
+      "th": "ดิสก์ไม่ได้เข้ารหัส",
+      "en": "Disk not encrypted"
+    },
+    "what": {
+      "th": "ไม่พบพาร์ทิชันที่เข้ารหัส (LUKS)",
+      "en": "No encrypted (LUKS) partition found."
+    },
+    "attack": {
+      "th": "ถ้าโน้ตบุ๊ก/ดิสก์หายหรือส่งซ่อม ถอดดิสก์ไปเสียบเครื่องอื่นก็อ่านไฟล์ทั้งหมดได้ (รวมกุญแจ/รหัสที่เบราว์เซอร์จำไว้)",
+      "en": "If the laptop/disk is lost or sent for repair, plugging the disk into another PC reveals every file (keys, saved browser passwords)."
+    },
+    "fix": {
+      "th": "ติดตั้ง Ubuntu ใหม่โดยเลือก 'Encrypt the new Ubuntu installation' หรือเข้ารหัสดิสก์ข้อมูลด้วย LUKS/VeraCrypt (เครื่องเซิร์ฟเวอร์ในตู้ล็อกอาจไม่จำเป็น)",
+      "en": "Reinstall with 'Encrypt the new Ubuntu installation', or encrypt data disks with LUKS/VeraCrypt (may be unnecessary for servers in a locked rack)."
+    },
     "refs": []
   },
   "host.autologin": {
-    "severity": "medium", "tag": "Physical",
-    "title": {"th": "เปิดล็อกอินอัตโนมัติ", "en": "Automatic login enabled"},
-    "what": {"th": "เปิดเครื่องแล้วเข้าหน้าจอผู้ใช้เลยโดยไม่ถามรหัส", "en": "The desktop logs in at boot without asking for a password."},
-    "attack": {"th": "ใครหยิบเครื่องไปเปิดก็ใช้งานบัญชีเราได้ทันที (อีเมล ร้านค้า ธนาคารที่เบราว์เซอร์จำไว้)", "en": "Anyone who powers it on uses your account (mail, shop admin, saved bank logins)."},
-    "fix": {"th": "Settings → Users → ปิด Automatic Login หรือแก้ /etc/gdm3/custom.conf ให้ `AutomaticLoginEnable=false`", "en": "Settings → Users → turn off Automatic Login, or set `AutomaticLoginEnable=false` in /etc/gdm3/custom.conf."},
+    "severity": "medium",
+    "tag": "Physical",
+    "title": {
+      "th": "เปิดล็อกอินอัตโนมัติ",
+      "en": "Automatic login enabled"
+    },
+    "what": {
+      "th": "เปิดเครื่องแล้วเข้าหน้าจอผู้ใช้เลยโดยไม่ถามรหัส",
+      "en": "The desktop logs in at boot without asking for a password."
+    },
+    "attack": {
+      "th": "ใครหยิบเครื่องไปเปิดก็ใช้งานบัญชีเราได้ทันที (อีเมล ร้านค้า ธนาคารที่เบราว์เซอร์จำไว้)",
+      "en": "Anyone who powers it on uses your account (mail, shop admin, saved bank logins)."
+    },
+    "fix": {
+      "th": "Settings → Users → ปิด Automatic Login หรือแก้ /etc/gdm3/custom.conf ให้ `AutomaticLoginEnable=false`",
+      "en": "Settings → Users → turn off Automatic Login, or set `AutomaticLoginEnable=false` in /etc/gdm3/custom.conf."
+    },
     "refs": []
   },
   "host.no_screen_lock": {
-    "severity": "low", "tag": "Physical",
-    "title": {"th": "ไม่ล็อกหน้าจออัตโนมัติ", "en": "No automatic screen lock"},
-    "what": {"th": "ลุกจากเครื่องแล้วหน้าจอไม่ล็อกเอง", "en": "The screen does not lock when you walk away."},
-    "attack": {"th": "คนในร้าน/ออฟฟิศเข้ามาใช้เครื่องได้ระหว่างเราไม่อยู่ (การโจมตีทางกายภาพที่ง่ายที่สุด)", "en": "Someone nearby can use the machine while you're away — the simplest physical attack."},
-    "fix": {"th": "Settings → Privacy → Screen Lock: เปิด Automatic Screen Lock, ตั้ง Blank Screen Delay 5 นาที · กด Super+L เมื่อลุก", "en": "Settings → Privacy → Screen Lock: enable automatic lock, blank after 5 min · press Super+L when you leave."},
+    "severity": "low",
+    "tag": "Physical",
+    "title": {
+      "th": "ไม่ล็อกหน้าจออัตโนมัติ",
+      "en": "No automatic screen lock"
+    },
+    "what": {
+      "th": "ลุกจากเครื่องแล้วหน้าจอไม่ล็อกเอง",
+      "en": "The screen does not lock when you walk away."
+    },
+    "attack": {
+      "th": "คนในร้าน/ออฟฟิศเข้ามาใช้เครื่องได้ระหว่างเราไม่อยู่ (การโจมตีทางกายภาพที่ง่ายที่สุด)",
+      "en": "Someone nearby can use the machine while you're away — the simplest physical attack."
+    },
+    "fix": {
+      "th": "Settings → Privacy → Screen Lock: เปิด Automatic Screen Lock, ตั้ง Blank Screen Delay 5 นาที · กด Super+L เมื่อลุก",
+      "en": "Settings → Privacy → Screen Lock: enable automatic lock, blank after 5 min · press Super+L when you leave."
+    },
     "refs": []
   },
   "host.samba_guest": {
-    "severity": "medium", "tag": "CWE-306",
-    "title": {"th": "แชร์ Samba เปิดให้ guest", "en": "Samba share allows guests"},
-    "what": {"th": "smb.conf มี `guest ok = yes`", "en": "smb.conf contains `guest ok = yes`."},
-    "attack": {"th": "ใครในวงก็เปิดแชร์นี้ได้โดยไม่ต้องมีรหัส ถ้าเขียนได้ ransomware ก็เข้ารหัสไฟล์ได้", "en": "Anyone on the LAN can open the share without a password; if writable, ransomware can encrypt it."},
-    "fix": {"th": "ตั้ง `guest ok = no`, เพิ่มผู้ใช้ด้วย `sudo smbpasswd -a <user>` แล้ว `sudo systemctl restart smbd`", "en": "Set `guest ok = no`, add users with `sudo smbpasswd -a <user>`, `sudo systemctl restart smbd`."},
+    "severity": "medium",
+    "tag": "CWE-306",
+    "title": {
+      "th": "แชร์ Samba เปิดให้ guest",
+      "en": "Samba share allows guests"
+    },
+    "what": {
+      "th": "smb.conf มี `guest ok = yes`",
+      "en": "smb.conf contains `guest ok = yes`."
+    },
+    "attack": {
+      "th": "ใครในวงก็เปิดแชร์นี้ได้โดยไม่ต้องมีรหัส ถ้าเขียนได้ ransomware ก็เข้ารหัสไฟล์ได้",
+      "en": "Anyone on the LAN can open the share without a password; if writable, ransomware can encrypt it."
+    },
+    "fix": {
+      "th": "ตั้ง `guest ok = no`, เพิ่มผู้ใช้ด้วย `sudo smbpasswd -a <user>` แล้ว `sudo systemctl restart smbd`",
+      "en": "Set `guest ok = no`, add users with `sudo smbpasswd -a <user>`, `sudo systemctl restart smbd`."
+    },
     "refs": []
+  },
+  "host.extra_root_account": {
+    "severity": "critical",
+    "tag": "CWE-250",
+    "title": {
+      "th": "มีบัญชีสิทธิ์ root มากกว่าหนึ่ง",
+      "en": "More than one UID 0 account"
+    },
+    "what": {
+      "th": "มีบัญชีที่ UID = 0 (สิทธิ์เท่า root) มากกว่าบัญชี root เดียว",
+      "en": "An account other than root has UID 0 (full root power)."
+    },
+    "attack": {
+      "th": "บัญชี UID 0 ที่แอบเพิ่มเข้ามาคือประตูหลัง (backdoor) ที่พบบ่อยหลังเครื่องถูกเจาะ ใช้สิทธิ์เต็มโดยไม่ต้อง sudo",
+      "en": "A sneaked-in UID 0 account is a classic backdoor after a breach — full power without sudo."
+    },
+    "fix": {
+      "th": "ตรวจว่าชื่อนั้นควรมีไหม ถ้าไม่ `sudo passwd -l <ชื่อ>` หรือ `sudo userdel <ชื่อ>` และสอบหาสาเหตุที่ถูกเพิ่ม",
+      "en": "Check whether it should exist; if not `sudo passwd -l <name>` or `sudo userdel <name>`, and investigate how it got there."
+    },
+    "refs": []
+  },
+  "host.empty_password": {
+    "severity": "critical",
+    "tag": "CWE-258",
+    "title": {
+      "th": "มีบัญชีที่รหัสผ่านว่าง",
+      "en": "Account with empty password"
+    },
+    "what": {
+      "th": "บัญชีใน /etc/shadow ไม่มีรหัสผ่าน",
+      "en": "An account in /etc/shadow has no password."
+    },
+    "attack": {
+      "th": "ล็อกอินได้โดยไม่ต้องใส่รหัส — ถ้าบัญชีนั้นใช้ sudo หรือ SSH ได้ก็ยึดเครื่องได้ทันที",
+      "en": "Anyone can log in with no password; if it has sudo or SSH access the machine is theirs."
+    },
+    "fix": {
+      "th": "ตั้งรหัส `sudo passwd <ชื่อ>` หรือล็อก `sudo passwd -l <ชื่อ>`",
+      "en": "Set a password `sudo passwd <name>` or lock it `sudo passwd -l <name>`."
+    },
+    "refs": []
+  },
+  "host.weak_hash": {
+    "severity": "high",
+    "tag": "CWE-916",
+    "title": {
+      "th": "เก็บรหัสผ่านด้วยอัลกอริทึมอ่อน",
+      "en": "Weak password hashing method"
+    },
+    "what": {
+      "th": "ENCRYPT_METHOD ไม่ใช่ SHA512/yescrypt (เช่น MD5/DES)",
+      "en": "ENCRYPT_METHOD is not SHA512/yescrypt (e.g. MD5/DES)."
+    },
+    "attack": {
+      "th": "hash แบบเก่าถอดรหัสแบบ offline ได้เร็วมากถ้าไฟล์ shadow หลุด",
+      "en": "Old hashes crack fast offline if the shadow file leaks."
+    },
+    "fix": {
+      "th": "ตั้ง `ENCRYPT_METHOD YESCRYPT` ใน /etc/login.defs แล้วให้ผู้ใช้ตั้งรหัสใหม่",
+      "en": "Set `ENCRYPT_METHOD YESCRYPT` in /etc/login.defs, then have users reset their passwords."
+    },
+    "refs": []
+  },
+  "host.no_pwquality": {
+    "severity": "low",
+    "tag": "Hardening",
+    "title": {
+      "th": "ไม่ได้บังคับความแข็งแรงของรหัสผ่าน",
+      "en": "No password-strength policy"
+    },
+    "what": {
+      "th": "ไม่มี pam_pwquality/cracklib จึงตั้งรหัสง่ายๆ ได้",
+      "en": "No pam_pwquality/cracklib, so trivial passwords are allowed."
+    },
+    "attack": {
+      "th": "รหัสสั้น/ง่ายถูกเดาได้ ทั้งผ่าน SSH และคนที่เข้าถึงเครื่อง",
+      "en": "Short/simple passwords get guessed, over SSH or by someone at the keyboard."
+    },
+    "fix": {
+      "th": "`sudo apt install libpam-pwquality` แล้วตั้ง minlen/ความซับซ้อนใน /etc/security/pwquality.conf",
+      "en": "`sudo apt install libpam-pwquality`, then set minlen/complexity in /etc/security/pwquality.conf."
+    },
+    "refs": []
+  },
+  "host.tmp_no_sticky": {
+    "severity": "medium",
+    "tag": "CWE-275",
+    "title": {
+      "th": "/tmp ไม่มี sticky bit",
+      "en": "/tmp missing sticky bit"
+    },
+    "what": {
+      "th": "ไดเรกทอรีที่ใครก็เขียนได้ แต่ไม่มี sticky bit",
+      "en": "A world-writable directory without the sticky bit."
+    },
+    "attack": {
+      "th": "ผู้ใช้อื่นลบหรือสลับไฟล์ของคนอื่นใน /tmp ได้ นำไปสู่การหลอกให้รันไฟล์ผิด",
+      "en": "Other users can delete or swap each other's files in /tmp, enabling file-swap tricks."
+    },
+    "fix": {
+      "th": "`sudo chmod +t /tmp` (ปกติควรเป็น 1777)",
+      "en": "`sudo chmod +t /tmp` (should be 1777)."
+    },
+    "refs": []
+  },
+  "host.world_writable": {
+    "severity": "high",
+    "tag": "CWE-732",
+    "title": {
+      "th": "มีไฟล์ระบบที่ใครก็เขียนได้",
+      "en": "World-writable files in system dirs"
+    },
+    "what": {
+      "th": "พบไฟล์ในไดเรกทอรีระบบที่ผู้ใช้ทุกคนแก้ไขได้",
+      "en": "Files in system directories are writable by every user."
+    },
+    "attack": {
+      "th": "ถ้าเป็นสคริปต์/ไฟล์ตั้งค่าที่ root หรือบริการเรียกใช้ ผู้ใช้ธรรมดาแก้ให้รันคำสั่งของตัวเองด้วยสิทธิ์ root ได้ (ยกระดับสิทธิ์)",
+      "en": "If root or a service runs such a script/config, an ordinary user can edit it to run their own commands as root (privilege escalation)."
+    },
+    "fix": {
+      "th": "ตรวจแต่ละไฟล์: `ls -l <path>` แล้วถอดสิทธิ์เขียนของ others `sudo chmod o-w <path>`",
+      "en": "Review each: `ls -l <path>`, then drop others' write bit `sudo chmod o-w <path>`."
+    },
+    "refs": []
+  },
+  "host.suid_unexpected": {
+    "severity": "medium",
+    "tag": "CWE-250",
+    "title": {
+      "th": "มีไฟล์ SUID ที่ไม่คุ้น",
+      "en": "Unexpected SUID binaries"
+    },
+    "what": {
+      "th": "ไฟล์ SUID รันด้วยสิทธิ์เจ้าของ (มักเป็น root) — พบบางไฟล์ที่ไม่ใช่ของมาตรฐาน",
+      "en": "SUID binaries run as their owner (often root); some here aren't standard."
+    },
+    "attack": {
+      "th": "SUID ที่เขียนไม่ดีหรือถูกวางไว้ เป็นทางยอดฮิตในการยกระดับเป็น root (ดู GTFOBins)",
+      "en": "A poorly-written or planted SUID binary is a favourite path to root (see GTFOBins)."
+    },
+    "fix": {
+      "th": "ตรวจว่าจำเป็นไหม ถ้าไม่ ถอด SUID `sudo chmod u-s <path>` · ลองเทียบกับ GTFOBins",
+      "en": "Check if needed; if not, strip SUID `sudo chmod u-s <path>` · compare with GTFOBins."
+    },
+    "refs": [
+      "https://gtfobins.github.io/"
+    ]
   }
 }

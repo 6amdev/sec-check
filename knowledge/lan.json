@@ -1,178 +1,566 @@
 {
   "lan.ssh": {
-    "severity": "info", "tag": "Exposure",
-    "title": {"th": "เปิด SSH", "en": "SSH open"},
-    "what": {"th": "เครื่องนี้รับการล็อกอิน SSH จากในวงแลน (แบนเนอร์บอกเวอร์ชัน)", "en": "This host accepts SSH logins from the LAN (the banner shows the version)."},
-    "attack": {"th": "SSH เองปลอดภัย แต่ถ้ายอมล็อกอินด้วยรหัสผ่านที่เดาง่าย บอท/มัลแวร์ในวงจะเดารหัสได้", "en": "SSH itself is solid, but with weak password logins a bot or malware inside the LAN can guess its way in."},
-    "fix": {"th": "ใช้ SSH key + ปิด PasswordAuthentication, ติดตั้ง fail2ban, จำกัดด้วย firewall ให้เฉพาะเครื่องที่ต้องใช้ (รัน `./seccheck.py host` บนเครื่องนั้น)", "en": "Use SSH keys, turn off PasswordAuthentication, add fail2ban, firewall it to the machines that need it (run `./seccheck.py host` on that machine)."},
-    "refs": ["https://www.ssh.com/academy/ssh/sshd_config"]
+    "severity": "info",
+    "tag": "Exposure",
+    "title": {
+      "th": "เปิด SSH",
+      "en": "SSH open"
+    },
+    "what": {
+      "th": "เครื่องนี้รับการล็อกอิน SSH จากในวงแลน (แบนเนอร์บอกเวอร์ชัน)",
+      "en": "This host accepts SSH logins from the LAN (the banner shows the version)."
+    },
+    "attack": {
+      "th": "SSH เองปลอดภัย แต่ถ้ายอมล็อกอินด้วยรหัสผ่านที่เดาง่าย บอท/มัลแวร์ในวงจะเดารหัสได้",
+      "en": "SSH itself is solid, but with weak password logins a bot or malware inside the LAN can guess its way in."
+    },
+    "fix": {
+      "th": "ใช้ SSH key + ปิด PasswordAuthentication, ติดตั้ง fail2ban, จำกัดด้วย firewall ให้เฉพาะเครื่องที่ต้องใช้ (รัน `./seccheck.py host` บนเครื่องนั้น)",
+      "en": "Use SSH keys, turn off PasswordAuthentication, add fail2ban, firewall it to the machines that need it (run `./seccheck.py host` on that machine)."
+    },
+    "refs": [
+      "https://www.ssh.com/academy/ssh/sshd_config"
+    ]
   },
   "lan.ssh_old": {
-    "severity": "low", "tag": "CWE-1104",
-    "title": {"th": "OpenSSH รุ่นเก่า", "en": "Old OpenSSH version"},
-    "what": {"th": "OpenSSH เวอร์ชันต่ำกว่า 8.0", "en": "OpenSSH older than 8.0."},
-    "attack": {"th": "รุ่นเก่ามี CVE สะสม (เช่น user enumeration) และมักแปลว่าเครื่องไม่ได้อัปเดตเลย", "en": "Old releases carry accumulated CVEs (e.g. user enumeration) and usually mean the box is never updated."},
-    "fix": {"th": "อัปเดตระบบ: `sudo apt update && sudo apt upgrade` (อุปกรณ์ฝังตัว/NAS → อัปเดตเฟิร์มแวร์)", "en": "Update: `sudo apt update && sudo apt upgrade` (embedded device/NAS → update its firmware)."},
-    "refs": ["https://www.openssh.com/security.html"]
+    "severity": "low",
+    "tag": "CWE-1104",
+    "title": {
+      "th": "OpenSSH รุ่นเก่า",
+      "en": "Old OpenSSH version"
+    },
+    "what": {
+      "th": "OpenSSH เวอร์ชันต่ำกว่า 8.0",
+      "en": "OpenSSH older than 8.0."
+    },
+    "attack": {
+      "th": "รุ่นเก่ามี CVE สะสม (เช่น user enumeration) และมักแปลว่าเครื่องไม่ได้อัปเดตเลย",
+      "en": "Old releases carry accumulated CVEs (e.g. user enumeration) and usually mean the box is never updated."
+    },
+    "fix": {
+      "th": "อัปเดตระบบ: `sudo apt update && sudo apt upgrade` (อุปกรณ์ฝังตัว/NAS → อัปเดตเฟิร์มแวร์)",
+      "en": "Update: `sudo apt update && sudo apt upgrade` (embedded device/NAS → update its firmware)."
+    },
+    "refs": [
+      "https://www.openssh.com/security.html"
+    ]
   },
   "lan.ftp": {
-    "severity": "medium", "tag": "CWE-319",
-    "title": {"th": "เปิด FTP (ไม่เข้ารหัส)", "en": "FTP open (unencrypted)"},
-    "what": {"th": "FTP ส่งชื่อผู้ใช้/รหัสผ่าน/ไฟล์เป็นข้อความธรรมดา", "en": "FTP sends usernames, passwords and files in plain text."},
-    "attack": {"th": "ใครที่ดักข้อมูลในวงได้ (เช่น เครื่องที่ติดมัลแวร์) จะเห็นรหัสผ่าน FTP; หลายเครื่องยังเปิด anonymous login ทิ้งไว้", "en": "Anything that can sniff the LAN (e.g. an infected PC) sees FTP passwords; many devices still allow anonymous login."},
-    "fix": {"th": "เลิกใช้ FTP เปลี่ยนเป็น SFTP (มากับ SSH) หรือ FTPS; ถ้าเป็น NAS/เราเตอร์ ปิดบริการ FTP ในหน้า admin", "en": "Replace FTP with SFTP (comes with SSH) or FTPS; on a NAS/router disable FTP in its admin page."},
+    "severity": "medium",
+    "tag": "CWE-319",
+    "title": {
+      "th": "เปิด FTP (ไม่เข้ารหัส)",
+      "en": "FTP open (unencrypted)"
+    },
+    "what": {
+      "th": "FTP ส่งชื่อผู้ใช้/รหัสผ่าน/ไฟล์เป็นข้อความธรรมดา",
+      "en": "FTP sends usernames, passwords and files in plain text."
+    },
+    "attack": {
+      "th": "ใครที่ดักข้อมูลในวงได้ (เช่น เครื่องที่ติดมัลแวร์) จะเห็นรหัสผ่าน FTP; หลายเครื่องยังเปิด anonymous login ทิ้งไว้",
+      "en": "Anything that can sniff the LAN (e.g. an infected PC) sees FTP passwords; many devices still allow anonymous login."
+    },
+    "fix": {
+      "th": "เลิกใช้ FTP เปลี่ยนเป็น SFTP (มากับ SSH) หรือ FTPS; ถ้าเป็น NAS/เราเตอร์ ปิดบริการ FTP ในหน้า admin",
+      "en": "Replace FTP with SFTP (comes with SSH) or FTPS; on a NAS/router disable FTP in its admin page."
+    },
     "refs": []
   },
   "lan.telnet": {
-    "severity": "high", "tag": "CWE-319",
-    "title": {"th": "เปิด Telnet", "en": "Telnet open"},
-    "what": {"th": "Telnet = รีโมตเข้าเครื่องแบบไม่เข้ารหัสเลย มักเจอในกล้อง IP/เราเตอร์/อุปกรณ์ IoT", "en": "Telnet is completely unencrypted remote login, common on IP cameras, routers and IoT."},
-    "attack": {"th": "มัลแวร์ Mirai และตระกูลเดียวกันเจาะอุปกรณ์ IoT นับล้านเครื่องผ่าน Telnet ด้วยรหัส default (admin/admin) แล้วเอาไปทำ botnet", "en": "Mirai-style malware took over millions of IoT devices via Telnet with default credentials (admin/admin) to build botnets."},
-    "fix": {"th": "ปิด Telnet ในหน้าตั้งค่าอุปกรณ์, เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์; ถ้าปิดไม่ได้ แยกอุปกรณ์ไปไว้ใน VLAN/Wi-Fi guest", "en": "Disable Telnet in the device settings, change default passwords, update firmware; if it can't be disabled, isolate the device on a VLAN/guest Wi-Fi."},
-    "refs": ["https://www.cloudflare.com/learning/ddos/glossary/mirai-botnet/"]
+    "severity": "high",
+    "tag": "CWE-319",
+    "title": {
+      "th": "เปิด Telnet",
+      "en": "Telnet open"
+    },
+    "what": {
+      "th": "Telnet = รีโมตเข้าเครื่องแบบไม่เข้ารหัสเลย มักเจอในกล้อง IP/เราเตอร์/อุปกรณ์ IoT",
+      "en": "Telnet is completely unencrypted remote login, common on IP cameras, routers and IoT."
+    },
+    "attack": {
+      "th": "มัลแวร์ Mirai และตระกูลเดียวกันเจาะอุปกรณ์ IoT นับล้านเครื่องผ่าน Telnet ด้วยรหัส default (admin/admin) แล้วเอาไปทำ botnet",
+      "en": "Mirai-style malware took over millions of IoT devices via Telnet with default credentials (admin/admin) to build botnets."
+    },
+    "fix": {
+      "th": "ปิด Telnet ในหน้าตั้งค่าอุปกรณ์, เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์; ถ้าปิดไม่ได้ แยกอุปกรณ์ไปไว้ใน VLAN/Wi-Fi guest",
+      "en": "Disable Telnet in the device settings, change default passwords, update firmware; if it can't be disabled, isolate the device on a VLAN/guest Wi-Fi."
+    },
+    "refs": [
+      "https://www.cloudflare.com/learning/ddos/glossary/mirai-botnet/"
+    ]
   },
   "lan.rsync": {
-    "severity": "medium", "tag": "CWE-306",
-    "title": {"th": "เปิด rsync daemon", "en": "rsync daemon open"},
-    "what": {"th": "บริการ rsync (พอร์ต 873) รับการเชื่อมต่อ", "en": "The rsync service (port 873) accepts connections."},
-    "attack": {"th": "rsync module ที่ไม่ตั้งรหัสให้ใครก็ดาวน์โหลด (หรืออัปโหลดทับ) ไฟล์ backup ได้", "en": "rsync modules without auth let anyone download (or overwrite) backup files."},
-    "fix": {"th": "ตั้ง `auth users` + `secrets file` ใน rsyncd.conf หรือใช้ rsync ผ่าน SSH แทน daemon", "en": "Set `auth users` + `secrets file` in rsyncd.conf, or use rsync over SSH instead of the daemon."},
+    "severity": "medium",
+    "tag": "CWE-306",
+    "title": {
+      "th": "เปิด rsync daemon",
+      "en": "rsync daemon open"
+    },
+    "what": {
+      "th": "บริการ rsync (พอร์ต 873) รับการเชื่อมต่อ",
+      "en": "The rsync service (port 873) accepts connections."
+    },
+    "attack": {
+      "th": "rsync module ที่ไม่ตั้งรหัสให้ใครก็ดาวน์โหลด (หรืออัปโหลดทับ) ไฟล์ backup ได้",
+      "en": "rsync modules without auth let anyone download (or overwrite) backup files."
+    },
+    "fix": {
+      "th": "ตั้ง `auth users` + `secrets file` ใน rsyncd.conf หรือใช้ rsync ผ่าน SSH แทน daemon",
+      "en": "Set `auth users` + `secrets file` in rsyncd.conf, or use rsync over SSH instead of the daemon."
+    },
     "refs": []
   },
   "lan.redis_noauth": {
-    "severity": "critical", "tag": "CWE-306",
-    "title": {"th": "Redis ไม่ต้องใช้รหัสผ่าน", "en": "Redis without authentication"},
-    "what": {"th": "เราส่ง PING ไป Redis ตอบ PONG ทันที แปลว่าใครในเครือข่ายก็สั่งงานได้ทุกคำสั่ง", "en": "We sent PING and Redis answered PONG — anyone on the network can run any command."},
-    "attack": {"th": "อ่าน/ลบข้อมูลทั้งหมด (session, cache) และเทคนิคคลาสสิก: ใช้ CONFIG SET เขียนไฟล์ authorized_keys หรือ cron เพื่อยึดเครื่อง — มัลแวร์ขุดคริปโตใช้วิธีนี้บ่อย", "en": "Read/wipe all data (sessions, cache), and the classic trick: CONFIG SET to write authorized_keys or a cron file and take over the host — common with crypto-mining malware."},
-    "fix": {"th": "ใน redis.conf: `bind 127.0.0.1 ::1`, `protected-mode yes`, `requirepass <รหัสยาว>` (หรือ ACL) แล้ว `sudo systemctl restart redis`", "en": "In redis.conf: `bind 127.0.0.1 ::1`, `protected-mode yes`, `requirepass <long secret>` (or ACLs), then `sudo systemctl restart redis`."},
-    "refs": ["https://redis.io/docs/latest/operate/oss_and_stack/management/security/"]
+    "severity": "critical",
+    "tag": "CWE-306",
+    "title": {
+      "th": "Redis ไม่ต้องใช้รหัสผ่าน",
+      "en": "Redis without authentication"
+    },
+    "what": {
+      "th": "เราส่ง PING ไป Redis ตอบ PONG ทันที แปลว่าใครในเครือข่ายก็สั่งงานได้ทุกคำสั่ง",
+      "en": "We sent PING and Redis answered PONG — anyone on the network can run any command."
+    },
+    "attack": {
+      "th": "อ่าน/ลบข้อมูลทั้งหมด (session, cache) และเทคนิคคลาสสิก: ใช้ CONFIG SET เขียนไฟล์ authorized_keys หรือ cron เพื่อยึดเครื่อง — มัลแวร์ขุดคริปโตใช้วิธีนี้บ่อย",
+      "en": "Read/wipe all data (sessions, cache), and the classic trick: CONFIG SET to write authorized_keys or a cron file and take over the host — common with crypto-mining malware."
+    },
+    "fix": {
+      "th": "ใน redis.conf: `bind 127.0.0.1 ::1`, `protected-mode yes`, `requirepass <รหัสยาว>` (หรือ ACL) แล้ว `sudo systemctl restart redis`",
+      "en": "In redis.conf: `bind 127.0.0.1 ::1`, `protected-mode yes`, `requirepass <long secret>` (or ACLs), then `sudo systemctl restart redis`."
+    },
+    "refs": [
+      "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"
+    ]
   },
   "lan.redis": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "Redis เปิดให้เครือข่าย", "en": "Redis reachable from the network"},
-    "what": {"th": "Redis รับการเชื่อมต่อจากเครือข่าย (ต้องใช้รหัสผ่าน)", "en": "Redis accepts network connections (password required)."},
-    "attack": {"th": "รหัสผ่าน Redis มักสั้นและไม่มีการจำกัดการเดา — เดาได้เร็วมาก", "en": "Redis passwords are often short and there is no rate limiting, so guessing is fast."},
-    "fix": {"th": "ถ้าแอปอยู่เครื่องเดียวกัน ให้ `bind 127.0.0.1` เท่านั้น ไม่งั้นจำกัดด้วย firewall", "en": "If the app is on the same host, `bind 127.0.0.1` only; otherwise restrict with a firewall."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "Redis เปิดให้เครือข่าย",
+      "en": "Redis reachable from the network"
+    },
+    "what": {
+      "th": "Redis รับการเชื่อมต่อจากเครือข่าย (ต้องใช้รหัสผ่าน)",
+      "en": "Redis accepts network connections (password required)."
+    },
+    "attack": {
+      "th": "รหัสผ่าน Redis มักสั้นและไม่มีการจำกัดการเดา — เดาได้เร็วมาก",
+      "en": "Redis passwords are often short and there is no rate limiting, so guessing is fast."
+    },
+    "fix": {
+      "th": "ถ้าแอปอยู่เครื่องเดียวกัน ให้ `bind 127.0.0.1` เท่านั้น ไม่งั้นจำกัดด้วย firewall",
+      "en": "If the app is on the same host, `bind 127.0.0.1` only; otherwise restrict with a firewall."
+    },
     "refs": []
   },
   "lan.memcached": {
-    "severity": "high", "tag": "CWE-306",
-    "title": {"th": "memcached เปิดโดยไม่มีรหัส", "en": "Open memcached"},
-    "what": {"th": "memcached ตอบคำสั่ง version — ไม่มีการยืนยันตัวตน", "en": "memcached answered `version` — there is no authentication."},
-    "attack": {"th": "อ่านข้อมูลใน cache (session, ข้อมูลผู้ใช้) ได้ และ memcached ที่เปิด UDP ถูกใช้ขยาย DDoS ได้ถึง 50,000 เท่า (เหตุการณ์ GitHub 1.35 Tbps ปี 2018)", "en": "Cache contents (sessions, user data) can be read, and UDP-exposed memcached amplified DDoS ~50,000× (the 1.35 Tbps GitHub attack, 2018)."},
-    "fix": {"th": "`-l 127.0.0.1 -U 0` ใน /etc/memcached.conf (ฟังเฉพาะ localhost ปิด UDP)", "en": "`-l 127.0.0.1 -U 0` in /etc/memcached.conf (localhost only, UDP off)."},
-    "refs": ["https://blog.cloudflare.com/memcrashed-major-amplification-attacks-from-port-11211/"]
+    "severity": "high",
+    "tag": "CWE-306",
+    "title": {
+      "th": "memcached เปิดโดยไม่มีรหัส",
+      "en": "Open memcached"
+    },
+    "what": {
+      "th": "memcached ตอบคำสั่ง version — ไม่มีการยืนยันตัวตน",
+      "en": "memcached answered `version` — there is no authentication."
+    },
+    "attack": {
+      "th": "อ่านข้อมูลใน cache (session, ข้อมูลผู้ใช้) ได้ และ memcached ที่เปิด UDP ถูกใช้ขยาย DDoS ได้ถึง 50,000 เท่า (เหตุการณ์ GitHub 1.35 Tbps ปี 2018)",
+      "en": "Cache contents (sessions, user data) can be read, and UDP-exposed memcached amplified DDoS ~50,000× (the 1.35 Tbps GitHub attack, 2018)."
+    },
+    "fix": {
+      "th": "`-l 127.0.0.1 -U 0` ใน /etc/memcached.conf (ฟังเฉพาะ localhost ปิด UDP)",
+      "en": "`-l 127.0.0.1 -U 0` in /etc/memcached.conf (localhost only, UDP off)."
+    },
+    "refs": [
+      "https://blog.cloudflare.com/memcrashed-major-amplification-attacks-from-port-11211/"
+    ]
   },
   "lan.vnc_noauth": {
-    "severity": "critical", "tag": "CWE-306",
-    "title": {"th": "VNC เข้าได้โดยไม่ต้องใช้รหัสผ่าน", "en": "VNC with no password"},
-    "what": {"th": "VNC บอกว่ารองรับ security type 1 (None) — ใครก็ดูและควบคุมหน้าจอได้", "en": "VNC offers security type 1 (None) — anyone can view and control the screen."},
-    "attack": {"th": "ผู้โจมตีเห็นทุกอย่างบนจอ พิมพ์คำสั่งแทนเราได้ เหมือนนั่งหน้าคอม", "en": "An attacker sees everything on screen and can type for you, as if sitting at the keyboard."},
-    "fix": {"th": "ตั้งรหัสผ่าน VNC ทันที, ให้ฟังเฉพาะ localhost แล้วเข้าผ่าน SSH tunnel: `ssh -L 5900:localhost:5900 host`", "en": "Set a VNC password now, listen on localhost only and connect via SSH tunnel: `ssh -L 5900:localhost:5900 host`."},
+    "severity": "critical",
+    "tag": "CWE-306",
+    "title": {
+      "th": "VNC เข้าได้โดยไม่ต้องใช้รหัสผ่าน",
+      "en": "VNC with no password"
+    },
+    "what": {
+      "th": "VNC บอกว่ารองรับ security type 1 (None) — ใครก็ดูและควบคุมหน้าจอได้",
+      "en": "VNC offers security type 1 (None) — anyone can view and control the screen."
+    },
+    "attack": {
+      "th": "ผู้โจมตีเห็นทุกอย่างบนจอ พิมพ์คำสั่งแทนเราได้ เหมือนนั่งหน้าคอม",
+      "en": "An attacker sees everything on screen and can type for you, as if sitting at the keyboard."
+    },
+    "fix": {
+      "th": "ตั้งรหัสผ่าน VNC ทันที, ให้ฟังเฉพาะ localhost แล้วเข้าผ่าน SSH tunnel: `ssh -L 5900:localhost:5900 host`",
+      "en": "Set a VNC password now, listen on localhost only and connect via SSH tunnel: `ssh -L 5900:localhost:5900 host`."
+    },
     "refs": []
   },
   "lan.vnc": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "เปิด VNC (รีโมตหน้าจอ)", "en": "VNC remote desktop open"},
-    "what": {"th": "VNC รับการเชื่อมต่อจากเครือข่าย (ต้องใช้รหัส)", "en": "VNC accepts network connections (password required)."},
-    "attack": {"th": "รหัส VNC แบบเก่าใช้ได้แค่ 8 ตัวอักษร และการเข้ารหัสอ่อน ถูกเดา/ดักได้", "en": "Classic VNC passwords are limited to 8 characters with weak crypto — guessable and sniffable."},
-    "fix": {"th": "เข้าผ่าน SSH tunnel หรือ VPN เท่านั้น อย่าเปิดพอร์ต 5900 ออกเครือข่าย", "en": "Only reach it through an SSH tunnel or VPN; do not expose port 5900."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "เปิด VNC (รีโมตหน้าจอ)",
+      "en": "VNC remote desktop open"
+    },
+    "what": {
+      "th": "VNC รับการเชื่อมต่อจากเครือข่าย (ต้องใช้รหัส)",
+      "en": "VNC accepts network connections (password required)."
+    },
+    "attack": {
+      "th": "รหัส VNC แบบเก่าใช้ได้แค่ 8 ตัวอักษร และการเข้ารหัสอ่อน ถูกเดา/ดักได้",
+      "en": "Classic VNC passwords are limited to 8 characters with weak crypto — guessable and sniffable."
+    },
+    "fix": {
+      "th": "เข้าผ่าน SSH tunnel หรือ VPN เท่านั้น อย่าเปิดพอร์ต 5900 ออกเครือข่าย",
+      "en": "Only reach it through an SSH tunnel or VPN; do not expose port 5900."
+    },
     "refs": []
   },
   "lan.docker_api": {
-    "severity": "critical", "tag": "CWE-306",
-    "title": {"th": "Docker API เปิดโดยไม่มีการป้องกัน", "en": "Unprotected Docker API"},
-    "what": {"th": "พอร์ต 2375 ตอบ /version — ใครก็สั่ง Docker บนเครื่องนี้ได้", "en": "Port 2375 answered /version — anyone can drive Docker on this host."},
-    "attack": {"th": "สั่งรัน container ที่ mount / ของเครื่องจริง = ได้ root ทั้งเครื่องในคำสั่งเดียว เป็นช่องที่บอทขุดคริปโตหาอยู่ตลอด", "en": "Start a container that mounts the host's / and you are root on the machine in one command — crypto-mining bots scan for this constantly."},
-    "fix": {"th": "ลบ `-H tcp://0.0.0.0:2375` ออกจาก dockerd ใช้ unix socket อย่างเดียว; ถ้าต้องรีโมต ใช้ TLS (2376) หรือ `docker context` ผ่าน SSH", "en": "Remove `-H tcp://0.0.0.0:2375` from dockerd and use the unix socket; for remote use TLS (2376) or `docker context` over SSH."},
-    "refs": ["https://docs.docker.com/engine/security/protect-access/"]
+    "severity": "critical",
+    "tag": "CWE-306",
+    "title": {
+      "th": "Docker API เปิดโดยไม่มีการป้องกัน",
+      "en": "Unprotected Docker API"
+    },
+    "what": {
+      "th": "พอร์ต 2375 ตอบ /version — ใครก็สั่ง Docker บนเครื่องนี้ได้",
+      "en": "Port 2375 answered /version — anyone can drive Docker on this host."
+    },
+    "attack": {
+      "th": "สั่งรัน container ที่ mount / ของเครื่องจริง = ได้ root ทั้งเครื่องในคำสั่งเดียว เป็นช่องที่บอทขุดคริปโตหาอยู่ตลอด",
+      "en": "Start a container that mounts the host's / and you are root on the machine in one command — crypto-mining bots scan for this constantly."
+    },
+    "fix": {
+      "th": "ลบ `-H tcp://0.0.0.0:2375` ออกจาก dockerd ใช้ unix socket อย่างเดียว; ถ้าต้องรีโมต ใช้ TLS (2376) หรือ `docker context` ผ่าน SSH",
+      "en": "Remove `-H tcp://0.0.0.0:2375` from dockerd and use the unix socket; for remote use TLS (2376) or `docker context` over SSH."
+    },
+    "refs": [
+      "https://docs.docker.com/engine/security/protect-access/"
+    ]
   },
   "lan.elasticsearch": {
-    "severity": "high", "tag": "CWE-306",
-    "title": {"th": "Elasticsearch เปิดโดยไม่มีรหัส", "en": "Open Elasticsearch"},
-    "what": {"th": "Elasticsearch ตอบข้อมูล cluster โดยไม่ต้องล็อกอิน", "en": "Elasticsearch returns cluster info without login."},
-    "attack": {"th": "ข้อมูลรั่วครั้งใหญ่หลายครั้ง (หลายร้อยล้านเรคคอร์ด) มาจาก Elasticsearch ที่เปิดทิ้งไว้ บอทยังลบข้อมูลแล้วเรียกค่าไถ่", "en": "Many huge leaks (hundreds of millions of records) came from open Elasticsearch; bots also wipe data and leave ransom notes."},
-    "fix": {"th": "เปิด security (`xpack.security.enabled: true`), `network.host: 127.0.0.1` หรือจำกัดด้วย firewall", "en": "Enable security (`xpack.security.enabled: true`), `network.host: 127.0.0.1` or firewall it."},
+    "severity": "high",
+    "tag": "CWE-306",
+    "title": {
+      "th": "Elasticsearch เปิดโดยไม่มีรหัส",
+      "en": "Open Elasticsearch"
+    },
+    "what": {
+      "th": "Elasticsearch ตอบข้อมูล cluster โดยไม่ต้องล็อกอิน",
+      "en": "Elasticsearch returns cluster info without login."
+    },
+    "attack": {
+      "th": "ข้อมูลรั่วครั้งใหญ่หลายครั้ง (หลายร้อยล้านเรคคอร์ด) มาจาก Elasticsearch ที่เปิดทิ้งไว้ บอทยังลบข้อมูลแล้วเรียกค่าไถ่",
+      "en": "Many huge leaks (hundreds of millions of records) came from open Elasticsearch; bots also wipe data and leave ransom notes."
+    },
+    "fix": {
+      "th": "เปิด security (`xpack.security.enabled: true`), `network.host: 127.0.0.1` หรือจำกัดด้วย firewall",
+      "en": "Enable security (`xpack.security.enabled: true`), `network.host: 127.0.0.1` or firewall it."
+    },
     "refs": []
   },
   "lan.database": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "ฐานข้อมูลเปิดให้เครือข่ายเข้าถึง", "en": "Database reachable from the network"},
-    "what": {"th": "MySQL / PostgreSQL / MSSQL รับการเชื่อมต่อจากเครื่องอื่น", "en": "MySQL / PostgreSQL / MSSQL accepts connections from other machines."},
-    "attack": {"th": "ฐานข้อมูลควรคุยกับแอปเท่านั้น เปิดกว้างแล้วโดนเดารหัส (root/รหัสว่าง) หรือโดนช่องโหว่ของตัวฐานข้อมูลเอง", "en": "A database should talk only to its app; open to the network it gets password-guessed (root / empty password) or hit by DB CVEs."},
-    "fix": {"th": "MySQL: `bind-address = 127.0.0.1` · PostgreSQL: `listen_addresses = 'localhost'` + pg_hba.conf · หรือจำกัดด้วย firewall ให้เฉพาะ IP ของแอป", "en": "MySQL: `bind-address = 127.0.0.1` · PostgreSQL: `listen_addresses = 'localhost'` + pg_hba.conf · or firewall to the app's IP only."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "ฐานข้อมูลเปิดให้เครือข่ายเข้าถึง",
+      "en": "Database reachable from the network"
+    },
+    "what": {
+      "th": "MySQL / PostgreSQL / MSSQL รับการเชื่อมต่อจากเครื่องอื่น",
+      "en": "MySQL / PostgreSQL / MSSQL accepts connections from other machines."
+    },
+    "attack": {
+      "th": "ฐานข้อมูลควรคุยกับแอปเท่านั้น เปิดกว้างแล้วโดนเดารหัส (root/รหัสว่าง) หรือโดนช่องโหว่ของตัวฐานข้อมูลเอง",
+      "en": "A database should talk only to its app; open to the network it gets password-guessed (root / empty password) or hit by DB CVEs."
+    },
+    "fix": {
+      "th": "MySQL: `bind-address = 127.0.0.1` · PostgreSQL: `listen_addresses = 'localhost'` + pg_hba.conf · หรือจำกัดด้วย firewall ให้เฉพาะ IP ของแอป",
+      "en": "MySQL: `bind-address = 127.0.0.1` · PostgreSQL: `listen_addresses = 'localhost'` + pg_hba.conf · or firewall to the app's IP only."
+    },
     "refs": []
   },
   "lan.mongodb": {
-    "severity": "high", "tag": "Exposure",
-    "title": {"th": "MongoDB เปิดให้เครือข่าย", "en": "MongoDB reachable from the network"},
-    "what": {"th": "MongoDB (27017) รับการเชื่อมต่อ — รุ่นเก่า/ตั้งค่า default มักไม่มีรหัส", "en": "MongoDB (27017) accepts connections — old/default setups often have no auth."},
-    "attack": {"th": "แคมเปญเรียกค่าไถ่ลบฐานข้อมูล MongoDB ที่เปิดทิ้งไว้หลายหมื่นแห่ง", "en": "Ransom campaigns wiped tens of thousands of exposed MongoDB instances."},
-    "fix": {"th": "`net.bindIp: 127.0.0.1` และ `security.authorization: enabled` ใน mongod.conf", "en": "`net.bindIp: 127.0.0.1` and `security.authorization: enabled` in mongod.conf."},
-    "refs": ["https://www.mongodb.com/docs/manual/administration/security-checklist/"]
+    "severity": "high",
+    "tag": "Exposure",
+    "title": {
+      "th": "MongoDB เปิดให้เครือข่าย",
+      "en": "MongoDB reachable from the network"
+    },
+    "what": {
+      "th": "MongoDB (27017) รับการเชื่อมต่อ — รุ่นเก่า/ตั้งค่า default มักไม่มีรหัส",
+      "en": "MongoDB (27017) accepts connections — old/default setups often have no auth."
+    },
+    "attack": {
+      "th": "แคมเปญเรียกค่าไถ่ลบฐานข้อมูล MongoDB ที่เปิดทิ้งไว้หลายหมื่นแห่ง",
+      "en": "Ransom campaigns wiped tens of thousands of exposed MongoDB instances."
+    },
+    "fix": {
+      "th": "`net.bindIp: 127.0.0.1` และ `security.authorization: enabled` ใน mongod.conf",
+      "en": "`net.bindIp: 127.0.0.1` and `security.authorization: enabled` in mongod.conf."
+    },
+    "refs": [
+      "https://www.mongodb.com/docs/manual/administration/security-checklist/"
+    ]
   },
   "lan.smb": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "เปิดแชร์ไฟล์ Windows (SMB)", "en": "SMB file sharing open"},
-    "what": {"th": "SMB (139/445) ใช้แชร์ไฟล์/เครื่องพิมพ์ในวง", "en": "SMB (139/445) is used for file and printer sharing."},
-    "attack": {"th": "WannaCry/NotPetya แพร่ผ่าน SMB จากเครื่องหนึ่งไปทั้งวง; แชร์ที่เปิด guest ให้ใครก็อ่าน/เข้ารหัสเรียกค่าไถ่ได้", "en": "WannaCry/NotPetya spread machine-to-machine over SMB; guest-enabled shares can be read or ransomware-encrypted by anyone."},
-    "fix": {"th": "ปิด SMBv1, ปิด guest, ใช้รหัสผ่านต่อผู้ใช้, อัปเดตระบบ, ปิดถ้าไม่ได้ใช้แชร์ไฟล์ (Samba: `server min protocol = SMB2`)", "en": "Disable SMBv1 and guest, use per-user passwords, patch, or turn it off if unused (Samba: `server min protocol = SMB2`)."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "เปิดแชร์ไฟล์ Windows (SMB)",
+      "en": "SMB file sharing open"
+    },
+    "what": {
+      "th": "SMB (139/445) ใช้แชร์ไฟล์/เครื่องพิมพ์ในวง",
+      "en": "SMB (139/445) is used for file and printer sharing."
+    },
+    "attack": {
+      "th": "WannaCry/NotPetya แพร่ผ่าน SMB จากเครื่องหนึ่งไปทั้งวง; แชร์ที่เปิด guest ให้ใครก็อ่าน/เข้ารหัสเรียกค่าไถ่ได้",
+      "en": "WannaCry/NotPetya spread machine-to-machine over SMB; guest-enabled shares can be read or ransomware-encrypted by anyone."
+    },
+    "fix": {
+      "th": "ปิด SMBv1, ปิด guest, ใช้รหัสผ่านต่อผู้ใช้, อัปเดตระบบ, ปิดถ้าไม่ได้ใช้แชร์ไฟล์ (Samba: `server min protocol = SMB2`)",
+      "en": "Disable SMBv1 and guest, use per-user passwords, patch, or turn it off if unused (Samba: `server min protocol = SMB2`)."
+    },
     "refs": []
   },
   "lan.rdp": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "เปิด Remote Desktop (RDP)", "en": "Remote Desktop (RDP) open"},
-    "what": {"th": "RDP (3389) รับการเชื่อมต่อ", "en": "RDP (3389) accepts connections."},
-    "attack": {"th": "ช่องทางอันดับต้นของ ransomware: เดารหัส/ใช้รหัสที่รั่ว และช่องโหว่อย่าง BlueKeep", "en": "A top ransomware entry point: password guessing, leaked credentials and bugs like BlueKeep."},
-    "fix": {"th": "เปิด Network Level Authentication, รหัสยาว, จำกัดด้วย firewall/VPN และอย่า forward 3389 ออกอินเทอร์เน็ต", "en": "Require Network Level Authentication, long passwords, firewall/VPN only, never port-forward 3389 to the internet."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "เปิด Remote Desktop (RDP)",
+      "en": "Remote Desktop (RDP) open"
+    },
+    "what": {
+      "th": "RDP (3389) รับการเชื่อมต่อ",
+      "en": "RDP (3389) accepts connections."
+    },
+    "attack": {
+      "th": "ช่องทางอันดับต้นของ ransomware: เดารหัส/ใช้รหัสที่รั่ว และช่องโหว่อย่าง BlueKeep",
+      "en": "A top ransomware entry point: password guessing, leaked credentials and bugs like BlueKeep."
+    },
+    "fix": {
+      "th": "เปิด Network Level Authentication, รหัสยาว, จำกัดด้วย firewall/VPN และอย่า forward 3389 ออกอินเทอร์เน็ต",
+      "en": "Require Network Level Authentication, long passwords, firewall/VPN only, never port-forward 3389 to the internet."
+    },
     "refs": []
   },
   "lan.mqtt": {
-    "severity": "medium", "tag": "CWE-319",
-    "title": {"th": "MQTT ไม่เข้ารหัส", "en": "Plain-text MQTT"},
-    "what": {"th": "MQTT broker (1883) ใช้ในบ้านอัจฉริยะ/IoT", "en": "An MQTT broker (1883), used by smart-home / IoT gear."},
-    "attack": {"th": "ถ้าไม่มีรหัส ใครก็ subscribe '#' ดูข้อมูลเซนเซอร์ทั้งหมด หรือ publish สั่งเปิดประตู/ปิดไฟได้", "en": "Without auth anyone can subscribe to '#' and read every sensor, or publish commands (open the door, switch off lights)."},
-    "fix": {"th": "Mosquitto: `allow_anonymous false` + `password_file`, ใช้ TLS ที่พอร์ต 8883", "en": "Mosquitto: `allow_anonymous false` + `password_file`, TLS on 8883."},
-    "refs": ["https://mosquitto.org/man/mosquitto-conf-5.html"]
+    "severity": "medium",
+    "tag": "CWE-319",
+    "title": {
+      "th": "MQTT ไม่เข้ารหัส",
+      "en": "Plain-text MQTT"
+    },
+    "what": {
+      "th": "MQTT broker (1883) ใช้ในบ้านอัจฉริยะ/IoT",
+      "en": "An MQTT broker (1883), used by smart-home / IoT gear."
+    },
+    "attack": {
+      "th": "ถ้าไม่มีรหัส ใครก็ subscribe '#' ดูข้อมูลเซนเซอร์ทั้งหมด หรือ publish สั่งเปิดประตู/ปิดไฟได้",
+      "en": "Without auth anyone can subscribe to '#' and read every sensor, or publish commands (open the door, switch off lights)."
+    },
+    "fix": {
+      "th": "Mosquitto: `allow_anonymous false` + `password_file`, ใช้ TLS ที่พอร์ต 8883",
+      "en": "Mosquitto: `allow_anonymous false` + `password_file`, TLS on 8883."
+    },
+    "refs": [
+      "https://mosquitto.org/man/mosquitto-conf-5.html"
+    ]
   },
   "lan.rtsp": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "สตรีมกล้อง (RTSP) เปิดอยู่", "en": "Camera stream (RTSP) open"},
-    "what": {"th": "พอร์ต 554 มักเป็นกล้อง IP / NVR", "en": "Port 554 is usually an IP camera / NVR."},
-    "attack": {"th": "กล้องหลายรุ่นดูสตรีมได้โดยไม่ต้องใช้รหัส หรือใช้รหัส default — มีเว็บรวมกล้องที่เปิดทิ้งไว้ทั่วโลก", "en": "Many cameras stream without auth or with default passwords — whole websites list exposed cameras."},
-    "fix": {"th": "เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์, แยกกล้องไว้ใน VLAN/Wi-Fi guest และอย่า forward พอร์ตออกอินเทอร์เน็ต", "en": "Change default passwords, update firmware, isolate cameras on a VLAN/guest Wi-Fi, never port-forward them."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "สตรีมกล้อง (RTSP) เปิดอยู่",
+      "en": "Camera stream (RTSP) open"
+    },
+    "what": {
+      "th": "พอร์ต 554 มักเป็นกล้อง IP / NVR",
+      "en": "Port 554 is usually an IP camera / NVR."
+    },
+    "attack": {
+      "th": "กล้องหลายรุ่นดูสตรีมได้โดยไม่ต้องใช้รหัส หรือใช้รหัส default — มีเว็บรวมกล้องที่เปิดทิ้งไว้ทั่วโลก",
+      "en": "Many cameras stream without auth or with default passwords — whole websites list exposed cameras."
+    },
+    "fix": {
+      "th": "เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์, แยกกล้องไว้ใน VLAN/Wi-Fi guest และอย่า forward พอร์ตออกอินเทอร์เน็ต",
+      "en": "Change default passwords, update firmware, isolate cameras on a VLAN/guest Wi-Fi, never port-forward them."
+    },
     "refs": []
   },
   "lan.printer_raw": {
-    "severity": "low", "tag": "Exposure",
-    "title": {"th": "เครื่องพิมพ์เปิดพอร์ต RAW 9100", "en": "Printer RAW port 9100 open"},
-    "what": {"th": "พอร์ต JetDirect รับงานพิมพ์โดยไม่ต้องยืนยันตัวตน", "en": "The JetDirect port accepts print jobs without authentication."},
-    "attack": {"th": "สั่งพิมพ์ขยะ หรือใช้คำสั่ง PJL อ่านการตั้งค่า/เอกสารที่ค้างในเครื่องพิมพ์บางรุ่น", "en": "Junk printing, or PJL commands to read settings / stored jobs on some models."},
-    "fix": {"th": "ปิดโปรโตคอลที่ไม่ใช้ในหน้า admin ของเครื่องพิมพ์ ตั้งรหัส admin และอัปเดตเฟิร์มแวร์", "en": "Disable unused protocols in the printer's admin page, set an admin password, update firmware."},
+    "severity": "low",
+    "tag": "Exposure",
+    "title": {
+      "th": "เครื่องพิมพ์เปิดพอร์ต RAW 9100",
+      "en": "Printer RAW port 9100 open"
+    },
+    "what": {
+      "th": "พอร์ต JetDirect รับงานพิมพ์โดยไม่ต้องยืนยันตัวตน",
+      "en": "The JetDirect port accepts print jobs without authentication."
+    },
+    "attack": {
+      "th": "สั่งพิมพ์ขยะ หรือใช้คำสั่ง PJL อ่านการตั้งค่า/เอกสารที่ค้างในเครื่องพิมพ์บางรุ่น",
+      "en": "Junk printing, or PJL commands to read settings / stored jobs on some models."
+    },
+    "fix": {
+      "th": "ปิดโปรโตคอลที่ไม่ใช้ในหน้า admin ของเครื่องพิมพ์ ตั้งรหัส admin และอัปเดตเฟิร์มแวร์",
+      "en": "Disable unused protocols in the printer's admin page, set an admin password, update firmware."
+    },
     "refs": []
   },
   "lan.nfs": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "เปิด NFS / RPC", "en": "NFS / RPC open"},
-    "what": {"th": "แชร์ไฟล์แบบ NFS หรือ rpcbind รับการเชื่อมต่อ", "en": "NFS file sharing or rpcbind accepts connections."},
-    "attack": {"th": "export ที่ตั้งเป็น * หรือ no_root_squash ให้เครื่องอื่น mount และเป็น root บนไฟล์ได้", "en": "Exports set to * or no_root_squash let other machines mount them and act as root on the files."},
-    "fix": {"th": "/etc/exports ระบุ IP ที่อนุญาตเท่านั้น ใช้ root_squash และปิด rpcbind ถ้าไม่ได้ใช้", "en": "List allowed IPs in /etc/exports, keep root_squash, disable rpcbind if unused."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "เปิด NFS / RPC",
+      "en": "NFS / RPC open"
+    },
+    "what": {
+      "th": "แชร์ไฟล์แบบ NFS หรือ rpcbind รับการเชื่อมต่อ",
+      "en": "NFS file sharing or rpcbind accepts connections."
+    },
+    "attack": {
+      "th": "export ที่ตั้งเป็น * หรือ no_root_squash ให้เครื่องอื่น mount และเป็น root บนไฟล์ได้",
+      "en": "Exports set to * or no_root_squash let other machines mount them and act as root on the files."
+    },
+    "fix": {
+      "th": "/etc/exports ระบุ IP ที่อนุญาตเท่านั้น ใช้ root_squash และปิด rpcbind ถ้าไม่ได้ใช้",
+      "en": "List allowed IPs in /etc/exports, keep root_squash, disable rpcbind if unused."
+    },
     "refs": []
   },
   "lan.tr069": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "พอร์ตจัดการระยะไกลของ ISP (TR-069)", "en": "ISP remote-management port (TR-069)"},
-    "what": {"th": "พอร์ต 7547 ใช้ให้ผู้ให้บริการอินเทอร์เน็ตจัดการเราเตอร์ระยะไกล", "en": "Port 7547 lets the ISP manage the router remotely."},
-    "attack": {"th": "ช่องโหว่ใน TR-069 เคยทำให้เราเตอร์เกือบล้านเครื่องในเยอรมนีล่ม (2016)", "en": "A TR-069 bug knocked ~1M German routers offline in 2016."},
-    "fix": {"th": "อัปเดตเฟิร์มแวร์ ถาม ISP ว่าปิดหรือจำกัดได้ไหม", "en": "Update firmware; ask your ISP whether it can be disabled or restricted."},
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "พอร์ตจัดการระยะไกลของ ISP (TR-069)",
+      "en": "ISP remote-management port (TR-069)"
+    },
+    "what": {
+      "th": "พอร์ต 7547 ใช้ให้ผู้ให้บริการอินเทอร์เน็ตจัดการเราเตอร์ระยะไกล",
+      "en": "Port 7547 lets the ISP manage the router remotely."
+    },
+    "attack": {
+      "th": "ช่องโหว่ใน TR-069 เคยทำให้เราเตอร์เกือบล้านเครื่องในเยอรมนีล่ม (2016)",
+      "en": "A TR-069 bug knocked ~1M German routers offline in 2016."
+    },
+    "fix": {
+      "th": "อัปเดตเฟิร์มแวร์ ถาม ISP ว่าปิดหรือจำกัดได้ไหม",
+      "en": "Update firmware; ask your ISP whether it can be disabled or restricted."
+    },
     "refs": []
   },
   "lan.http_service": {
-    "severity": "info", "tag": "Inventory",
-    "title": {"th": "มีหน้าเว็บ/หน้า admin ในวง", "en": "Web interface on the LAN"},
-    "what": {"th": "เครื่อง/อุปกรณ์นี้มีหน้าเว็บ (มักเป็นหน้าตั้งค่า เช่น NAS, กล้อง, เราเตอร์, dev server)", "en": "This device serves a web page (often a settings page: NAS, camera, router, dev server)."},
-    "attack": {"th": "หน้า admin ในบ้านมักใช้ HTTP และรหัส default — ตรวจต่อเชิงลึกได้ด้วยโมดูล web", "en": "Home admin pages often use HTTP and default passwords — check deeper with the web module."},
-    "fix": {"th": "ตรวจต่อ: `./seccheck.py web http://<ip>:<port>` และเปลี่ยนรหัส default ของอุปกรณ์", "en": "Dig deeper: `./seccheck.py web http://<ip>:<port>`, and change the device's default password."},
+    "severity": "info",
+    "tag": "Inventory",
+    "title": {
+      "th": "มีหน้าเว็บ/หน้า admin ในวง",
+      "en": "Web interface on the LAN"
+    },
+    "what": {
+      "th": "เครื่อง/อุปกรณ์นี้มีหน้าเว็บ (มักเป็นหน้าตั้งค่า เช่น NAS, กล้อง, เราเตอร์, dev server)",
+      "en": "This device serves a web page (often a settings page: NAS, camera, router, dev server)."
+    },
+    "attack": {
+      "th": "หน้า admin ในบ้านมักใช้ HTTP และรหัส default — ตรวจต่อเชิงลึกได้ด้วยโมดูล web",
+      "en": "Home admin pages often use HTTP and default passwords — check deeper with the web module."
+    },
+    "fix": {
+      "th": "ตรวจต่อ: `./seccheck.py web http://<ip>:<port>` และเปลี่ยนรหัส default ของอุปกรณ์",
+      "en": "Dig deeper: `./seccheck.py web http://<ip>:<port>`, and change the device's default password."
+    },
+    "refs": []
+  },
+  "lan.rtsp_noauth": {
+    "severity": "high",
+    "tag": "CWE-306",
+    "title": {
+      "th": "กล้อง/NVR สตรีมได้โดยไม่ต้องยืนยันตัวตน",
+      "en": "Camera/NVR streams without authentication"
+    },
+    "what": {
+      "th": "ส่ง RTSP OPTIONS แล้วกล้องตอบ 200 OK โดยไม่ขอรหัสผ่าน — ดูภาพได้โดยไม่ต้องล็อกอิน",
+      "en": "An RTSP OPTIONS got 200 OK with no auth challenge — the stream is viewable without login."
+    },
+    "attack": {
+      "th": "ใครในวง (หรือคนนอกถ้า forward พอร์ตไว้) เปิดดูภาพกล้องได้ มีเว็บรวมกล้องเปิดทั่วโลก; ลองด้วย VLC เปิด rtsp://ip:554/ ก็เห็น",
+      "en": "Anyone on the LAN (or outside if port-forwarded) can watch the feed; whole sites index open cameras. VLC opening rtsp://ip:554/ already shows it."
+    },
+    "fix": {
+      "th": "เปิด authentication ในหน้าตั้งค่ากล้อง, เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์, แยกกล้องไว้ VLAN/Wi-Fi แขก และห้าม forward พอร์ตออกเน็ต",
+      "en": "Enable authentication in the camera settings, change default passwords, update firmware, isolate cameras on a VLAN/guest Wi-Fi, never port-forward them."
+    },
+    "refs": []
+  },
+  "lan.http_basic": {
+    "severity": "medium",
+    "tag": "CWE-319",
+    "title": {
+      "th": "หน้าเข้าสู่ระบบใช้ HTTP Basic (ไม่เข้ารหัส)",
+      "en": "HTTP Basic auth over plain HTTP"
+    },
+    "what": {
+      "th": "อุปกรณ์ใช้ Basic auth บน http — ชื่อผู้ใช้/รหัสผ่านถูกส่งเป็น base64 (ถอดกลับได้ ไม่ใช่การเข้ารหัส)",
+      "en": "The device uses Basic auth over http — the username/password is sent as base64 (reversible, not encryption)."
+    },
+    "attack": {
+      "th": "ใครดักข้อมูลในวงได้ก็อ่านรหัสผ่านอุปกรณ์ได้ทันที และ Basic auth ไม่มีการจำกัดการเดารหัส",
+      "en": "Anyone sniffing the LAN reads the password immediately, and Basic auth has no rate limiting on guesses."
+    },
+    "fix": {
+      "th": "เปิด HTTPS บนอุปกรณ์ถ้ารองรับ, เปลี่ยนรหัส default, เข้าหน้าตั้งค่าผ่านสาย/เครือข่ายที่เชื่อถือได้",
+      "en": "Enable HTTPS on the device if supported, change default passwords, administer it over a trusted link."
+    },
+    "refs": []
+  },
+  "lan.default_creds": {
+    "severity": "critical",
+    "tag": "OWASP A07 · CWE-1392",
+    "title": {
+      "th": "อุปกรณ์ยังใช้รหัสผ่านที่ตั้งมาจากโรงงาน",
+      "en": "Device still uses default credentials"
+    },
+    "what": {
+      "th": "ลองรหัส default (เช่น admin/admin) บนหน้า Basic auth แล้วเข้าได้",
+      "en": "A default credential (e.g. admin/admin) worked on the Basic-auth page."
+    },
+    "attack": {
+      "th": "รหัส default ของทุกยี่ห้อหาได้ในเน็ต บอตอย่าง Mirai ยึดอุปกรณ์ด้วยวิธีนี้เป็นล้านเครื่อง เข้าได้แล้วเปลี่ยน DNS/ดูกล้อง/ใช้เป็นฐานโจมตีต่อ",
+      "en": "Default passwords for every brand are online; Mirai-style bots took over millions of devices this way. Once in, they change DNS, watch cameras, or pivot deeper."
+    },
+    "fix": {
+      "th": "เปลี่ยนรหัส admin เป็นรหัสยาวไม่ซ้ำทันที, อัปเดตเฟิร์มแวร์, ปิดบริการ/พอร์ตที่ไม่ใช้",
+      "en": "Change the admin password to a long unique one now, update firmware, disable unused services/ports."
+    },
+    "refs": [
+      "https://www.cloudflare.com/learning/ddos/glossary/mirai-botnet/"
+    ]
+  },
+  "lan.login_form": {
+    "severity": "check",
+    "tag": "Checklist",
+    "title": {
+      "th": "พบหน้าฟอร์มล็อกอิน — ลองรหัส default เองในเบราว์เซอร์",
+      "en": "Login form found — try default creds yourself in a browser"
+    },
+    "what": {
+      "th": "อุปกรณ์มีหน้าล็อกอินแบบฟอร์ม sec-check ไม่ลองรหัสกับฟอร์มอัตโนมัติ (การ POST อาจมีผลข้างเคียง/ล็อกบัญชี)",
+      "en": "The device has a form-based login. sec-check does not auto-try credentials on forms (a POST could have side effects / lock the account)."
+    },
+    "attack": {
+      "th": "ถ้ายังเป็นรหัส default คนในวงก็เข้าจัดการอุปกรณ์ได้",
+      "en": "If it is still a default password, anyone on the LAN can take over the device."
+    },
+    "fix": {
+      "th": "เปิดหน้านี้ในเบราว์เซอร์ ลองรหัสที่ตั้งมาจากโรงงาน (ดูคู่มือ/ใต้เครื่อง) ถ้าเข้าได้ให้เปลี่ยนรหัสทันที",
+      "en": "Open the page in a browser, try the factory default (manual/sticker); if it works, change it immediately."
+    },
     "refs": []
   }
 }

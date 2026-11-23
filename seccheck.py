@@ -126,6 +126,11 @@ def cmd_lessons(_args):
 
 
 def main(argv=None):
+    # ตั้งภาษาก่อนสร้าง parser เพื่อให้ --help เป็นภาษาที่เลือก / set language before building the parser
+    pre = argparse.ArgumentParser(add_help=False)
+    pre.add_argument("--lang", default=os.environ.get("SECCHECK_LANG", "th"))
+    i18n.set_default(i18n.norm(pre.parse_known_args(argv)[0].lang) or "th")
+
     p = argparse.ArgumentParser(prog="seccheck.py", description=_("ตรวจหาช่องโหว่ในระบบของตัวเอง (ไม่ทำลาย)"))
     p.add_argument("--lang", choices=["th", "en"], default=os.environ.get("SECCHECK_LANG", "th"))
     p.add_argument("--out", default=str(HERE / "reports"), help=_("โฟลเดอร์เก็บรายงาน"))
@@ -215,9 +220,6 @@ def main(argv=None):
     sv.add_argument("--api-key", default=os.environ.get("SECCHECK_API_KEY"))
     sub.add_parser("mcp", help=_("เปิด MCP server (stdio) ให้ AI สั่งสแกนได้"))
 
-    pre = argparse.ArgumentParser(add_help=False)
-    pre.add_argument("--lang", default=os.environ.get("SECCHECK_LANG", "th"))
-    i18n.set_default(pre.parse_known_args(argv)[0].lang)
     args = p.parse_args(argv)
     i18n.set_default(args.lang)
 

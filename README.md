@@ -27,6 +27,8 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **150 lessons** — list them with `./seccheck.py lessons`.
 
+**Four ways to use it, one engine:** the **CLI** (`./scan.sh`), a **web UI** (`./web.sh` — Dashboard, Scan, Network Map, Learn, History), a **REST API** (`/api/*`), and an **MCP server** (`./seccheck.py mcp`) so AI tools can drive scans. All of them go through the same allow-list and stay non-destructive.
+
 | Module | Checks | Examples |
 |---|---|---|
 | 🌐 **web** | 30 | HTTPS & certificate, TLS 1.0/1.1, HTTP→HTTPS, HSTS, CSP, clickjacking, cookies (HttpOnly/Secure/SameSite), CORS origin reflection, version leaks, exposed `.git` / `.env` / SQL dumps / backups, `phpinfo()`, directory listing, debug error pages, robots.txt hints, security.txt |
@@ -99,8 +101,11 @@ The web UI runs the same engine and the same allow-list: it only scans targets i
 Every check has a **difficulty level (1–5)** — level 1 is the wide-open, easy-win stuff (default creds, missing auth, exposed files), rising to deeper misconfig at level 4. Pick a level in the Scan page or with `--level` on the CLI (`./seccheck.py host --level 1`) to focus on the quick wins first.
 
 <img src="docs/screenshots/web-dashboard-en.png" width="48%" alt="Web dashboard"> <img src="docs/screenshots/map-en.png" width="48%" alt="Network map (example data)">
+<img src="docs/screenshots/web-learn-en.png" width="48%" alt="Learn page"> <img src="docs/screenshots/web-scan-en.png" width="48%" alt="Scan page">
 
 *(The network map above uses example devices in the documentation IP range — the real page builds it from your own scan.)*
+
+> **Learning path:** sec-check is built so that auditing your own systems doubles as practice. Start the [practice lab](#-practice-lab), scan it, then open the **Learn** page (`/learn`) — it lays out every weakness by difficulty level 1→5 with *what it is · how attackers use it · how to fix it*, and every 🔴 finding in a report links straight to its lesson. Harden, re-scan, and watch 🔴 turn 🟢.
 
 This is the web UI; sec-check also exposes a **REST API** and an **MCP server** so scripts and AI tools can drive scans (see below).
 
@@ -182,7 +187,7 @@ docs/DESIGN.md       the full design (4 entry points, 8 categories, phases)
 tests/               python3 -m unittest discover -s tests
 ```
 
-**Adding a check:** add a lesson to `knowledge/<module>.json`, then in `checks/<module>.py` call `res.add("<id>", target, evidence)` when it's a problem or `res.ok("<Thai label>", target)` when it passes. Add a vulnerable and a fixed version to the lab so you can see both.
+**Adding a check (contributing):** add a lesson to `knowledge/<module>.json` — every lesson needs `severity`, `level` (1–5), `tag`, and `title`/`what`/`attack`/`fix` each with both `th` and `en` (a test enforces this). Then in `checks/<module>.py` call `res.add("<id>", target, evidence)` when it's a problem or `res.ok("<Thai label>", target)` when it passes. Add a vulnerable and a fixed version to `lab/vulnlab.py` so you (and the tests) can see both. Run `python3 -m unittest discover -s tests` before sending a change. Keep everything **non-destructive and allow-list gated** — sec-check deliberately ships no deauth/brute-force/DoS/exploit automation, and that's a hard line, not a TODO.
 
 ## 🧭 Roadmap
 

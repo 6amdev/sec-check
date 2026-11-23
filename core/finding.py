@@ -96,6 +96,16 @@ class Result:
         d["notes"] = [list(n) for n in self.notes]
         return d
 
+    @classmethod
+    def from_dict(cls, d):
+        r = cls(d["module"], d["target"], d.get("started", 0.0), d.get("finished", 0.0))
+        r.findings = [Finding(**f) for f in d.get("findings", [])]
+        r.passed = [Passed(**p) for p in d.get("passed", [])]
+        r.notes = [tuple(n) for n in d.get("notes", [])]
+        r.tables = d.get("tables", [])
+        r.manual = d.get("manual", [])
+        return r
+
 
 def effective_severity(f, kb):
     return f.severity or kb.get(f.id, {}).get("severity", "info")

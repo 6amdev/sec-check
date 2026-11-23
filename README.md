@@ -71,6 +71,23 @@ Run `./seccheck.py host` with `sudo` to also check empty-password accounts; with
 
 Reports are saved to `reports/` as HTML (switchable Thai/English, light/dark) and JSON. The folder is git-ignored. The HTML describes your systems, so don't publish it.
 
+### Web UI
+
+Prefer a browser? `sec-check` also serves a small web app from Python (no build step, like disk-check) with a Dashboard, a Scan page (pick a target from the allow-list, watch 🔴/🟢 results), a **Network Map** of your LAN, scan History, and the full report:
+
+```bash
+./web.sh                       # http://127.0.0.1:8770 (this machine only)
+./web.sh --host 0.0.0.0 --pin 1234   # reachable from your phone on the LAN, PIN-protected
+```
+
+The web UI runs the same engine and the same allow-list: it only scans targets in `scope.json`, stays non-destructive, and shows the legal warning on every page. Results are stored in SQLite (`data/`, git-ignored) so you can compare before/after hardening.
+
+<img src="docs/screenshots/web-dashboard-en.png" width="48%" alt="Web dashboard"> <img src="docs/screenshots/map-en.png" width="48%" alt="Network map (example data)">
+
+*(The network map above uses example devices in the documentation IP range — the real page builds it from your own scan.)*
+
+This is **Phase 1** of the [design](docs/DESIGN.md); a REST API and an MCP server (so AI tools can drive scans) are planned for a later phase.
+
 ### Learn
 
 ```bash
@@ -105,12 +122,15 @@ Reports are saved to `reports/` as HTML (switchable Thai/English, light/dark) an
 ## 🗂️ Project layout
 
 ```
-seccheck.py          CLI
-core/                scope (allow-list), net (safe helpers), finding, kb (knowledge loader), report (HTML/JSON)
+seccheck.py          CLI            ·  ./scan.sh
+webapp.py            web UI         ·  ./web.sh   (Dashboard · Scan · Map · History · Report)
+core/                scope (allow-list), net (safe helpers), finding, kb, report (HTML/JSON),
+                     db (SQLite history), netmap (network map from a scan)
 checks/              web.py · lan.py · host.py · router.py   — each has run(target, opts) -> Result
 knowledge/*.json     the lessons: severity, tag, title/what/attack/fix in th+en, refs
 lab/vulnlab.py       practice lab (loopback only)
 locales/en.json      UI translations (Thai is the source language, like disk-check)
+docs/DESIGN.md       the full design (4 entry points, 8 categories, phases)
 tests/               python3 -m unittest discover -s tests
 ```
 

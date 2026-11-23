@@ -73,7 +73,8 @@ def layout(title, active, body_html, lang):
     nav = "".join(f'<a href="{href}?lang={lang}" class="{"on" if active == key else ""}">{E(_(label))}</a>'
                   for key, href, label in (
                       ("dash", "/", "Dashboard"), ("scan", "/scan", "สั่งสแกน"), ("map", "/map", "แผนที่"),
-                      ("targets", "/targets", "เป้าหมาย"), ("history", "/history", "ประวัติ")))
+                      ("findings", "/findings", "ช่องโหว่"), ("targets", "/targets", "เป้าหมาย"),
+                      ("history", "/history", "ประวัติ"), ("settings", "/settings", "ตั้งค่า")))
     other = "en" if lang == "th" else "th"
     return f"""<!doctype html><html lang="{lang}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>sec-check · {E(_(title))}</title>
@@ -114,16 +115,38 @@ def dash(lang):
     return body
 
 
-def targets_page(lang):
-    rows = "".join(f'<tr><td class="mono">{E(e["target"])}</td><td>{E(e.get("kind",""))}</td>'
-                   f'<td>{E(e.get("note",""))}</td><td class="mut">{E(e.get("confirmed",""))}</td></tr>'
+def targets_page(lang, msg="", err=""):
+    rows = "".join(f'''<tr><td class="mono">{E(e["target"])}</td><td>{E(e.get("kind",""))}</td>
+<td>{E(e.get("note",""))}</td><td class="mut">{E(e.get("confirmed",""))}</td>
+<td><form method="post" action="/targets?lang={lang}" style="margin:0"><input type="hidden" name="remove" value="{E(e["target"])}">
+<button class="btn ghost" style="padding:4px 10px">{E(_("ลบ"))}</button></form></td></tr>'''
                    for e in scope.load())
-    return f'''<div class="card"><h2 style="margin-top:0">{E(_("เป้าหมายที่อนุญาต (allow-list)"))}</h2>
-<p>{E(_("เพิ่ม/ลบเป้าหมายทำผ่าน CLI (ต้องยืนยันว่าเป็นเจ้าของ):"))}</p>
-<div class="log">./seccheck.py scope add 192.168.1.0/24 --note "home LAN"
-./seccheck.py scope add https://example.com --note "my site"</div>
-<p>127.0.0.0/8 · localhost — {E(_("(เครื่องนี้ — อนุญาตเสมอ)"))}</p>
-<table class="hist"><tr><th>{E(_("เป้าหมาย"))}</th><th>kind</th><th>note</th><th>{E(_("ยืนยันเมื่อ"))}</th></tr>{rows}</table></div>'''
+    note = (f'<div class="warn" style="background:#22c55e18;border-color:#22c55e55">✅ {E(msg)}</div>' if msg else "") + \
+           (f'<div class="warn">⛔ {E(err)}</div>' if err else "")
+    return f'''{note}<div class="card"><h2 style="margin-top:0">{E(_("เป้าหมายที่อนุญาต (allow-list)"))}</h2>
+<p class="mut">{E(_("127.0.0.0/8 · localhost — เครื่องนี้ อนุญาตเสมอ"))}</p>
+<table class="hist"><tr><th>{E(_("เป้าหมาย"))}</th><th>kind</th><th>note</th><th>{E(_("ยืนยันเมื่อ"))}</th><th></th></tr>{rows}</table></div>
+<div class="card"><h3 style="margin-top:0">{E(_("เพิ่มเป้าหมาย"))}</h3>
+<form method="post" action="/targets?lang={lang}">
+<p><input name="target" placeholder="192.168.1.0/24  |  https://example.com" style="width:320px;max-width:100%">
+<input name="note" placeholder="{E(_('หมายเหตุ'))}" style="width:180px;max-width:100%"></p>
+<p><label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--mut)">
+<input type="checkbox" name="confirm" value="1" style="margin-top:3px">
+{E(_("ข้าพเจ้ายืนยันว่าเป็นเจ้าของระบบนี้ หรือได้รับอนุญาตเป็นลายลักษณ์อักษรให้ทดสอบ — การสแกนระบบของผู้อื่นโดยไม่ได้รับอนุญาตผิดกฎหมาย"))}</label></p>
+<button class="btn" type="submit">{E(_("เพิ่มเข้า allow-list"))}</button></form>
+<p class="mut" style="font-size:12.5px">{E(_("ทำแบบเดียวกันใน CLI ได้: ./seccheck.py scope add <เป้าหมาย>"))}</p></div>'''
+
+
+def settings_page(lang):
+    return f'''<div class="card"><h2 style="margin-top:0">⚙️ {E(_("ตั้งค่า"))}</h2>
+<table class="hist">
+<tr><td>{E(_("ภาษา"))}</td><td><a class="btn ghost" href="?lang=th">ไทย</a> <a class="btn ghost" href="?lang=en">English</a></td></tr>
+<tr><td>{E(_("ธีม"))}</td><td class="mut">{E(_("ตามระบบ (สว่าง/มืด) อัตโนมัติ"))}</td></tr>
+<tr><td>PIN</td><td class="mut">{E(_("ตั้งตอนเปิดเซิร์ฟเวอร์") + ": ./web.sh --pin 1234")}  ·  {E(_("สถานะตอนนี้") + ": " + (_("ตั้งแล้ว") if PIN else _("ไม่ได้ตั้ง")))}</td></tr>
+<tr><td>{E(_("เปิดให้วงแลนเข้าถึง"))}</td><td class="mut">./web.sh --host 0.0.0.0</td></tr>
+<tr><td>{E(_("ลองรหัส default"))}</td><td class="mut">{E(_("เลือกตอนสั่งสแกน (ติ๊กในหน้า Scan) — อ่านอย่างเดียว จำกัดอัตรา"))}</td></tr>
+</table>
+<p class="mut" style="font-size:12.5px">{E(_("ระดับความยาก (1–5) และการเทียบ 🔴→🟢 ย้อนหลัง จะเพิ่มในเฟสถัดไป"))}</p></div>'''
 
 
 def history_page(lang):
@@ -284,6 +307,15 @@ class App(BaseHTTPRequestHandler):
                 self._page("Targets", "targets", targets_page(lang), lang)
             elif path == "/history":
                 self._page("History", "history", history_page(lang), lang)
+            elif path == "/settings":
+                self._page("Settings", "settings", settings_page(lang), lang)
+            elif path == "/findings":
+                last = db.latest()
+                if last:
+                    return self._send("", 303, headers={"Location": f"/report/{last['id']}?lang={lang}"})
+                self._page("Findings", "findings",
+                           f'<div class="card">{E(_("ยังไม่มีผลสแกน"))} · '
+                           f'<a class="btn" href="/scan?lang={lang}">{E(_("สั่งสแกน"))}</a></div>', lang)
             elif path.startswith("/report/"):
                 html_doc = report_page(path.split("/")[-1], lang)
                 if html_doc:
@@ -329,6 +361,25 @@ class App(BaseHTTPRequestHandler):
             threading.Thread(target=run_job, args=(job_id, pick, creds), daemon=True).start()
             time.sleep(0.2)
             return self._send("", 303, headers={"Location": f"/scan/{job_id}?lang={lang}"})
+        if u.path == "/targets":
+            if form.get("remove", [""])[0]:
+                scope.remove(form["remove"][0])
+                return self._page("Targets", "targets", targets_page(lang, msg=_("ลบแล้ว: {t}", t=form["remove"][0])), lang)
+            target = form.get("target", [""])[0].strip()
+            note = form.get("note", [""])[0].strip()
+            if not target:
+                return self._page("Targets", "targets", targets_page(lang, err=_("ต้องระบุเป้าหมาย")), lang)
+            if form.get("confirm", [""])[0] != "1":
+                return self._page("Targets", "targets",
+                                  targets_page(lang, err=_("ต้องติ๊กยืนยันว่าเป็นเจ้าของ/ได้รับอนุญาตก่อน")), lang)
+            try:
+                scope.normalize(target)
+            except Exception:
+                return self._page("Targets", "targets", targets_page(lang, err=_("รูปแบบเป้าหมายไม่ถูกต้อง")), lang)
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                scope.add(target, note, assume_yes=True)
+            return self._page("Targets", "targets", targets_page(lang, msg=_("เพิ่มแล้ว: {t}", t=target)), lang)
         self._send("", 404)
 
 

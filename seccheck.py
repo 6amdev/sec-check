@@ -150,6 +150,10 @@ def main(argv=None):
     e = sub.add_parser("explain", help=_("อ่านคำอธิบายช่องโหว่"))
     e.add_argument("id")
     sub.add_parser("lessons", help=_("รายการช่องโหว่ทั้งหมดที่ตรวจได้"))
+    sv = sub.add_parser("serve", help=_("เปิดหน้าเว็บ (Dashboard/Scan/Map)"))
+    sv.add_argument("--host", default="127.0.0.1")
+    sv.add_argument("--port", type=int, default=8770)
+    sv.add_argument("--pin", default=os.environ.get("SECCHECK_PIN"))
 
     pre = argparse.ArgumentParser(add_help=False)
     pre.add_argument("--lang", default=os.environ.get("SECCHECK_LANG", "th"))
@@ -171,6 +175,10 @@ def main(argv=None):
             return cmd_explain(args)
         elif args.cmd == "lessons":
             cmd_lessons(args)
+        elif args.cmd == "serve":
+            import webapp
+            webapp.main(["--host", args.host, "--port", str(args.port), "--lang", args.lang]
+                        + (["--pin", args.pin] if args.pin else []))
         elif args.cmd == "all":
             cmd_all(args)
         else:

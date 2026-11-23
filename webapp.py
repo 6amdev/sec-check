@@ -73,8 +73,9 @@ def layout(title, active, body_html, lang):
     nav = "".join(f'<a href="{href}?lang={lang}" class="{"on" if active == key else ""}">{E(_(label))}</a>'
                   for key, href, label in (
                       ("dash", "/", "Dashboard"), ("scan", "/scan", "สั่งสแกน"), ("map", "/map", "แผนที่"),
-                      ("findings", "/findings", "ช่องโหว่"), ("targets", "/targets", "เป้าหมาย"),
-                      ("history", "/history", "ประวัติ"), ("settings", "/settings", "ตั้งค่า")))
+                      ("findings", "/findings", "ช่องโหว่"), ("learn", "/learn", "เรียนรู้"),
+                      ("targets", "/targets", "เป้าหมาย"), ("history", "/history", "ประวัติ"),
+                      ("settings", "/settings", "ตั้งค่า")))
     other = "en" if lang == "th" else "th"
     return f"""<!doctype html><html lang="{lang}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>sec-check · {E(_(title))}</title>
@@ -135,6 +136,50 @@ def targets_page(lang, msg="", err=""):
 {E(_("ข้าพเจ้ายืนยันว่าเป็นเจ้าของระบบนี้ หรือได้รับอนุญาตเป็นลายลักษณ์อักษรให้ทดสอบ — การสแกนระบบของผู้อื่นโดยไม่ได้รับอนุญาตผิดกฎหมาย"))}</label></p>
 <button class="btn" type="submit">{E(_("เพิ่มเข้า allow-list"))}</button></form>
 <p class="mut" style="font-size:12.5px">{E(_("ทำแบบเดียวกันใน CLI ได้: ./seccheck.py scope add <เป้าหมาย>"))}</p></div>'''
+
+
+LEVEL_TITLE = {1: "🟢 Level 1 — พื้นฐาน (ของเปิดโล่ง)", 2: "🟡 Level 2 — โปรโตคอล/ตั้งค่าอ่อน",
+               3: "🟠 Level 3 — เวอร์ชันเก่า / ข้อมูลรั่ว / hardening", 4: "🔴 Level 4 — ตั้งค่าพลาดเชิงลึก",
+               5: "⚫ Level 5 — ขั้นสูง (lab / เครือข่ายตัวเอง)"}
+CURRICULUM_URL = "https://github.com/6amdev/sec-check/blob/main/docs/CURRICULUM.md"
+
+
+def learn_page(lang, focus=""):
+    k = kb.load()
+    by_level = {}
+    for id, e in k.items():
+        by_level.setdefault(e.get("level", 3), []).append((id, e))
+    sev_order = {s: i for i, s in enumerate(SEVERITIES)}
+    sev_order["check"] = 9
+    out = [f'''<div class="card"><h2 style="margin-top:0">🎓 {E(_("เรียนรู้: เจาะ → ป้องกัน"))}</h2>
+<p>{E(_("บทเรียนจัดกลุ่มตามระดับความยาก 1–5 — เริ่มจากของเปิดโล่งที่เจอง่าย ไล่ไปจนถึงขั้นสูง แต่ละข้อบอก คืออะไร · ผู้โจมตีใช้ยังไง · วิธีแก้"))}</p>
+<p class="mut">{E(_("หลักสูตรฉบับเต็ม (รวมเทคนิคขั้นสูงที่ยังไม่ตรวจอัตโนมัติ เช่น SQLi/XSS บนเป้าฝึก):"))}
+<a href="{CURRICULUM_URL}" target="_blank" rel="noopener">docs/CURRICULUM.md ↗</a></p></div>''']
+    for lvl in (1, 2, 3, 4, 5):
+        items = sorted(by_level.get(lvl, []), key=lambda it: sev_order.get(it[1].get("severity"), 5))
+        if not items:
+            continue
+        out.append(f'<h2 id="level-{lvl}">{E(_(LEVEL_TITLE[lvl]))} <span class="mut" style="font-size:14px">({len(items)})</span></h2>')
+        for id, e in items:
+            t = lambda f: fmt(kb.text(e, f, lang))
+            sev = e.get("severity", "info")
+            hl = ' style="outline:2px solid var(--acc)"' if id == focus else ""
+            out.append(f'''<div class="card" id="lesson-{E(id)}"{hl}>
+<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+<span class="pill {sev}">{E(report.sev_label(sev, lang))}</span>
+<b style="flex:1;min-width:180px">{t("title")}</b>
+<span class="mut" style="font-size:12px">{E(e.get("tag",""))} · <span class="mono">{E(id)}</span></span></div>
+<div class="grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px">
+<div class="box"><b style="color:var(--mut);font-size:12px">{E(_("คืออะไร"))}</b><br>{t("what")}</div>
+<div class="box"><b style="color:var(--mut);font-size:12px">{E(_("ผู้โจมตีใช้ยังไง"))}</b><br>{t("attack")}</div>
+<div class="box"><b style="color:var(--mut);font-size:12px">{E(_("วิธีแก้"))}</b><br>{t("fix")}</div></div></div>''')
+    return "<style>.grid{grid-template-columns:repeat(3,1fr)}@media(max-width:760px){.grid{grid-template-columns:1fr}}" \
+           ".box{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px}</style>" \
+           + "\n".join(out)
+
+
+def fmt(s):
+    return report.fmt(s)
 
 
 def settings_page(lang):
@@ -353,6 +398,8 @@ class App(BaseHTTPRequestHandler):
                 self._page("History", "history", history_page(lang), lang)
             elif path == "/settings":
                 self._page("Settings", "settings", settings_page(lang), lang)
+            elif path == "/learn":
+                self._page("Learn", "learn", learn_page(lang, qs.get("focus", [""])[0]), lang)
             elif path.startswith("/compare/"):
                 parts = path.split("/")
                 try:

@@ -264,5 +264,15 @@
  "ระบุชื่อ Wi-Fi ที่จะตรวจ (ค่าเริ่มต้น = ที่ต่ออยู่)": "Name the Wi-Fi to audit (default = the one you're on)",
  "ตรวจความแข็งแรงของรหัส Wi-Fi ในเครื่อง (ไม่เก็บ ไม่ส่งออก)": "Check Wi-Fi passphrase strength locally (never stored or sent)",
  "เปิดหน้าเว็บ (Dashboard/Scan/Map)": "Open the web UI (Dashboard/Scan/Map)",
- "Wi-Fi ที่ต่ออยู่ (passive)": "Connected Wi-Fi (passive)"
+ "Wi-Fi ที่ต่ออยู่ (passive)": "Connected Wi-Fi (passive)",
+ "เรียนรู้": "Learn",
+ "เรียนรู้เพิ่ม ↗": "Learn more ↗",
+ "เรียนรู้: เจาะ → ป้องกัน": "Learn: attack → defend",
+ "บทเรียนจัดกลุ่มตามระดับความยาก 1–5 — เริ่มจากของเปิดโล่งที่เจอง่าย ไล่ไปจนถึงขั้นสูง แต่ละข้อบอก คืออะไร · ผู้โจมตีใช้ยังไง · วิธีแก้": "Lessons grouped by difficulty 1–5 — from wide-open easy wins up to advanced, each with what it is · how attackers use it · how to fix.",
+ "หลักสูตรฉบับเต็ม (รวมเทคนิคขั้นสูงที่ยังไม่ตรวจอัตโนมัติ เช่น SQLi/XSS บนเป้าฝึก):": "Full curriculum (incl. advanced techniques not auto-detected yet, e.g. SQLi/XSS on practice targets):",
+ "🟢 Level 1 — พื้นฐาน (ของเปิดโล่ง)": "🟢 Level 1 — basics (wide-open)",
+ "🟡 Level 2 — โปรโตคอล/ตั้งค่าอ่อน": "🟡 Level 2 — weak protocols / config",
+ "🟠 Level 3 — เวอร์ชันเก่า / ข้อมูลรั่ว / hardening": "🟠 Level 3 — old versions / info leaks / hardening",
+ "🔴 Level 4 — ตั้งค่าพลาดเชิงลึก": "🔴 Level 4 — deeper misconfig",
+ "⚫ Level 5 — ขั้นสูง (lab / เครือข่ายตัวเอง)": "⚫ Level 5 — advanced (lab / your own network)"
 }

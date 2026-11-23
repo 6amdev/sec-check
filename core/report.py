@@ -66,7 +66,8 @@ border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mut);font-
 .ok:before{content:"✓";color:var(--ok);font-weight:800}
 .note{padding:6px 0;border-bottom:1px dashed var(--line)}.note:last-child{border:0}
 details>summary{cursor:pointer;color:var(--mut);font-weight:600;margin:6px 0}
-label.chk{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);margin-top:8px;cursor:pointer}
+label.chk{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);margin-top:8px;cursor:pointer}
+.learn{font-size:12.5px;color:var(--acc);text-decoration:none;margin-left:14px}.learn:hover{text-decoration:underline}
 .foot{margin-top:40px;font-size:12.5px;color:var(--mut);text-align:center}
 .L{display:none}html[lang=th] .L.th,html[lang=en] .L.en{display:block}
 """
@@ -108,7 +109,8 @@ def finding_html(f, sev, lang, idx):
 <div class="box atk"><b>{_('ผู้โจมตีใช้ยังไง')}</b>{t('attack')}</div>
 <div class="box fix"><b>{_('วิธีแก้')}</b>{t('fix')}</div></div>
 {f'<div class="refs">📚 {refs}</div>' if refs else ''}
-<label class="chk"><input type="checkbox" data-k="{E(f.id)}-{idx}"> {_('แก้แล้ว')}</label></div>"""
+<label class="chk"><input type="checkbox" data-k="{E(f.id)}-{idx}"> {_('แก้แล้ว')}</label>
+<a class="learn" href="/learn?focus={E(f.id)}#lesson-{E(f.id)}">{_('เรียนรู้เพิ่ม ↗')}</a></div>"""
 
 
 def manual_html(mid, lang):

@@ -80,8 +80,8 @@ def finish(results, args, name):
 
 
 def run_module(mod, target, args):
-    from checks import camera, dns, host, iot, lan, mac, router, tls, web, webapp, wifi, windows
-    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac, "webapp": webapp, "iot": iot, "dns": dns, "email": dns}[mod]
+    from checks import camera, cve, dns, host, iot, lan, mac, router, tls, web, webapp, wifi, windows
+    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac, "webapp": webapp, "iot": iot, "dns": dns, "email": dns, "cve": cve}[mod]
     print(_("▶ กำลังตรวจ {m} {t}", m=_(report.MODULE_TH[mod]), t=target or ""), flush=True)
     return m.run(target, args)
 
@@ -189,6 +189,9 @@ def main(argv=None):
     em = sub.add_parser("email", help=_("ตรวจความปลอดภัยอีเมลของโดเมน (SPF/DKIM/DMARC)"))
     em.add_argument("target")
     em.add_argument("--level", **lvl)
+    cv = sub.add_parser("cve", help=_("จับคู่เวอร์ชันบริการกับช่องโหว่ที่รู้จัก (CVE, ออฟไลน์)"))
+    cv.add_argument("target")
+    cv.add_argument("--level", **lvl)
     r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
     r.add_argument("target", nargs="?")
     r.add_argument("--timeout", type=float, default=1.5)

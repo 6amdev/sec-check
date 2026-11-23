@@ -467,6 +467,7 @@ def main():
         start("webapp practice (vulnerable)", ThreadingHTTPServer, (WEAK, 8810), WebappWeak),
         start("webapp practice (hardened)", ThreadingHTTPServer, (SAFE, 8810), WebappSafe),
         start("chromecast open (fake)", ThreadingHTTPServer, (WEAK, 8008), FakeCast),
+        start("legacy web Apache/2.4.29 (fake)", ThreadingHTTPServer, (WEAK, 8000), Weak),  # ไว้ทดสอบโมดูล cve
     ]
     if not any(servers):
         sys.exit(1)

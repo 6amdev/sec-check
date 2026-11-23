@@ -1,0 +1,18 @@
+{
+  "cve.known_vuln": {
+    "severity": "high", "tag": "OWASP A06 · CWE-1035", "level": 3,
+    "title": {"th": "บริการเวอร์ชันเก่าที่มีช่องโหว่ที่รู้จัก (CVE)", "en": "Outdated service with a known vulnerability (CVE)"},
+    "what": {"th": "เวอร์ชันของบริการที่เห็นจาก banner ตรงกับช่องโหว่ที่มีรหัส CVE อยู่แล้ว (เทียบจากตารางในเครื่อง ไม่ได้ยิง exploit)", "en": "The service version seen in the banner matches a published CVE (compared against a local table; nothing was exploited)."},
+    "attack": {"th": "พอ CVE ออก รายละเอียดและโค้ด exploit มักเป็นสาธารณะภายในไม่กี่วัน ผู้โจมตีสแกนหาเวอร์ชันที่ตรงแล้วยิงได้ทันที — บริการที่ไม่อัปเดตคือเป้าที่ง่ายที่สุด", "en": "Once a CVE is public, exploit code usually follows within days; attackers scan for the matching version and fire — unpatched services are the easiest targets."},
+    "fix": {"th": "อัปเดตบริการ/เฟิร์มแวร์ให้เป็นเวอร์ชันล่าสุด (ดู CVE ที่ระบุในหลักฐาน) · ถ้าเป็นอุปกรณ์ที่หมดการสนับสนุน (EOL) ควรเปลี่ยน · หมายเหตุ: บาง distro backport แพตช์ ทำให้เวอร์ชันดูเก่าแต่แก้แล้ว — ยืนยันอีกครั้ง", "en": "Update the service/firmware to the latest version (see the CVE in the evidence) · replace end-of-life gear · note: some distros backport patches, so an old-looking version may already be fixed — verify."},
+    "refs": ["https://nvd.nist.gov/", "https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/"]
+  },
+  "cve.eol_software": {
+    "severity": "medium", "tag": "OWASP A06", "level": 3,
+    "title": {"th": "ซอฟต์แวร์/เฟิร์มแวร์หมดการสนับสนุน (EOL)", "en": "End-of-life software/firmware"},
+    "what": {"th": "บริการที่เห็นเป็นเวอร์ชันเก่ามากหรือโปรเจกต์เลิกพัฒนาแล้ว — จะไม่มีแพตช์ความปลอดภัยอีก", "en": "The service is a very old or abandoned project — it will get no more security patches."},
+    "attack": {"th": "ช่องโหว่ใหม่ที่พบจะไม่มีวันถูกแก้ ผู้โจมตีจึงใช้ได้เรื่อยๆ (พบบ่อยในเราเตอร์/กล้องเก่า)", "en": "New flaws will never be fixed, so attackers can keep using them (common in old routers/cameras)."},
+    "fix": {"th": "เปลี่ยนไปใช้ซอฟต์แวร์/อุปกรณ์ที่ยังได้รับการสนับสนุน หรือแยกออกไปวงที่จำกัดการเข้าถึงอย่างเข้มงวด", "en": "Move to supported software/hardware, or isolate it on a tightly restricted network segment."},
+    "refs": []
+  }
+}

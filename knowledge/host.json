@@ -18,7 +18,8 @@
       "th": "ตั้งให้ฟังแค่ 127.0.0.1 ในไฟล์ config ของบริการนั้น และ/หรือ `sudo ufw enable` (ufw บล็อกขาเข้าเป็นค่าเริ่มต้น) · ถ้าเป็น Docker `-p 6379:6379` ให้เปลี่ยนเป็น `-p 127.0.0.1:6379:6379`",
       "en": "Bind it to 127.0.0.1 in its config and/or `sudo ufw enable` (ufw denies incoming by default) · for Docker change `-p 6379:6379` to `-p 127.0.0.1:6379:6379`."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.listen_exposed": {
     "severity": "info",
@@ -39,7 +40,8 @@
       "th": "ปิดบริการที่ไม่ใช้: `systemctl disable --now <ชื่อ>` · ดูว่าใครเปิดพอร์ต: `sudo ss -tlnp`",
       "en": "Disable what you don't use: `systemctl disable --now <name>` · see who owns a port: `sudo ss -tlnp`."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "host.firewall_off": {
     "severity": "medium",
@@ -62,7 +64,8 @@
     },
     "refs": [
       "https://help.ubuntu.com/community/UFW"
-    ]
+    ],
+    "level": 1
   },
   "host.ssh_root_login": {
     "severity": "high",
@@ -83,7 +86,8 @@
       "th": "ใน /etc/ssh/sshd_config.d/hardening.conf: `PermitRootLogin no` แล้ว `sudo systemctl reload ssh` (ใช้ผู้ใช้ปกติ + sudo)",
       "en": "In /etc/ssh/sshd_config.d/hardening.conf: `PermitRootLogin no`, then `sudo systemctl reload ssh` (log in as a user, then sudo)."
     },
-    "refs": []
+    "refs": [],
+    "level": 4
   },
   "host.ssh_password": {
     "severity": "medium",
@@ -104,7 +108,8 @@
       "th": "1) `ssh-keygen -t ed25519` บนเครื่องเรา 2) `ssh-copy-id user@server` 3) ทดสอบล็อกอินด้วย key 4) ตั้ง `PasswordAuthentication no` แล้ว reload (อย่าปิด session เดิมจนกว่าจะทดสอบผ่าน)",
       "en": "1) `ssh-keygen -t ed25519` locally 2) `ssh-copy-id user@server` 3) test key login 4) set `PasswordAuthentication no` and reload (keep your current session open until tested)."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "host.ssh_empty_password": {
     "severity": "critical",
@@ -125,7 +130,8 @@
       "th": "`PermitEmptyPasswords no` แล้ว reload ssh",
       "en": "`PermitEmptyPasswords no`, then reload ssh."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "host.updates_security": {
     "severity": "high",
@@ -148,7 +154,8 @@
     },
     "refs": [
       "https://ubuntu.com/security/notices"
-    ]
+    ],
+    "level": 3
   },
   "host.updates_pending": {
     "severity": "low",
@@ -169,7 +176,8 @@
       "th": "`sudo apt upgrade`",
       "en": "`sudo apt upgrade`"
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "host.no_auto_updates": {
     "severity": "medium",
@@ -192,7 +200,8 @@
     },
     "refs": [
       "https://help.ubuntu.com/community/AutomaticSecurityUpdates"
-    ]
+    ],
+    "level": 4
   },
   "host.reboot_required": {
     "severity": "low",
@@ -213,7 +222,8 @@
       "th": "รีบูตเมื่อสะดวก: `sudo reboot`",
       "en": "Reboot when convenient: `sudo reboot`."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "host.shadow_readable": {
     "severity": "critical",
@@ -234,7 +244,8 @@
       "th": "`sudo chmod 640 /etc/shadow && sudo chown root:shadow /etc/shadow`",
       "en": "`sudo chmod 640 /etc/shadow && sudo chown root:shadow /etc/shadow`"
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.home_open": {
     "severity": "low",
@@ -255,7 +266,8 @@
       "th": "`chmod 750 ~` (Ubuntu 21.04+ ตั้งเป็น 750 ให้ผู้ใช้ใหม่อยู่แล้ว)",
       "en": "`chmod 750 ~` (Ubuntu 21.04+ already uses 750 for new users)."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "host.ssh_dir_perms": {
     "severity": "medium",
@@ -276,7 +288,8 @@
       "th": "`chmod 700 ~/.ssh && chmod 600 ~/.ssh/*` (ยกเว้น *.pub ที่ 644 ได้)",
       "en": "`chmod 700 ~/.ssh && chmod 600 ~/.ssh/*` (*.pub may be 644)."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "host.ssh_key_perms": {
     "severity": "medium",
@@ -297,7 +310,8 @@
       "th": "`chmod 600 ~/.ssh/id_*` (ยกเว้น .pub)",
       "en": "`chmod 600 ~/.ssh/id_*` (not the .pub files)."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "host.ssh_key_no_passphrase": {
     "severity": "low",
@@ -318,7 +332,8 @@
       "th": "`ssh-keygen -p -f ~/.ssh/id_ed25519` ตั้ง passphrase แล้วใช้ ssh-agent ช่วยไม่ต้องพิมพ์บ่อย",
       "en": "`ssh-keygen -p -f ~/.ssh/id_ed25519` to add a passphrase; ssh-agent saves retyping it."
     },
-    "refs": []
+    "refs": [],
+    "level": 4
   },
   "host.aslr_off": {
     "severity": "medium",
@@ -339,7 +354,8 @@
       "th": "`echo 'kernel.randomize_va_space=2' | sudo tee /etc/sysctl.d/99-aslr.conf && sudo sysctl --system`",
       "en": "`echo 'kernel.randomize_va_space=2' | sudo tee /etc/sysctl.d/99-aslr.conf && sudo sysctl --system`"
     },
-    "refs": []
+    "refs": [],
+    "level": 4
   },
   "host.no_disk_encryption": {
     "severity": "low",
@@ -360,7 +376,8 @@
       "th": "ติดตั้ง Ubuntu ใหม่โดยเลือก 'Encrypt the new Ubuntu installation' หรือเข้ารหัสดิสก์ข้อมูลด้วย LUKS/VeraCrypt (เครื่องเซิร์ฟเวอร์ในตู้ล็อกอาจไม่จำเป็น)",
       "en": "Reinstall with 'Encrypt the new Ubuntu installation', or encrypt data disks with LUKS/VeraCrypt (may be unnecessary for servers in a locked rack)."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "host.autologin": {
     "severity": "medium",
@@ -381,7 +398,8 @@
       "th": "Settings → Users → ปิด Automatic Login หรือแก้ /etc/gdm3/custom.conf ให้ `AutomaticLoginEnable=false`",
       "en": "Settings → Users → turn off Automatic Login, or set `AutomaticLoginEnable=false` in /etc/gdm3/custom.conf."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.no_screen_lock": {
     "severity": "low",
@@ -402,7 +420,8 @@
       "th": "Settings → Privacy → Screen Lock: เปิด Automatic Screen Lock, ตั้ง Blank Screen Delay 5 นาที · กด Super+L เมื่อลุก",
       "en": "Settings → Privacy → Screen Lock: enable automatic lock, blank after 5 min · press Super+L when you leave."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.samba_guest": {
     "severity": "medium",
@@ -423,7 +442,8 @@
       "th": "ตั้ง `guest ok = no`, เพิ่มผู้ใช้ด้วย `sudo smbpasswd -a <user>` แล้ว `sudo systemctl restart smbd`",
       "en": "Set `guest ok = no`, add users with `sudo smbpasswd -a <user>`, `sudo systemctl restart smbd`."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.extra_root_account": {
     "severity": "critical",
@@ -444,7 +464,8 @@
       "th": "ตรวจว่าชื่อนั้นควรมีไหม ถ้าไม่ `sudo passwd -l <ชื่อ>` หรือ `sudo userdel <ชื่อ>` และสอบหาสาเหตุที่ถูกเพิ่ม",
       "en": "Check whether it should exist; if not `sudo passwd -l <name>` or `sudo userdel <name>`, and investigate how it got there."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.empty_password": {
     "severity": "critical",
@@ -465,7 +486,8 @@
       "th": "ตั้งรหัส `sudo passwd <ชื่อ>` หรือล็อก `sudo passwd -l <ชื่อ>`",
       "en": "Set a password `sudo passwd <name>` or lock it `sudo passwd -l <name>`."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.weak_hash": {
     "severity": "high",
@@ -486,7 +508,8 @@
       "th": "ตั้ง `ENCRYPT_METHOD YESCRYPT` ใน /etc/login.defs แล้วให้ผู้ใช้ตั้งรหัสใหม่",
       "en": "Set `ENCRYPT_METHOD YESCRYPT` in /etc/login.defs, then have users reset their passwords."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "host.no_pwquality": {
     "severity": "low",
@@ -507,7 +530,8 @@
       "th": "`sudo apt install libpam-pwquality` แล้วตั้ง minlen/ความซับซ้อนใน /etc/security/pwquality.conf",
       "en": "`sudo apt install libpam-pwquality`, then set minlen/complexity in /etc/security/pwquality.conf."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "host.tmp_no_sticky": {
     "severity": "medium",
@@ -528,7 +552,8 @@
       "th": "`sudo chmod +t /tmp` (ปกติควรเป็น 1777)",
       "en": "`sudo chmod +t /tmp` (should be 1777)."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "host.world_writable": {
     "severity": "high",
@@ -549,7 +574,8 @@
       "th": "ตรวจแต่ละไฟล์: `ls -l <path>` แล้วถอดสิทธิ์เขียนของ others `sudo chmod o-w <path>`",
       "en": "Review each: `ls -l <path>`, then drop others' write bit `sudo chmod o-w <path>`."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "host.suid_unexpected": {
     "severity": "medium",
@@ -572,6 +598,7 @@
     },
     "refs": [
       "https://gtfobins.github.io/"
-    ]
+    ],
+    "level": 3
   }
 }

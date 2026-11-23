@@ -20,7 +20,8 @@
     },
     "refs": [
       "https://www.ssh.com/academy/ssh/sshd_config"
-    ]
+    ],
+    "level": 2
   },
   "lan.ssh_old": {
     "severity": "low",
@@ -43,7 +44,8 @@
     },
     "refs": [
       "https://www.openssh.com/security.html"
-    ]
+    ],
+    "level": 3
   },
   "lan.ftp": {
     "severity": "medium",
@@ -64,7 +66,8 @@
       "th": "เลิกใช้ FTP เปลี่ยนเป็น SFTP (มากับ SSH) หรือ FTPS; ถ้าเป็น NAS/เราเตอร์ ปิดบริการ FTP ในหน้า admin",
       "en": "Replace FTP with SFTP (comes with SSH) or FTPS; on a NAS/router disable FTP in its admin page."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "lan.telnet": {
     "severity": "high",
@@ -87,7 +90,8 @@
     },
     "refs": [
       "https://www.cloudflare.com/learning/ddos/glossary/mirai-botnet/"
-    ]
+    ],
+    "level": 1
   },
   "lan.rsync": {
     "severity": "medium",
@@ -108,7 +112,8 @@
       "th": "ตั้ง `auth users` + `secrets file` ใน rsyncd.conf หรือใช้ rsync ผ่าน SSH แทน daemon",
       "en": "Set `auth users` + `secrets file` in rsyncd.conf, or use rsync over SSH instead of the daemon."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "lan.redis_noauth": {
     "severity": "critical",
@@ -131,7 +136,8 @@
     },
     "refs": [
       "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"
-    ]
+    ],
+    "level": 1
   },
   "lan.redis": {
     "severity": "medium",
@@ -152,7 +158,8 @@
       "th": "ถ้าแอปอยู่เครื่องเดียวกัน ให้ `bind 127.0.0.1` เท่านั้น ไม่งั้นจำกัดด้วย firewall",
       "en": "If the app is on the same host, `bind 127.0.0.1` only; otherwise restrict with a firewall."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "lan.memcached": {
     "severity": "high",
@@ -175,7 +182,8 @@
     },
     "refs": [
       "https://blog.cloudflare.com/memcrashed-major-amplification-attacks-from-port-11211/"
-    ]
+    ],
+    "level": 2
   },
   "lan.vnc_noauth": {
     "severity": "critical",
@@ -196,7 +204,8 @@
       "th": "ตั้งรหัสผ่าน VNC ทันที, ให้ฟังเฉพาะ localhost แล้วเข้าผ่าน SSH tunnel: `ssh -L 5900:localhost:5900 host`",
       "en": "Set a VNC password now, listen on localhost only and connect via SSH tunnel: `ssh -L 5900:localhost:5900 host`."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "lan.vnc": {
     "severity": "medium",
@@ -217,7 +226,8 @@
       "th": "เข้าผ่าน SSH tunnel หรือ VPN เท่านั้น อย่าเปิดพอร์ต 5900 ออกเครือข่าย",
       "en": "Only reach it through an SSH tunnel or VPN; do not expose port 5900."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "lan.docker_api": {
     "severity": "critical",
@@ -240,7 +250,8 @@
     },
     "refs": [
       "https://docs.docker.com/engine/security/protect-access/"
-    ]
+    ],
+    "level": 1
   },
   "lan.elasticsearch": {
     "severity": "high",
@@ -261,7 +272,8 @@
       "th": "เปิด security (`xpack.security.enabled: true`), `network.host: 127.0.0.1` หรือจำกัดด้วย firewall",
       "en": "Enable security (`xpack.security.enabled: true`), `network.host: 127.0.0.1` or firewall it."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "lan.database": {
     "severity": "medium",
@@ -282,7 +294,8 @@
       "th": "MySQL: `bind-address = 127.0.0.1` · PostgreSQL: `listen_addresses = 'localhost'` + pg_hba.conf · หรือจำกัดด้วย firewall ให้เฉพาะ IP ของแอป",
       "en": "MySQL: `bind-address = 127.0.0.1` · PostgreSQL: `listen_addresses = 'localhost'` + pg_hba.conf · or firewall to the app's IP only."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "lan.mongodb": {
     "severity": "high",
@@ -305,7 +318,8 @@
     },
     "refs": [
       "https://www.mongodb.com/docs/manual/administration/security-checklist/"
-    ]
+    ],
+    "level": 1
   },
   "lan.smb": {
     "severity": "medium",
@@ -326,7 +340,8 @@
       "th": "ปิด SMBv1, ปิด guest, ใช้รหัสผ่านต่อผู้ใช้, อัปเดตระบบ, ปิดถ้าไม่ได้ใช้แชร์ไฟล์ (Samba: `server min protocol = SMB2`)",
       "en": "Disable SMBv1 and guest, use per-user passwords, patch, or turn it off if unused (Samba: `server min protocol = SMB2`)."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "lan.rdp": {
     "severity": "medium",
@@ -347,7 +362,8 @@
       "th": "เปิด Network Level Authentication, รหัสยาว, จำกัดด้วย firewall/VPN และอย่า forward 3389 ออกอินเทอร์เน็ต",
       "en": "Require Network Level Authentication, long passwords, firewall/VPN only, never port-forward 3389 to the internet."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "lan.mqtt": {
     "severity": "medium",
@@ -370,7 +386,8 @@
     },
     "refs": [
       "https://mosquitto.org/man/mosquitto-conf-5.html"
-    ]
+    ],
+    "level": 2
   },
   "lan.rtsp": {
     "severity": "medium",
@@ -391,7 +408,8 @@
       "th": "เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์, แยกกล้องไว้ใน VLAN/Wi-Fi guest และอย่า forward พอร์ตออกอินเทอร์เน็ต",
       "en": "Change default passwords, update firmware, isolate cameras on a VLAN/guest Wi-Fi, never port-forward them."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "lan.printer_raw": {
     "severity": "low",
@@ -412,7 +430,8 @@
       "th": "ปิดโปรโตคอลที่ไม่ใช้ในหน้า admin ของเครื่องพิมพ์ ตั้งรหัส admin และอัปเดตเฟิร์มแวร์",
       "en": "Disable unused protocols in the printer's admin page, set an admin password, update firmware."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "lan.nfs": {
     "severity": "medium",
@@ -433,7 +452,8 @@
       "th": "/etc/exports ระบุ IP ที่อนุญาตเท่านั้น ใช้ root_squash และปิด rpcbind ถ้าไม่ได้ใช้",
       "en": "List allowed IPs in /etc/exports, keep root_squash, disable rpcbind if unused."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "lan.tr069": {
     "severity": "medium",
@@ -454,7 +474,8 @@
       "th": "อัปเดตเฟิร์มแวร์ ถาม ISP ว่าปิดหรือจำกัดได้ไหม",
       "en": "Update firmware; ask your ISP whether it can be disabled or restricted."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "lan.http_service": {
     "severity": "info",
@@ -475,7 +496,8 @@
       "th": "ตรวจต่อ: `./seccheck.py web http://<ip>:<port>` และเปลี่ยนรหัส default ของอุปกรณ์",
       "en": "Dig deeper: `./seccheck.py web http://<ip>:<port>`, and change the device's default password."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   },
   "lan.rtsp_noauth": {
     "severity": "high",
@@ -496,7 +518,8 @@
       "th": "เปิด authentication ในหน้าตั้งค่ากล้อง, เปลี่ยนรหัส default, อัปเดตเฟิร์มแวร์, แยกกล้องไว้ VLAN/Wi-Fi แขก และห้าม forward พอร์ตออกเน็ต",
       "en": "Enable authentication in the camera settings, change default passwords, update firmware, isolate cameras on a VLAN/guest Wi-Fi, never port-forward them."
     },
-    "refs": []
+    "refs": [],
+    "level": 1
   },
   "lan.http_basic": {
     "severity": "medium",
@@ -517,7 +540,8 @@
       "th": "เปิด HTTPS บนอุปกรณ์ถ้ารองรับ, เปลี่ยนรหัส default, เข้าหน้าตั้งค่าผ่านสาย/เครือข่ายที่เชื่อถือได้",
       "en": "Enable HTTPS on the device if supported, change default passwords, administer it over a trusted link."
     },
-    "refs": []
+    "refs": [],
+    "level": 2
   },
   "lan.default_creds": {
     "severity": "critical",
@@ -540,7 +564,8 @@
     },
     "refs": [
       "https://www.cloudflare.com/learning/ddos/glossary/mirai-botnet/"
-    ]
+    ],
+    "level": 1
   },
   "lan.login_form": {
     "severity": "check",
@@ -561,6 +586,7 @@
       "th": "เปิดหน้านี้ในเบราว์เซอร์ ลองรหัสที่ตั้งมาจากโรงงาน (ดูคู่มือ/ใต้เครื่อง) ถ้าเข้าได้ให้เปลี่ยนรหัสทันที",
       "en": "Open the page in a browser, try the factory default (manual/sticker); if it works, change it immediately."
     },
-    "refs": []
+    "refs": [],
+    "level": 3
   }
 }

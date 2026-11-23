@@ -227,5 +227,20 @@
  "เลือกตอนสั่งสแกน (ติ๊กในหน้า Scan) — อ่านอย่างเดียว จำกัดอัตรา": "Chosen per scan (tick on the Scan page) — read-only, rate-limited",
  "ระดับความยาก (1–5) และการเทียบ 🔴→🟢 ย้อนหลัง จะเพิ่มในเฟสถัดไป": "Difficulty levels (1–5) and 🔴→🟢 history comparison are coming in a later phase",
  "ช่องโหว่": "Findings",
- "เพิ่มแล้ว: {t}": "Added: {t}"
+ "เพิ่มแล้ว: {t}": "Added: {t}",
+ "ระดับความยาก": "Difficulty",
+ "ทั้งหมด (5)": "All (5)",
+ "ของเปิดโล่ง/เจอง่าย": "wide-open / easy wins",
+ "โปรโตคอลอ่อน": "weak protocols",
+ "hardening/ข้อมูลรั่ว": "hardening / info leaks",
+ "ตั้งค่าพลาดเชิงลึก": "deeper misconfig",
+ "เทียบก่อน/หลัง": "Compare",
+ "ไม่พบสแกนที่จะเทียบ": "Scans to compare not found",
+ "เทียบก่อน/หลังแก้": "Before/after comparison",
+ "แก้แล้ว (🔴→🟢)": "Fixed (🔴→🟢)",
+ "โผล่ใหม่": "New",
+ "ยังเจาะได้อยู่": "Still open",
+ "ไม่มีการเปลี่ยนแปลงระหว่างสองครั้งนี้": "No change between these two scans",
+ "ระดับความยาก 1–5 (1 = เฉพาะของเปิดโล่ง/เจอง่าย, 5 = ทั้งหมด)": "Difficulty 1–5 (1 = only wide-open/easy wins, 5 = all)",
+ "(กรองที่ระดับความยาก ≤ {l})": "(filtered to difficulty ≤ {l})"
 }

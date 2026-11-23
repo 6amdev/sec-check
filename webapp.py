@@ -150,14 +150,46 @@ def settings_page(lang):
 
 
 def history_page(lang):
-    rows = "".join(f'''<tr><td>{r['id']}</td><td>{time.strftime('%Y-%m-%d %H:%M', time.localtime(r['started']))}</td>
-<td>{E(r['modules'])}</td><td class="mono">{E(r['target'][:50])}</td><td><b>{r['score']}</b> ({E(r['grade'])})</td>
-<td><a class="btn ghost" href="/report/{r['id']}?lang={lang}">{E(_("รายงาน"))}</a></td></tr>'''
-                   for r in db.recent(50))
-    inner = rows or f'<tr><td colspan="6" class="mut">{E(_("ยังไม่มีประวัติ"))}</td></tr>'
+    out = []
+    for r in db.recent(50):
+        prev = db.previous_like(r["id"])
+        cmp_link = (f'<a class="btn ghost" href="/compare/{prev}/{r["id"]}?lang={lang}">{E(_("เทียบก่อน/หลัง"))}</a>'
+                    if prev else "")
+        out.append(f'''<tr><td>{r['id']}</td><td>{time.strftime('%Y-%m-%d %H:%M', time.localtime(r['started']))}</td>
+<td>{E(r['modules'])}</td><td class="mono">{E(r['target'][:44])}</td><td><b>{r['score']}</b> ({E(r['grade'])})</td>
+<td><a class="btn ghost" href="/report/{r['id']}?lang={lang}">{E(_("รายงาน"))}</a> {cmp_link}</td></tr>''')
+    inner = "".join(out) or f'<tr><td colspan="6" class="mut">{E(_("ยังไม่มีประวัติ"))}</td></tr>'
     return (f'<div class="card"><h2 style="margin-top:0">{E(_("ประวัติการสแกน (เทียบก่อน/หลังแก้)"))}</h2>'
             f'<table class="hist"><tr><th>#</th><th>{E(_("เวลา"))}</th><th>module</th>'
             f'<th>{E(_("เป้าหมาย"))}</th><th>{E(_("คะแนน"))}</th><th></th></tr>{inner}</table></div>')
+
+
+def compare_page(old_id, new_id, lang):
+    old, new = db.get(old_id), db.get(new_id)
+    if not old or not new:
+        return f'<div class="card">{E(_("ไม่พบสแกนที่จะเทียบ"))}</div>'
+    d = db.compare(old_id, new_id)
+
+    def block(title, items, icon, color):
+        if not items:
+            return ""
+        rows = "".join(f'<div class="find" style="border-left:4px solid {color};padding-left:10px;margin:6px 0">'
+                       f'<b>{icon} {E(kb.text(kb.get(f["check_id"]), "title", lang))}</b> '
+                       f'<span class="pill {f["severity"]}">{E(report.sev_label(f["severity"], lang))}</span>'
+                       f'<br><span class="mono mut">{E(f["target"])}</span></div>' for f in items)
+        return f'<div class="card"><h3 style="margin-top:0">{icon} {E(title)} ({len(items)})</h3>{rows}</div>'
+
+    head = (f'<div class="card"><h2 style="margin-top:0">{E(_("เทียบก่อน/หลังแก้"))}</h2>'
+            f'<p class="mut">#{old_id} ({old["score"]}/100, {time.strftime("%m-%d %H:%M", time.localtime(old["started"]))}) '
+            f'→ #{new_id} ({new["score"]}/100, {time.strftime("%m-%d %H:%M", time.localtime(new["started"]))}) · '
+            f'{E(new["target"][:70])}</p>'
+            f'<p><b style="font-size:22px;color:{"#22c55e" if new["score"]>=old["score"] else "#ef4444"}">'
+            f'{new["score"]-old["score"]:+d}</b> {E(_("คะแนน"))}</p></div>')
+    return (head + block(_("แก้แล้ว (🔴→🟢)"), d["fixed"], "🟢", "#22c55e")
+            + block(_("โผล่ใหม่"), d["new"], "🔴", "#ef4444")
+            + block(_("ยังเจาะได้อยู่"), d["still"], "🔴", "#f59e0b")
+            + (f'<div class="card mut">{E(_("ไม่มีการเปลี่ยนแปลงระหว่างสองครั้งนี้"))}</div>'
+               if not (d["fixed"] or d["new"] or d["still"]) else ""))
 
 
 def scan_form(lang):
@@ -174,12 +206,19 @@ def scan_form(lang):
 <option value="lan:">{E(_("วงแลนของเครื่องนี้ (อัตโนมัติ)"))}</option>
 {lantargets}{webtargets}
 </select></label></p>
+<p><label>{E(_("ระดับความยาก"))}: <select name="level">
+<option value="5">{E(_("ทั้งหมด (5)"))}</option>
+<option value="1">1 — {E(_("ของเปิดโล่ง/เจอง่าย"))}</option>
+<option value="2">2 — {E(_("โปรโตคอลอ่อน"))}</option>
+<option value="3">3 — {E(_("hardening/ข้อมูลรั่ว"))}</option>
+<option value="4">4 — {E(_("ตั้งค่าพลาดเชิงลึก"))}</option>
+</select></label></p>
 <p><label><input type="checkbox" name="creds" value="1"> {E(_("ลองรหัส default บนหน้า Basic auth (อ่านอย่างเดียว จำกัดอัตรา)"))}</label></p>
 <button class="btn" type="submit">{E(_("เริ่มสแกน"))}</button></form>
 <p class="mut">{E(_("สแกนได้เฉพาะเป้าหมายใน allow-list · แบบไม่ทำลาย"))}</p></div>'''
 
 
-def run_job(job_id, pick, creds):
+def run_job(job_id, pick, creds, level=5):
     job = JOBS[job_id]
     with SCAN_LOCK:
         job["status"] = "running"
@@ -196,7 +235,8 @@ def run_job(job_id, pick, creds):
                     results = [web.run(pick[4:], opts)]
                 else:
                     raise ValueError("unknown target")
-            job["scan_id"] = db.save(results)
+            kb.filter_level(results, level)
+            job["scan_id"] = db.save(results, level=level)
             report.save(results, HERE / "reports", pick.replace(":", "_") or "scan")
             job["status"] = "done"
         except scope.OutOfScope as e:
@@ -309,6 +349,12 @@ class App(BaseHTTPRequestHandler):
                 self._page("History", "history", history_page(lang), lang)
             elif path == "/settings":
                 self._page("Settings", "settings", settings_page(lang), lang)
+            elif path.startswith("/compare/"):
+                parts = path.split("/")
+                try:
+                    self._page("Compare", "history", compare_page(int(parts[2]), int(parts[3]), lang), lang)
+                except (IndexError, ValueError):
+                    self._send(layout("Compare", "history", '<div class="card">bad compare</div>', lang), 404)
             elif path == "/findings":
                 last = db.latest()
                 if last:
@@ -355,10 +401,14 @@ class App(BaseHTTPRequestHandler):
                 return self._send("", 303, headers={"Location": f"/scan?lang={lang}"})
             pick = form.get("pick", ["host"])[0]
             creds = form.get("creds", [""])[0] == "1"
+            try:
+                level = max(1, min(5, int(form.get("level", ["5"])[0])))
+            except ValueError:
+                level = 5
             job_id = secrets.token_hex(6)
             JOBS[job_id] = {"status": "queued", "log": "", "scan_id": None, "error": "",
                             "module": pick, "target": pick}
-            threading.Thread(target=run_job, args=(job_id, pick, creds), daemon=True).start()
+            threading.Thread(target=run_job, args=(job_id, pick, creds, level), daemon=True).start()
             time.sleep(0.2)
             return self._send("", 303, headers={"Location": f"/scan/{job_id}?lang={lang}"})
         if u.path == "/targets":

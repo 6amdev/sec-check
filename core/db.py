@@ -122,6 +122,34 @@ def counts(scan_id):
         con.close()
 
 
+def previous_like(scan_id):
+    """สแกนก่อนหน้าที่ module+target เดียวกัน (ไว้เทียบก่อน/หลัง) / prior scan with same modules+target"""
+    con = connect()
+    try:
+        cur = con.execute("SELECT modules, target FROM scans WHERE id=?", (scan_id,)).fetchone()
+        if not cur:
+            return None
+        row = con.execute("SELECT id FROM scans WHERE modules=? AND target=? AND id<? ORDER BY id DESC LIMIT 1",
+                          (cur["modules"], cur["target"], scan_id)).fetchone()
+        return row["id"] if row else None
+    finally:
+        con.close()
+
+
+def compare(old_id, new_id):
+    """เทียบสองสแกน → fixed (🔴→🟢) / still (🔴) / new (🔴 ใหม่) / compare two scans by (check_id, target)"""
+    def vuln(sid):
+        return {(f["check_id"], f["target"]): f for f in findings(sid, "VULNERABLE")}
+    old, new = vuln(old_id), vuln(new_id)
+    fixed = [f for key, f in old.items() if key not in new]
+    still = [f for key, f in new.items() if key in old]
+    added = [f for key, f in new.items() if key not in old]
+    order = {s: i for i, s in enumerate(SEVERITIES)}
+    for lst in (fixed, still, added):
+        lst.sort(key=lambda f: order.get(f["severity"], 9))
+    return {"fixed": fixed, "still": still, "new": added}
+
+
 def trend(target, check_id):
     """ประวัติสถานะของเช็กเดียวกันบนเป้าเดียวกัน (ดู 🔴→🟢) / state history for one check on one target"""
     con = connect()

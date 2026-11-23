@@ -1,122 +1,334 @@
 {
   "router.telnet": {
-    "severity": "high", "tag": "CWE-319",
-    "title": {"th": "เราเตอร์เปิด Telnet", "en": "Router has Telnet open"},
-    "what": {"th": "เราเตอร์รับการล็อกอิน Telnet (ไม่เข้ารหัส)", "en": "The router accepts Telnet logins (unencrypted)."},
-    "attack": {"th": "botnet ตระกูล Mirai เจาะเราเตอร์ผ่าน Telnet + รหัส default แล้วใช้เป็นฐานโจมตี/ดักข้อมูลทั้งบ้าน", "en": "Mirai-type botnets break into routers via Telnet + default passwords and use them to attack others or spy on the whole home."},
-    "fix": {"th": "ปิด Telnet ในหน้า admin (มักอยู่ใน Management/Remote access), เปลี่ยนรหัส admin, อัปเดตเฟิร์มแวร์ — ถ้าปิดไม่ได้ ขอ ISP เปลี่ยนเครื่อง", "en": "Disable Telnet in the admin page (often under Management/Remote access), change the admin password, update firmware — if it can't be disabled ask your ISP for another unit."},
-    "refs": []
+    "severity": "high",
+    "tag": "CWE-319",
+    "title": {
+      "th": "เราเตอร์เปิด Telnet",
+      "en": "Router has Telnet open"
+    },
+    "what": {
+      "th": "เราเตอร์รับการล็อกอิน Telnet (ไม่เข้ารหัส)",
+      "en": "The router accepts Telnet logins (unencrypted)."
+    },
+    "attack": {
+      "th": "botnet ตระกูล Mirai เจาะเราเตอร์ผ่าน Telnet + รหัส default แล้วใช้เป็นฐานโจมตี/ดักข้อมูลทั้งบ้าน",
+      "en": "Mirai-type botnets break into routers via Telnet + default passwords and use them to attack others or spy on the whole home."
+    },
+    "fix": {
+      "th": "ปิด Telnet ในหน้า admin (มักอยู่ใน Management/Remote access), เปลี่ยนรหัส admin, อัปเดตเฟิร์มแวร์ — ถ้าปิดไม่ได้ ขอ ISP เปลี่ยนเครื่อง",
+      "en": "Disable Telnet in the admin page (often under Management/Remote access), change the admin password, update firmware — if it can't be disabled ask your ISP for another unit."
+    },
+    "refs": [],
+    "level": 1
   },
   "router.ftp": {
-    "severity": "medium", "tag": "CWE-319",
-    "title": {"th": "เราเตอร์เปิด FTP", "en": "Router has FTP open"},
-    "what": {"th": "มักมาจากฟีเจอร์แชร์ไฟล์ USB ของเราเตอร์", "en": "Usually the router's USB file-sharing feature."},
-    "attack": {"th": "FTP ไม่เข้ารหัส และบางรุ่นเปิด anonymous ให้อ่านไฟล์ใน USB ได้", "en": "FTP is unencrypted and some models allow anonymous access to the USB drive."},
-    "fix": {"th": "ปิด FTP/USB sharing ถ้าไม่ได้ใช้ หรือบังคับรหัสผ่าน", "en": "Disable FTP/USB sharing if unused, or require a password."},
-    "refs": []
+    "severity": "medium",
+    "tag": "CWE-319",
+    "title": {
+      "th": "เราเตอร์เปิด FTP",
+      "en": "Router has FTP open"
+    },
+    "what": {
+      "th": "มักมาจากฟีเจอร์แชร์ไฟล์ USB ของเราเตอร์",
+      "en": "Usually the router's USB file-sharing feature."
+    },
+    "attack": {
+      "th": "FTP ไม่เข้ารหัส และบางรุ่นเปิด anonymous ให้อ่านไฟล์ใน USB ได้",
+      "en": "FTP is unencrypted and some models allow anonymous access to the USB drive."
+    },
+    "fix": {
+      "th": "ปิด FTP/USB sharing ถ้าไม่ได้ใช้ หรือบังคับรหัสผ่าน",
+      "en": "Disable FTP/USB sharing if unused, or require a password."
+    },
+    "refs": [],
+    "level": 1
   },
   "router.tr069": {
-    "severity": "low", "tag": "Exposure",
-    "title": {"th": "พอร์ต TR-069 เปิดฝั่งในบ้าน", "en": "TR-069 port open on the LAN side"},
-    "what": {"th": "พอร์ตจัดการระยะไกลของ ISP (7547) ตอบจากในบ้าน", "en": "The ISP's remote-management port (7547) answers from inside."},
-    "attack": {"th": "ช่องโหว่ TR-069 เคยถูกใช้ยึดเราเตอร์จำนวนมาก; ฝั่งในบ้านปกติไม่ควรเปิด", "en": "TR-069 bugs have been used to hijack routers en masse; normally it shouldn't be open on the LAN side."},
-    "fix": {"th": "อัปเดตเฟิร์มแวร์ และสอบถาม ISP", "en": "Update firmware and ask your ISP."},
-    "refs": []
+    "severity": "low",
+    "tag": "Exposure",
+    "title": {
+      "th": "พอร์ต TR-069 เปิดฝั่งในบ้าน",
+      "en": "TR-069 port open on the LAN side"
+    },
+    "what": {
+      "th": "พอร์ตจัดการระยะไกลของ ISP (7547) ตอบจากในบ้าน",
+      "en": "The ISP's remote-management port (7547) answers from inside."
+    },
+    "attack": {
+      "th": "ช่องโหว่ TR-069 เคยถูกใช้ยึดเราเตอร์จำนวนมาก; ฝั่งในบ้านปกติไม่ควรเปิด",
+      "en": "TR-069 bugs have been used to hijack routers en masse; normally it shouldn't be open on the LAN side."
+    },
+    "fix": {
+      "th": "อัปเดตเฟิร์มแวร์ และสอบถาม ISP",
+      "en": "Update firmware and ask your ISP."
+    },
+    "refs": [],
+    "level": 4
   },
   "router.ssh": {
-    "severity": "info", "tag": "Exposure",
-    "title": {"th": "เราเตอร์เปิด SSH", "en": "Router has SSH open"},
-    "what": {"th": "เราเตอร์รับ SSH (พบบ่อยใน OpenWrt/MikroTik)", "en": "The router accepts SSH (common on OpenWrt/MikroTik)."},
-    "attack": {"th": "ปลอดภัยถ้ารหัสแข็งแรง/ใช้ key และไม่เปิดฝั่ง WAN", "en": "Fine with strong passwords/keys and if it is not open on the WAN side."},
-    "fix": {"th": "ใช้ key, ปิดฝั่ง WAN, จำกัดเฉพาะ LAN", "en": "Use keys, disable on WAN, LAN only."},
-    "refs": []
+    "severity": "info",
+    "tag": "Exposure",
+    "title": {
+      "th": "เราเตอร์เปิด SSH",
+      "en": "Router has SSH open"
+    },
+    "what": {
+      "th": "เราเตอร์รับ SSH (พบบ่อยใน OpenWrt/MikroTik)",
+      "en": "The router accepts SSH (common on OpenWrt/MikroTik)."
+    },
+    "attack": {
+      "th": "ปลอดภัยถ้ารหัสแข็งแรง/ใช้ key และไม่เปิดฝั่ง WAN",
+      "en": "Fine with strong passwords/keys and if it is not open on the WAN side."
+    },
+    "fix": {
+      "th": "ใช้ key, ปิดฝั่ง WAN, จำกัดเฉพาะ LAN",
+      "en": "Use keys, disable on WAN, LAN only."
+    },
+    "refs": [],
+    "level": 3
   },
   "router.admin_http": {
-    "severity": "medium", "tag": "CWE-319",
-    "title": {"th": "หน้า admin เราเตอร์ใช้ HTTP", "en": "Router admin page over HTTP"},
-    "what": {"th": "หน้าตั้งค่าเราเตอร์ไม่เข้ารหัส — รหัส admin ถูกส่งเป็นข้อความธรรมดา", "en": "The router's settings page is unencrypted — the admin password travels in plain text."},
-    "attack": {"th": "อุปกรณ์ที่ติดมัลแวร์ใน Wi-Fi เดียวกันดักรหัส admin ได้ แล้วเปลี่ยน DNS ของทั้งบ้านไปเว็บปลอม (DNS hijacking)", "en": "An infected device on the same Wi-Fi can sniff the admin password, then point the whole home's DNS to fake sites (DNS hijacking)."},
-    "fix": {"th": "เปิด HTTPS ในหน้า admin ถ้ารุ่นรองรับ; อย่างน้อยเข้าหน้า admin ด้วยสายแลน/ตอนไม่มีอุปกรณ์แปลกปลอม และใช้รหัส admin ไม่ซ้ำกับที่อื่น", "en": "Enable HTTPS for the admin page if supported; at least configure it over a cable and use a unique admin password."},
-    "refs": []
+    "severity": "medium",
+    "tag": "CWE-319",
+    "title": {
+      "th": "หน้า admin เราเตอร์ใช้ HTTP",
+      "en": "Router admin page over HTTP"
+    },
+    "what": {
+      "th": "หน้าตั้งค่าเราเตอร์ไม่เข้ารหัส — รหัส admin ถูกส่งเป็นข้อความธรรมดา",
+      "en": "The router's settings page is unencrypted — the admin password travels in plain text."
+    },
+    "attack": {
+      "th": "อุปกรณ์ที่ติดมัลแวร์ใน Wi-Fi เดียวกันดักรหัส admin ได้ แล้วเปลี่ยน DNS ของทั้งบ้านไปเว็บปลอม (DNS hijacking)",
+      "en": "An infected device on the same Wi-Fi can sniff the admin password, then point the whole home's DNS to fake sites (DNS hijacking)."
+    },
+    "fix": {
+      "th": "เปิด HTTPS ในหน้า admin ถ้ารุ่นรองรับ; อย่างน้อยเข้าหน้า admin ด้วยสายแลน/ตอนไม่มีอุปกรณ์แปลกปลอม และใช้รหัส admin ไม่ซ้ำกับที่อื่น",
+      "en": "Enable HTTPS for the admin page if supported; at least configure it over a cable and use a unique admin password."
+    },
+    "refs": [],
+    "level": 2
   },
   "router.upnp": {
-    "severity": "medium", "tag": "Exposure",
-    "title": {"th": "เราเตอร์เปิด UPnP", "en": "UPnP enabled on router"},
-    "what": {"th": "เราเตอร์ตอบ UPnP — โปรแกรมในบ้านสั่งเปิดพอร์ตออกอินเทอร์เน็ตเองได้โดยไม่ถาม", "en": "The router answers UPnP — any program inside can open ports to the internet without asking."},
-    "attack": {"th": "มัลแวร์หรืออุปกรณ์ IoT ที่ถูกเจาะสั่ง UPnP เปิดทางให้คนนอกเข้ามาในบ้าน; บางเราเตอร์เผลอเปิด UPnP ฝั่ง WAN ด้วย", "en": "Malware or a hacked IoT device can use UPnP to open a way in for outsiders; some routers even expose UPnP on the WAN."},
-    "fix": {"th": "ปิด UPnP ในหน้า admin แล้วตั้ง port forward เองเฉพาะที่จำเป็น (เกมคอนโซลบางรุ่นอาจต้องใช้ — ชั่งน้ำหนักเอง)", "en": "Disable UPnP and add only the port forwards you need by hand (some game consoles want it — weigh it up)."},
-    "refs": []
+    "severity": "medium",
+    "tag": "Exposure",
+    "title": {
+      "th": "เราเตอร์เปิด UPnP",
+      "en": "UPnP enabled on router"
+    },
+    "what": {
+      "th": "เราเตอร์ตอบ UPnP — โปรแกรมในบ้านสั่งเปิดพอร์ตออกอินเทอร์เน็ตเองได้โดยไม่ถาม",
+      "en": "The router answers UPnP — any program inside can open ports to the internet without asking."
+    },
+    "attack": {
+      "th": "มัลแวร์หรืออุปกรณ์ IoT ที่ถูกเจาะสั่ง UPnP เปิดทางให้คนนอกเข้ามาในบ้าน; บางเราเตอร์เผลอเปิด UPnP ฝั่ง WAN ด้วย",
+      "en": "Malware or a hacked IoT device can use UPnP to open a way in for outsiders; some routers even expose UPnP on the WAN."
+    },
+    "fix": {
+      "th": "ปิด UPnP ในหน้า admin แล้วตั้ง port forward เองเฉพาะที่จำเป็น (เกมคอนโซลบางรุ่นอาจต้องใช้ — ชั่งน้ำหนักเอง)",
+      "en": "Disable UPnP and add only the port forwards you need by hand (some game consoles want it — weigh it up)."
+    },
+    "refs": [],
+    "level": 2
   },
   "router.wifi_open": {
-    "severity": "critical", "tag": "CWE-319",
-    "title": {"th": "Wi-Fi ไม่มีรหัสผ่าน", "en": "Open Wi-Fi (no encryption)"},
-    "what": {"th": "Wi-Fi ที่เครื่องนี้ต่ออยู่ไม่เข้ารหัส", "en": "The Wi-Fi this machine uses is not encrypted."},
-    "attack": {"th": "ใครอยู่ใกล้ๆ ก็ต่อเข้าวงได้ และดักทุกอย่างที่ไม่ใช่ HTTPS", "en": "Anyone nearby can join the LAN and sniff everything that isn't HTTPS."},
-    "fix": {"th": "ตั้งเป็น WPA2-PSK (AES) หรือ WPA3 พร้อมรหัสยาว 12+ ตัว; ถ้าเป็น Wi-Fi สาธารณะ ใช้ VPN", "en": "Use WPA2-PSK (AES) or WPA3 with a 12+ character passphrase; on public Wi-Fi use a VPN."},
-    "refs": []
+    "severity": "critical",
+    "tag": "CWE-319",
+    "title": {
+      "th": "Wi-Fi ไม่มีรหัสผ่าน",
+      "en": "Open Wi-Fi (no encryption)"
+    },
+    "what": {
+      "th": "Wi-Fi ที่เครื่องนี้ต่ออยู่ไม่เข้ารหัส",
+      "en": "The Wi-Fi this machine uses is not encrypted."
+    },
+    "attack": {
+      "th": "ใครอยู่ใกล้ๆ ก็ต่อเข้าวงได้ และดักทุกอย่างที่ไม่ใช่ HTTPS",
+      "en": "Anyone nearby can join the LAN and sniff everything that isn't HTTPS."
+    },
+    "fix": {
+      "th": "ตั้งเป็น WPA2-PSK (AES) หรือ WPA3 พร้อมรหัสยาว 12+ ตัว; ถ้าเป็น Wi-Fi สาธารณะ ใช้ VPN",
+      "en": "Use WPA2-PSK (AES) or WPA3 with a 12+ character passphrase; on public Wi-Fi use a VPN."
+    },
+    "refs": [],
+    "level": 1
   },
   "router.wifi_wep": {
-    "severity": "critical", "tag": "CWE-327",
-    "title": {"th": "Wi-Fi ใช้ WEP", "en": "Wi-Fi uses WEP"},
-    "what": {"th": "WEP ถูกเจาะได้ในไม่กี่นาทีตั้งแต่ปี 2005", "en": "WEP has been breakable in minutes since 2005."},
-    "attack": {"th": "เครื่องมือแบบ aircrack-ng ถอดรหัส WEP ได้จากการดักแพ็กเก็ตไม่นาน", "en": "Tools like aircrack-ng recover WEP keys from a short packet capture."},
-    "fix": {"th": "เปลี่ยนเป็น WPA2/WPA3 ทันที ถ้าเราเตอร์ไม่รองรับ ควรเปลี่ยนเราเตอร์", "en": "Switch to WPA2/WPA3 now; replace the router if it can't."},
-    "refs": []
+    "severity": "critical",
+    "tag": "CWE-327",
+    "title": {
+      "th": "Wi-Fi ใช้ WEP",
+      "en": "Wi-Fi uses WEP"
+    },
+    "what": {
+      "th": "WEP ถูกเจาะได้ในไม่กี่นาทีตั้งแต่ปี 2005",
+      "en": "WEP has been breakable in minutes since 2005."
+    },
+    "attack": {
+      "th": "เครื่องมือแบบ aircrack-ng ถอดรหัส WEP ได้จากการดักแพ็กเก็ตไม่นาน",
+      "en": "Tools like aircrack-ng recover WEP keys from a short packet capture."
+    },
+    "fix": {
+      "th": "เปลี่ยนเป็น WPA2/WPA3 ทันที ถ้าเราเตอร์ไม่รองรับ ควรเปลี่ยนเราเตอร์",
+      "en": "Switch to WPA2/WPA3 now; replace the router if it can't."
+    },
+    "refs": [],
+    "level": 2
   },
   "router.wifi_wpa1": {
-    "severity": "medium", "tag": "CWE-327",
-    "title": {"th": "Wi-Fi ยังเปิด WPA (รุ่น 1)/TKIP", "en": "Wi-Fi still allows WPA1/TKIP"},
-    "what": {"th": "โหมดผสม WPA/WPA2 ยอมให้อุปกรณ์ใช้ WPA รุ่นแรก", "en": "Mixed WPA/WPA2 mode lets devices use original WPA."},
-    "attack": {"th": "TKIP มีจุดอ่อนที่รู้จักแล้ว และการเปิดรุ่นเก่าไว้ทำให้ downgrade ได้", "en": "TKIP has known weaknesses and leaving it on allows downgrades."},
-    "fix": {"th": "ตั้งเป็น WPA2-PSK (AES/CCMP) อย่างเดียว หรือ WPA2/WPA3", "en": "Use WPA2-PSK (AES/CCMP) only, or WPA2/WPA3."},
-    "refs": []
+    "severity": "medium",
+    "tag": "CWE-327",
+    "title": {
+      "th": "Wi-Fi ยังเปิด WPA (รุ่น 1)/TKIP",
+      "en": "Wi-Fi still allows WPA1/TKIP"
+    },
+    "what": {
+      "th": "โหมดผสม WPA/WPA2 ยอมให้อุปกรณ์ใช้ WPA รุ่นแรก",
+      "en": "Mixed WPA/WPA2 mode lets devices use original WPA."
+    },
+    "attack": {
+      "th": "TKIP มีจุดอ่อนที่รู้จักแล้ว และการเปิดรุ่นเก่าไว้ทำให้ downgrade ได้",
+      "en": "TKIP has known weaknesses and leaving it on allows downgrades."
+    },
+    "fix": {
+      "th": "ตั้งเป็น WPA2-PSK (AES/CCMP) อย่างเดียว หรือ WPA2/WPA3",
+      "en": "Use WPA2-PSK (AES/CCMP) only, or WPA2/WPA3."
+    },
+    "refs": [],
+    "level": 2
   },
   "router.manual_admin_password": {
-    "severity": "check", "tag": "Checklist",
-    "title": {"th": "เปลี่ยนรหัส admin ของเราเตอร์แล้วหรือยัง", "en": "Changed the router admin password?"},
-    "what": {"th": "รหัสที่ติดมาจากโรงงาน (มักอยู่ใต้เครื่อง) ไม่ควรใช้ต่อ", "en": "The factory password (often on a sticker) shouldn't stay."},
-    "attack": {"th": "รายการรหัส default ของทุกยี่ห้อหาได้ในอินเทอร์เน็ต sec-check จึงไม่ลองให้ — เป็นการล็อกอินที่ต้องให้เจ้าของทำเอง", "en": "Default passwords for every brand are online. sec-check deliberately does not try them — logging in is the owner's job."},
-    "fix": {"th": "เข้าหน้า admin → เปลี่ยนรหัสเป็นรหัสยาวที่ไม่ซ้ำ (เก็บในตัวจัดการรหัสผ่าน)", "en": "Admin page → set a long unique password (keep it in a password manager)."},
-    "refs": []
+    "severity": "check",
+    "tag": "Checklist",
+    "title": {
+      "th": "เปลี่ยนรหัส admin ของเราเตอร์แล้วหรือยัง",
+      "en": "Changed the router admin password?"
+    },
+    "what": {
+      "th": "รหัสที่ติดมาจากโรงงาน (มักอยู่ใต้เครื่อง) ไม่ควรใช้ต่อ",
+      "en": "The factory password (often on a sticker) shouldn't stay."
+    },
+    "attack": {
+      "th": "รายการรหัส default ของทุกยี่ห้อหาได้ในอินเทอร์เน็ต sec-check จึงไม่ลองให้ — เป็นการล็อกอินที่ต้องให้เจ้าของทำเอง",
+      "en": "Default passwords for every brand are online. sec-check deliberately does not try them — logging in is the owner's job."
+    },
+    "fix": {
+      "th": "เข้าหน้า admin → เปลี่ยนรหัสเป็นรหัสยาวที่ไม่ซ้ำ (เก็บในตัวจัดการรหัสผ่าน)",
+      "en": "Admin page → set a long unique password (keep it in a password manager)."
+    },
+    "refs": [],
+    "level": 1
   },
   "router.manual_wps": {
-    "severity": "check", "tag": "Checklist",
-    "title": {"th": "ปิด WPS หรือยัง", "en": "Is WPS disabled?"},
-    "what": {"th": "WPS = ปุ่ม/PIN 8 หลักสำหรับต่อ Wi-Fi ง่ายๆ", "en": "WPS is the push-button / 8-digit PIN for easy Wi-Fi joining."},
-    "attack": {"th": "PIN ของ WPS ถูกเดาได้ภายในไม่กี่ชั่วโมง (Reaver/Pixie Dust) แม้รหัส Wi-Fi จะยาวแค่ไหน", "en": "The WPS PIN can be brute-forced in hours (Reaver/Pixie Dust), however strong the Wi-Fi password."},
-    "fix": {"th": "หน้า admin → Wireless → WPS → Disable", "en": "Admin page → Wireless → WPS → Disable."},
-    "refs": []
+    "severity": "check",
+    "tag": "Checklist",
+    "title": {
+      "th": "ปิด WPS หรือยัง",
+      "en": "Is WPS disabled?"
+    },
+    "what": {
+      "th": "WPS = ปุ่ม/PIN 8 หลักสำหรับต่อ Wi-Fi ง่ายๆ",
+      "en": "WPS is the push-button / 8-digit PIN for easy Wi-Fi joining."
+    },
+    "attack": {
+      "th": "PIN ของ WPS ถูกเดาได้ภายในไม่กี่ชั่วโมง (Reaver/Pixie Dust) แม้รหัส Wi-Fi จะยาวแค่ไหน",
+      "en": "The WPS PIN can be brute-forced in hours (Reaver/Pixie Dust), however strong the Wi-Fi password."
+    },
+    "fix": {
+      "th": "หน้า admin → Wireless → WPS → Disable",
+      "en": "Admin page → Wireless → WPS → Disable."
+    },
+    "refs": [],
+    "level": 4
   },
   "router.manual_firmware": {
-    "severity": "check", "tag": "Checklist",
-    "title": {"th": "เฟิร์มแวร์เราเตอร์ล่าสุดหรือยัง", "en": "Router firmware up to date?"},
-    "what": {"th": "เราเตอร์คือคอมพิวเตอร์ที่เปิด 24 ชม. และต่ออินเทอร์เน็ตตรง", "en": "A router is a 24/7 computer directly on the internet."},
-    "attack": {"th": "ช่องโหว่เราเตอร์ถูกใช้ทำ botnet บ่อยมาก และรุ่นที่หมดอายุการซัพพอร์ต (EOL) จะไม่มีแพตช์อีก", "en": "Router bugs feed botnets constantly, and end-of-life models get no more patches."},
-    "fix": {"th": "เช็กเวอร์ชันในหน้า admin เทียบกับเว็บผู้ผลิต เปิด auto-update ถ้ามี ถ้า EOL แล้วควรเปลี่ยนเครื่อง", "en": "Compare the admin page version with the vendor site, enable auto-update, replace EOL units."},
-    "refs": []
+    "severity": "check",
+    "tag": "Checklist",
+    "title": {
+      "th": "เฟิร์มแวร์เราเตอร์ล่าสุดหรือยัง",
+      "en": "Router firmware up to date?"
+    },
+    "what": {
+      "th": "เราเตอร์คือคอมพิวเตอร์ที่เปิด 24 ชม. และต่ออินเทอร์เน็ตตรง",
+      "en": "A router is a 24/7 computer directly on the internet."
+    },
+    "attack": {
+      "th": "ช่องโหว่เราเตอร์ถูกใช้ทำ botnet บ่อยมาก และรุ่นที่หมดอายุการซัพพอร์ต (EOL) จะไม่มีแพตช์อีก",
+      "en": "Router bugs feed botnets constantly, and end-of-life models get no more patches."
+    },
+    "fix": {
+      "th": "เช็กเวอร์ชันในหน้า admin เทียบกับเว็บผู้ผลิต เปิด auto-update ถ้ามี ถ้า EOL แล้วควรเปลี่ยนเครื่อง",
+      "en": "Compare the admin page version with the vendor site, enable auto-update, replace EOL units."
+    },
+    "refs": [],
+    "level": 3
   },
   "router.manual_remote_admin": {
-    "severity": "check", "tag": "Checklist",
-    "title": {"th": "ปิดการจัดการจากระยะไกล (WAN) หรือยัง", "en": "Remote (WAN) management off?"},
-    "what": {"th": "บางเราเตอร์เปิดหน้า admin ให้เข้าจากอินเทอร์เน็ตได้", "en": "Some routers expose the admin page to the internet."},
-    "attack": {"th": "หน้า admin จากอินเทอร์เน็ต = บอททั่วโลกมาเดารหัส/ยิงช่องโหว่ได้", "en": "An internet-facing admin page invites bots worldwide to guess passwords and fire exploits."},
-    "fix": {"th": "หน้า admin → Remote Management / Web access from WAN → ปิด (ถ้าต้องจัดการนอกบ้าน ใช้ VPN เช่น WireGuard/Tailscale)", "en": "Admin page → Remote Management / Web access from WAN → off (use a VPN such as WireGuard/Tailscale for away-from-home access)."},
-    "refs": []
+    "severity": "check",
+    "tag": "Checklist",
+    "title": {
+      "th": "ปิดการจัดการจากระยะไกล (WAN) หรือยัง",
+      "en": "Remote (WAN) management off?"
+    },
+    "what": {
+      "th": "บางเราเตอร์เปิดหน้า admin ให้เข้าจากอินเทอร์เน็ตได้",
+      "en": "Some routers expose the admin page to the internet."
+    },
+    "attack": {
+      "th": "หน้า admin จากอินเทอร์เน็ต = บอททั่วโลกมาเดารหัส/ยิงช่องโหว่ได้",
+      "en": "An internet-facing admin page invites bots worldwide to guess passwords and fire exploits."
+    },
+    "fix": {
+      "th": "หน้า admin → Remote Management / Web access from WAN → ปิด (ถ้าต้องจัดการนอกบ้าน ใช้ VPN เช่น WireGuard/Tailscale)",
+      "en": "Admin page → Remote Management / Web access from WAN → off (use a VPN such as WireGuard/Tailscale for away-from-home access)."
+    },
+    "refs": [],
+    "level": 1
   },
   "router.manual_guest_iot": {
-    "severity": "check", "tag": "Checklist",
-    "title": {"th": "แยกอุปกรณ์ IoT/แขกไว้คนละวงหรือยัง", "en": "IoT and guests on a separate network?"},
-    "what": {"th": "กล้อง ทีวี ปลั๊กอัจฉริยะ และมือถือแขก ไม่ควรอยู่วงเดียวกับเครื่องทำงาน/เซิร์ฟเวอร์", "en": "Cameras, TVs, smart plugs and guest phones shouldn't share a network with work PCs/servers."},
-    "attack": {"th": "IoT อัปเดตน้อยและโดนเจาะง่าย ถ้าอยู่วงเดียวกัน ผู้โจมตีกระโดดจากกล้องไปเครื่องเราได้ (lateral movement)", "en": "IoT is rarely patched and easy to compromise; on the same LAN the attacker can hop from the camera to your PC."},
-    "fix": {"th": "เปิด Guest Wi-Fi (ติ๊ก 'ห้ามเข้าถึงเครือข่ายภายใน') แล้วย้าย IoT ไปไว้ที่นั่น หรือทำ VLAN", "en": "Enable guest Wi-Fi with 'isolate from LAN' and move IoT there, or use VLANs."},
-    "refs": []
+    "severity": "check",
+    "tag": "Checklist",
+    "title": {
+      "th": "แยกอุปกรณ์ IoT/แขกไว้คนละวงหรือยัง",
+      "en": "IoT and guests on a separate network?"
+    },
+    "what": {
+      "th": "กล้อง ทีวี ปลั๊กอัจฉริยะ และมือถือแขก ไม่ควรอยู่วงเดียวกับเครื่องทำงาน/เซิร์ฟเวอร์",
+      "en": "Cameras, TVs, smart plugs and guest phones shouldn't share a network with work PCs/servers."
+    },
+    "attack": {
+      "th": "IoT อัปเดตน้อยและโดนเจาะง่าย ถ้าอยู่วงเดียวกัน ผู้โจมตีกระโดดจากกล้องไปเครื่องเราได้ (lateral movement)",
+      "en": "IoT is rarely patched and easy to compromise; on the same LAN the attacker can hop from the camera to your PC."
+    },
+    "fix": {
+      "th": "เปิด Guest Wi-Fi (ติ๊ก 'ห้ามเข้าถึงเครือข่ายภายใน') แล้วย้าย IoT ไปไว้ที่นั่น หรือทำ VLAN",
+      "en": "Enable guest Wi-Fi with 'isolate from LAN' and move IoT there, or use VLANs."
+    },
+    "refs": [],
+    "level": 4
   },
   "router.manual_port_forward": {
-    "severity": "check", "tag": "Checklist",
-    "title": {"th": "ทบทวน port forward / DMZ", "en": "Review port forwards / DMZ"},
-    "what": {"th": "port forward ที่ลืมไว้ = ประตูจากอินเทอร์เน็ตเข้าเครื่องในบ้าน", "en": "Forgotten port forwards are doors from the internet into your LAN."},
-    "attack": {"th": "Shodan สแกนทั้งอินเทอร์เน็ตทุกวัน บริการที่ forward ออกไปจะถูกเจอภายในชั่วโมง", "en": "Shodan scans the whole internet daily; forwarded services are found within hours."},
-    "fix": {"th": "หน้า admin → NAT/Port forwarding → ลบอันที่ไม่ใช้, ปิด DMZ · ดูจากภายนอกได้ที่ Shodan (ค้นหา IP บ้านตัวเอง)", "en": "Admin page → NAT/Port forwarding → delete unused rules, disable DMZ · see the outside view by looking up your own public IP on Shodan."},
-    "refs": ["https://www.shodan.io/"]
+    "severity": "check",
+    "tag": "Checklist",
+    "title": {
+      "th": "ทบทวน port forward / DMZ",
+      "en": "Review port forwards / DMZ"
+    },
+    "what": {
+      "th": "port forward ที่ลืมไว้ = ประตูจากอินเทอร์เน็ตเข้าเครื่องในบ้าน",
+      "en": "Forgotten port forwards are doors from the internet into your LAN."
+    },
+    "attack": {
+      "th": "Shodan สแกนทั้งอินเทอร์เน็ตทุกวัน บริการที่ forward ออกไปจะถูกเจอภายในชั่วโมง",
+      "en": "Shodan scans the whole internet daily; forwarded services are found within hours."
+    },
+    "fix": {
+      "th": "หน้า admin → NAT/Port forwarding → ลบอันที่ไม่ใช้, ปิด DMZ · ดูจากภายนอกได้ที่ Shodan (ค้นหา IP บ้านตัวเอง)",
+      "en": "Admin page → NAT/Port forwarding → delete unused rules, disable DMZ · see the outside view by looking up your own public IP on Shodan."
+    },
+    "refs": [
+      "https://www.shodan.io/"
+    ],
+    "level": 4
   }
 }

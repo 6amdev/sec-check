@@ -80,7 +80,9 @@ Prefer a browser? `sec-check` also serves a small web app from Python (no build 
 ./web.sh --host 0.0.0.0 --pin 1234   # reachable from your phone on the LAN, PIN-protected
 ```
 
-The web UI runs the same engine and the same allow-list: it only scans targets in `scope.json`, stays non-destructive, and shows the legal warning on every page. Results are stored in SQLite (`data/`, git-ignored) so you can compare before/after hardening.
+The web UI runs the same engine and the same allow-list: it only scans targets in `scope.json`, stays non-destructive, and shows the legal warning on every page. Results are stored in SQLite (`data/`, git-ignored), so the **History** page can diff two scans and show what you **Fixed (🔴→🟢)**, what's **New**, and what's **Still open** after you harden something.
+
+Every check has a **difficulty level (1–5)** — level 1 is the wide-open, easy-win stuff (default creds, missing auth, exposed files), rising to deeper misconfig at level 4. Pick a level in the Scan page or with `--level` on the CLI (`./seccheck.py host --level 1`) to focus on the quick wins first.
 
 <img src="docs/screenshots/web-dashboard-en.png" width="48%" alt="Web dashboard"> <img src="docs/screenshots/map-en.png" width="48%" alt="Network map (example data)">
 

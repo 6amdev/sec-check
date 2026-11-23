@@ -60,6 +60,10 @@ def summary(results):
 
 
 def finish(results, args, name):
+    lvl = getattr(args, "level", 5)
+    kb.filter_level(results, lvl)
+    if lvl < 5:
+        print(_("(กรองที่ระดับความยาก ≤ {l})", l=lvl))
     summary(results)
     path = report.save(results, args.out, name)
     print(_("📄 รายงาน: {p}", p=path))
@@ -127,9 +131,13 @@ def main(argv=None):
     sp.add_argument("--note", default="")
     sp.add_argument("--yes", action="store_true", help=_("ยืนยันว่าเป็นเจ้าของ (ไม่ถาม)"))
 
+    lvl = dict(type=int, default=5, choices=[1, 2, 3, 4, 5],
+               help=_("ระดับความยาก 1–5 (1 = เฉพาะของเปิดโล่ง/เจอง่าย, 5 = ทั้งหมด)"))
+
     w = sub.add_parser("web", help=_("ตรวจเว็บไซต์"))
     w.add_argument("target")
     w.add_argument("--delay", type=float, default=0.15, help=_("หน่วงระหว่าง request (วินาที)"))
+    w.add_argument("--level", **lvl)
 
     ln = sub.add_parser("lan", help=_("หาเครื่องและบริการในวงแลน"))
     ln.add_argument("target", nargs="?")
@@ -137,16 +145,20 @@ def main(argv=None):
     ln.add_argument("--max-hosts", type=int, default=1024)
     ln.add_argument("--default-creds", action="store_true",
                     help=_("ลองรหัส default บนหน้า Basic auth (อ่านอย่างเดียว จำกัดอัตรา)"))
+    ln.add_argument("--level", **lvl)
 
-    sub.add_parser("host", help=_("ตรวจเครื่อง Linux นี้"))
+    h = sub.add_parser("host", help=_("ตรวจเครื่อง Linux นี้"))
+    h.add_argument("--level", **lvl)
     r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
     r.add_argument("target", nargs="?")
     r.add_argument("--timeout", type=float, default=1.5)
+    r.add_argument("--level", **lvl)
     a = sub.add_parser("all", help=_("ตรวจทุกอย่างที่อยู่ใน scope"))
     a.add_argument("--delay", type=float, default=0.15)
     a.add_argument("--timeout", type=float, default=0.8)
     a.add_argument("--max-hosts", type=int, default=1024)
     a.add_argument("--default-creds", action="store_true")
+    a.add_argument("--level", **lvl)
     e = sub.add_parser("explain", help=_("อ่านคำอธิบายช่องโหว่"))
     e.add_argument("id")
     sub.add_parser("lessons", help=_("รายการช่องโหว่ทั้งหมดที่ตรวจได้"))

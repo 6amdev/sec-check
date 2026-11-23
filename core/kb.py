@@ -27,3 +27,18 @@ def text(entry, field, lang):
 
 def get(id):
     return load().get(id, {"severity": "info", "title": {"th": id, "en": id}})
+
+
+def level(id):
+    """ระดับความยาก 1–5 ของเช็กนี้ / difficulty level of this check (1 = easy win)"""
+    return load().get(id, {}).get("level", 3)
+
+
+def filter_level(results, max_level):
+    """เก็บเฉพาะ finding/manual ที่ระดับ <= max_level / keep only findings up to max_level (in place)"""
+    if not max_level or max_level >= 5:
+        return results
+    for r in results:
+        r.findings = [f for f in r.findings if level(f.id) <= max_level]
+        r.manual = [m for m in r.manual if level(m) <= max_level]
+    return results

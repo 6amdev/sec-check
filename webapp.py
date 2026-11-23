@@ -33,7 +33,7 @@ from core import VERSION, db, kb, netmap, report, scope
 from core.finding import Result, SEVERITIES, grade, score
 
 E = html.escape
-MODULES = {"host": "เครื่องนี้ (Linux)", "lan": "เครือข่าย LAN", "web": "เว็บไซต์", "router": "เราเตอร์ / Wi-Fi", "wifi": "Wi-Fi"}
+MODULES = {"host": "เครื่องนี้ (Linux)", "lan": "เครือข่าย LAN", "web": "เว็บไซต์", "router": "เราเตอร์ / Wi-Fi", "wifi": "Wi-Fi", "tls": "TLS/SSL"}
 JOBS = {}                      # job_id -> dict(status, log, scan_id, error, module, target)
 SCAN_LOCK = threading.Lock()   # สแกนทีละงาน / one scan at a time
 SESSIONS = set()
@@ -242,6 +242,8 @@ def scan_form(lang):
                          for e in scope.load() if e["kind"] in ("url", "host") and not e["target"].startswith("*."))
     lantargets = "".join(f'<option value="lan:{E(e["target"])}">{E(_("วงแลน"))}: {E(e["target"])}</option>'
                          for e in scope.load() if e["kind"] == "net")
+    tlstargets = "".join(f'<option value="tls:{E(e["target"])}">TLS: {E(e["target"])}</option>'
+                         for e in scope.load() if e["kind"] in ("url", "host") and not e["target"].startswith("*."))
     running = next((j for j in JOBS.values() if j["status"] == "running"), None)
     note = f'<div class="warn">{E(_("มีการสแกนกำลังทำงานอยู่ — รอให้เสร็จก่อน"))}</div>' if running else ""
     return f'''{note}<div class="card"><h2 style="margin-top:0">{E(_("สั่งสแกน"))}</h2>
@@ -250,7 +252,7 @@ def scan_form(lang):
 <option value="host">{E(_("เครื่องนี้ (Linux) — host audit"))}</option>
 <option value="wifi">{E(_("Wi-Fi ที่ต่ออยู่ (passive)"))}</option>
 <option value="lan:">{E(_("วงแลนของเครื่องนี้ (อัตโนมัติ)"))}</option>
-{lantargets}{webtargets}
+{lantargets}{webtargets}{tlstargets}
 </select></label></p>
 <p><label>{E(_("ระดับความยาก"))}: <select name="level">
 <option value="5">{E(_("ทั้งหมด (5)"))}</option>
@@ -270,7 +272,7 @@ def run_job(job_id, pick, creds, level=5):
         job["status"] = "running"
         buf = io.StringIO()
         try:
-            from checks import host, lan, web, wifi
+            from checks import host, lan, tls, web, wifi
             opts = argparse.Namespace(delay=0.1, timeout=0.8, max_hosts=1024, default_creds=creds,
                                       passphrase=None, ssid=None)
             with contextlib.redirect_stdout(buf):
@@ -282,6 +284,8 @@ def run_job(job_id, pick, creds, level=5):
                     results = [lan.run(pick[4:] or None, opts)]
                 elif pick.startswith("web:"):
                     results = [web.run(pick[4:], opts)]
+                elif pick.startswith("tls:"):
+                    results = [tls.run(pick[4:], opts)]
                 else:
                     raise ValueError("unknown target")
             kb.filter_level(results, level)

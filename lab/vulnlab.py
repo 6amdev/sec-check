@@ -18,6 +18,7 @@ Practice lab — deliberately vulnerable services, bound to loopback only
 ฟังเฉพาะ 127.0.0.x — เครื่องอื่นในเครือข่ายเข้าไม่ได้ / loopback only — unreachable from the network.
 """
 import json
+import os
 import socketserver
 import sys
 import threading
@@ -228,6 +229,42 @@ def start(name, server_cls, addr, handler):
     return srv
 
 
+def self_signed_cert():
+    """สร้างใบรับรอง self-signed ชั่วคราวด้วย openssl (ไว้ทดสอบโมดูล tls) / temp self-signed cert for the tls module"""
+    import shutil
+    import ssl
+    import subprocess
+    import tempfile
+    if not shutil.which("openssl"):
+        return None
+    d = tempfile.mkdtemp(prefix="seccheck-lab-tls-")
+    pem = os.path.join(d, "cert.pem")
+    try:
+        subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-keyout", pem, "-out", pem,
+                        "-days", "365", "-nodes", "-subj", "/CN=lab.local"],
+                       capture_output=True, timeout=30, check=True)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain(pem)
+    return ctx
+
+
+def start_https(name, addr, handler, ctx):
+    if ctx is None:
+        print(f"  ⏭  {name:<22} {addr[0]}:{addr[1]}  skipped (no openssl)")
+        return None
+    try:
+        srv = ThreadingHTTPServer(addr, handler)
+        srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
+    except OSError as e:
+        print(f"  ⏭  {name:<22} {addr[0]}:{addr[1]}  skipped ({e.strerror})")
+        return None
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    print(f"  ✅ {name:<22} {addr[0]}:{addr[1]}")
+    return srv
+
+
 def main():
     sys.stdout.reconfigure(line_buffering=True)
     print("sec-check lab — loopback only / ฟังเฉพาะเครื่องนี้  (Ctrl+C to stop)")
@@ -242,6 +279,7 @@ def main():
         start("elasticsearch (fake)", ThreadingHTTPServer, (WEAK, 9200), Elastic),
         start("router admin+default (fake)", ThreadingHTTPServer, (WEAK, 8081), BasicAuth),
         start("rtsp no-auth (fake)", TCP, (WEAK, 8554), Rtsp),
+        start_https("https self-signed (fake)", (WEAK, 8443), Weak, self_signed_cert()),
     ]
     if not any(servers):
         sys.exit(1)

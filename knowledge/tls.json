@@ -1,0 +1,90 @@
+{
+  "tls.sslv3": {
+    "severity": "critical", "tag": "CWE-327", "level": 1,
+    "title": {"th": "เซิร์ฟเวอร์ยอมรับ SSLv3", "en": "Server accepts SSLv3"},
+    "what": {"th": "เซิร์ฟเวอร์ยังคุยด้วย SSL 3.0 ซึ่งเลิกใช้ไปนานแล้ว", "en": "The server still speaks SSL 3.0, long deprecated."},
+    "attack": {"th": "ช่องโหว่ POODLE ใช้ SSLv3 ถอดรหัสข้อมูลทีละไบต์ได้ · ผู้โจมตีบังคับให้ลดระดับมาใช้ SSLv3 แล้วดักอ่าน", "en": "The POODLE attack decrypts SSLv3 traffic byte by byte; an attacker forces a downgrade to SSLv3, then reads it."},
+    "fix": {"th": "ปิด SSLv3 ทั้งหมด · nginx `ssl_protocols TLSv1.2 TLSv1.3;` · Apache `SSLProtocol -all +TLSv1.2 +TLSv1.3`", "en": "Disable SSLv3 entirely · nginx `ssl_protocols TLSv1.2 TLSv1.3;` · Apache `SSLProtocol -all +TLSv1.2 +TLSv1.3`."},
+    "refs": ["https://ssl-config.mozilla.org/"]
+  },
+  "tls.old_protocol": {
+    "severity": "medium", "tag": "OWASP A02 · CWE-327", "level": 2,
+    "title": {"th": "รองรับ TLS รุ่นเก่า (1.0/1.1)", "en": "Old TLS versions accepted (1.0/1.1)"},
+    "what": {"th": "เซิร์ฟเวอร์ยอมรับ TLS 1.0/1.1 ที่เลิกใช้แล้วตั้งแต่ปี 2021 (RFC 8996)", "en": "The server accepts TLS 1.0/1.1, deprecated since 2021 (RFC 8996)."},
+    "attack": {"th": "รุ่นเก่ามีจุดอ่อน (BEAST, Lucky13) และเปิดช่องให้บังคับลดระดับ (downgrade) เพื่อถอดรหัสบางส่วน", "en": "Old versions have weaknesses (BEAST, Lucky13) and allow downgrade attacks to break parts of the session."},
+    "fix": {"th": "ตั้งให้รับเฉพาะ TLS 1.2 ขึ้นไป · ใช้ Mozilla SSL Config Generator ช่วยตั้งค่า", "en": "Accept only TLS 1.2+; use the Mozilla SSL Config Generator."},
+    "refs": ["https://datatracker.ietf.org/doc/html/rfc8996", "https://ssl-config.mozilla.org/"]
+  },
+  "tls.no_tls13": {
+    "severity": "low", "tag": "Hardening", "level": 3,
+    "title": {"th": "ยังไม่รองรับ TLS 1.3", "en": "TLS 1.3 not supported"},
+    "what": {"th": "เซิร์ฟเวอร์ยังไม่รองรับ TLS 1.3 (รุ่นใหม่สุด เร็วและปลอดภัยกว่า)", "en": "The server doesn't support TLS 1.3 (the newest, faster and safer version)."},
+    "attack": {"th": "ไม่ใช่ช่องโหว่โดยตรง แต่ TLS 1.3 ตัด cipher อ่อนทิ้งหมดและกัน downgrade ได้ดีกว่า", "en": "Not a vulnerability by itself, but TLS 1.3 drops all weak ciphers and resists downgrade better."},
+    "fix": {"th": "อัปเดต OpenSSL/เว็บเซิร์ฟเวอร์ แล้วเพิ่ม TLSv1.3 ในการตั้งค่า", "en": "Update OpenSSL/the web server, then add TLSv1.3 to the config."},
+    "refs": []
+  },
+  "tls.weak_cipher": {
+    "severity": "high", "tag": "CWE-327", "level": 2,
+    "title": {"th": "เซิร์ฟเวอร์ยอมรับ cipher ที่อ่อน", "en": "Server accepts weak ciphers"},
+    "what": {"th": "เซิร์ฟเวอร์ยอมใช้ cipher ที่รู้กันว่าอ่อน เช่น RC4, 3DES, DES, NULL หรือ EXPORT", "en": "The server allows known-weak ciphers such as RC4, 3DES, DES, NULL or EXPORT."},
+    "attack": {"th": "RC4 มี bias ที่ถอดได้ · 3DES โดน Sweet32 · NULL = ไม่เข้ารหัสเลย · ผู้โจมตีบังคับให้ใช้ cipher อ่อนแล้วถอดรหัส", "en": "RC4 has recoverable biases; 3DES is hit by Sweet32; NULL means no encryption. An attacker forces a weak cipher, then decrypts."},
+    "fix": {"th": "ตั้ง cipher list ให้รับเฉพาะตัวแข็ง (AEAD: AES-GCM, ChaCha20) · ใช้ค่าแนะนำจาก Mozilla (intermediate/modern)", "en": "Restrict the cipher list to strong AEAD suites (AES-GCM, ChaCha20); use Mozilla's intermediate/modern presets."},
+    "refs": ["https://ssl-config.mozilla.org/", "https://sweet32.info/"]
+  },
+  "tls.cert_expired": {
+    "severity": "high", "tag": "CWE-295", "level": 1,
+    "title": {"th": "ใบรับรองหมดอายุแล้ว", "en": "Certificate has expired"},
+    "what": {"th": "ใบรับรอง TLS หมดอายุ — เบราว์เซอร์จะบล็อกและขึ้นคำเตือน", "en": "The TLS certificate has expired — browsers block the site with a warning."},
+    "attack": {"th": "ผู้ใช้ถูกฝึกให้กดผ่านคำเตือน พอโดนปลอมใบรับรองจริงก็กดผ่านเหมือนกัน และเว็บใช้งานไม่ได้", "en": "Users learn to click through the warning, so a real fake certificate gets clicked through too — and the site is unusable."},
+    "fix": {"th": "ต่ออายุทันที (`sudo certbot renew`) และเปิดต่ออายุอัตโนมัติ", "en": "Renew now (`sudo certbot renew`) and enable auto-renewal."},
+    "refs": []
+  },
+  "tls.cert_expiring": {
+    "severity": "medium", "tag": "Ops", "level": 3,
+    "title": {"th": "ใบรับรองใกล้หมดอายุ", "en": "Certificate expires soon"},
+    "what": {"th": "ใบรับรองจะหมดอายุในไม่ช้า", "en": "The certificate will expire soon."},
+    "attack": {"th": "ถ้าไม่ต่อ เว็บจะล่มและขึ้นคำเตือน (ลูกค้าเข้าไม่ได้)", "en": "If not renewed, the site goes down with a warning (customers can't reach it)."},
+    "fix": {"th": "เช็กว่าต่ออายุอัตโนมัติทำงาน: `systemctl list-timers | grep certbot`; ทดสอบ `certbot renew --dry-run`", "en": "Check auto-renewal: `systemctl list-timers | grep certbot`; test `certbot renew --dry-run`."},
+    "refs": []
+  },
+  "tls.cert_self_signed": {
+    "severity": "medium", "tag": "CWE-295", "level": 2,
+    "title": {"th": "ใบรับรองออกเอง (self-signed)", "en": "Self-signed certificate"},
+    "what": {"th": "ใบรับรองไม่ได้ออกโดย CA ที่เชื่อถือ — เบราว์เซอร์ไม่ไว้ใจ", "en": "The certificate isn't issued by a trusted CA — browsers don't trust it."},
+    "attack": {"th": "self-signed แยกไม่ออกจากใบปลอมของผู้โจมตี ทำให้ MITM เนียนได้ · ผู้ใช้ชินกับการกดผ่าน", "en": "A self-signed cert is indistinguishable from an attacker's fake one, making MITM easy; users get used to clicking through."},
+    "fix": {"th": "ใช้ใบรับรองฟรีจาก Let's Encrypt สำหรับบริการที่คนทั่วไปเข้า · ภายในองค์กรให้ติดตั้ง internal CA ที่เครื่องไว้ใจ", "en": "Use a free Let's Encrypt cert for public services; internally, deploy an internal CA your machines trust."},
+    "refs": ["https://letsencrypt.org/"]
+  },
+  "tls.cert_hostname_mismatch": {
+    "severity": "high", "tag": "CWE-297", "level": 2,
+    "title": {"th": "ชื่อในใบรับรองไม่ตรงกับโดเมน", "en": "Certificate hostname mismatch"},
+    "what": {"th": "ใบรับรองออกให้ชื่ออื่น ไม่ตรงกับโดเมนที่ใช้", "en": "The certificate is for a different name than the domain in use."},
+    "attack": {"th": "เบราว์เซอร์เตือน และการยืนยันตัวตนของเซิร์ฟเวอร์ใช้ไม่ได้ เปิดช่องให้ปลอมเซิร์ฟเวอร์", "en": "Browsers warn, and server identity can't be verified, opening the door to server impersonation."},
+    "fix": {"th": "ออกใบรับรองใหม่ให้ครอบคลุมทุกชื่อที่ใช้ (รวม www และ subdomain) ผ่าน SAN", "en": "Reissue the certificate covering every name used (incl. www and subdomains) via SAN."},
+    "refs": []
+  },
+  "tls.cert_untrusted": {
+    "severity": "medium", "tag": "CWE-295", "level": 2,
+    "title": {"th": "ใบรับรองเชื่อถือไม่ได้ (chain ไม่ครบ/CA ไม่รู้จัก)", "en": "Untrusted certificate (broken chain / unknown CA)"},
+    "what": {"th": "ตรวจสอบใบรับรองไม่ผ่าน — มักเพราะส่ง intermediate ไม่ครบ หรือ CA ไม่อยู่ในรายการที่ไว้ใจ", "en": "Certificate validation fails — usually a missing intermediate, or a CA not in the trust store."},
+    "attack": {"th": "บางเบราว์เซอร์/แอปจะเตือนหรือปฏิเสธ และทำให้ผู้ใช้ชินกับการกดผ่าน", "en": "Some browsers/apps warn or refuse, and it trains users to click through."},
+    "fix": {"th": "ส่งไฟล์ fullchain.pem (รวม intermediate) แทน cert.pem · ตรวจด้วย SSL Labs", "en": "Serve fullchain.pem (with intermediates) instead of cert.pem; verify with SSL Labs."},
+    "refs": ["https://www.ssllabs.com/ssltest/"]
+  },
+  "tls.weak_key": {
+    "severity": "high", "tag": "CWE-326", "level": 2,
+    "title": {"th": "กุญแจใบรับรองสั้นเกินไป (<2048 บิต)", "en": "Weak certificate key (<2048-bit)"},
+    "what": {"th": "ใบรับรองใช้กุญแจ RSA ต่ำกว่า 2048 บิต", "en": "The certificate uses an RSA key under 2048 bits."},
+    "attack": {"th": "กุญแจสั้นถูกแยกตัวประกอบ (factor) ได้ด้วยทรัพยากรที่เอื้อมถึง เท่ากับการเข้ารหัสอ่อนลง", "en": "Short keys can be factored with reachable resources, weakening the encryption."},
+    "fix": {"th": "ออกใบรับรองใหม่ด้วยกุญแจ RSA 2048/4096 บิต หรือ ECDSA P-256", "en": "Reissue with an RSA 2048/4096-bit key or ECDSA P-256."},
+    "refs": []
+  },
+  "tls.sha1_sig": {
+    "severity": "medium", "tag": "CWE-328", "level": 3,
+    "title": {"th": "ใบรับรองเซ็นด้วย SHA-1", "en": "Certificate signed with SHA-1"},
+    "what": {"th": "ใบรับรองใช้ลายเซ็น SHA-1 ซึ่งถูกเลิกใช้เพราะชนกันได้ (collision)", "en": "The certificate is signed with SHA-1, deprecated because of collisions."},
+    "attack": {"th": "SHA-1 ถูกทำ collision ได้จริง (SHAttered) เปิดช่องปลอมใบรับรองในทางทฤษฎี", "en": "SHA-1 collisions are real (SHAttered), enabling certificate forgery in theory."},
+    "fix": {"th": "ออกใบรับรองใหม่ที่เซ็นด้วย SHA-256 ขึ้นไป (CA สมัยใหม่ทำให้อยู่แล้ว)", "en": "Reissue signed with SHA-256+ (modern CAs already do)."},
+    "refs": ["https://shattered.io/"]
+  }
+}

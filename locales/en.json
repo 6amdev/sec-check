@@ -274,5 +274,13 @@
  "🟡 Level 2 — โปรโตคอล/ตั้งค่าอ่อน": "🟡 Level 2 — weak protocols / config",
  "🟠 Level 3 — เวอร์ชันเก่า / ข้อมูลรั่ว / hardening": "🟠 Level 3 — old versions / info leaks / hardening",
  "🔴 Level 4 — ตั้งค่าพลาดเชิงลึก": "🔴 Level 4 — deeper misconfig",
- "⚫ Level 5 — ขั้นสูง (lab / เครือข่ายตัวเอง)": "⚫ Level 5 — advanced (lab / your own network)"
+ "⚫ Level 5 — ขั้นสูง (lab / เครือข่ายตัวเอง)": "⚫ Level 5 — advanced (lab / your own network)",
+ "เชื่อมต่อ TLS ไม่ได้ (พอร์ตไม่เปิด?)": "Can't connect over TLS (port closed?)",
+ "รองรับ TLS รุ่นใหม่": "Supports a modern TLS version",
+ "เวอร์ชัน TLS ที่เซิร์ฟเวอร์ยอมรับ": "TLS versions the server accepts",
+ "เวอร์ชัน": "Version",
+ "ไม่พบ cipher อ่อนที่ทดสอบ (RC4/3DES/DES/NULL/EXPORT/MD5)": "No weak ciphers among those tested (RC4/3DES/DES/NULL/EXPORT/MD5)",
+ "ใบรับรองถูกต้องและเชื่อถือได้": "Certificate is valid and trusted",
+ "ขนาดกุญแจเพียงพอ": "Key size is adequate",
+ "ตรวจ TLS/SSL ของบริการ (host:port หรือ URL)": "Audit a service's TLS/SSL (host:port or URL)"
 }

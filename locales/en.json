@@ -299,5 +299,9 @@
  "ไม่พบพอร์ตกล้องที่คุ้น (RTSP 554/8554, HTTP 80/8080/8899) บนเป้าหมายนี้": "No familiar camera ports (RTSP 554/8554, HTTP 80/8080/8899) on this target",
  "ตรวจแบบอ่านอย่างเดียว — ไม่เปลี่ยนค่า ไม่บันทึกภาพ ไม่ยิง exploit": "Read-only — no settings changed, no footage saved, no exploit",
  "ตรวจกล้อง IP / NVR ในวง (ONVIF/RTSP)": "Audit an IP camera / NVR on the LAN (ONVIF/RTSP)",
- "กล้อง/NVR": "Camera/NVR"
+ "กล้อง/NVR": "Camera/NVR",
+ "ระบุ IP ของเครื่อง Mac เช่น ./seccheck.py mac 192.168.1.40": "Give the Mac's IP, e.g. ./seccheck.py mac 192.168.1.40",
+ "บริการที่เปิดบนเครื่อง Mac": "Services open on the Mac",
+ "ไม่พบบริการแชร์/รีโมตของ Mac ที่เปิดอยู่บนเป้าหมายนี้": "No Mac sharing/remote services open on this target",
+ "ตรวจเครื่อง Mac ในวง (Screen Sharing/AFP/SMB)": "Audit a Mac on the LAN (Screen Sharing/AFP/SMB)"
 }

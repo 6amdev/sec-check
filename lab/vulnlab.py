@@ -296,6 +296,15 @@ class Elastic(JsonAPI):
     payload = {"name": "lab", "cluster_name": "lab-cluster", "version": {"number": "6.8.0"}}
 
 
+class NoOp(socketserver.BaseRequestHandler):
+    """เปิดพอร์ตเฉยๆ ไว้ให้ตัวตรวจเห็นว่า 'open' (เช่น ARD/AFP) / just holds a port open"""
+    def handle(self):
+        try:
+            self.request.recv(16)
+        except OSError:
+            pass
+
+
 class TCP(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
@@ -366,6 +375,7 @@ def main():
         start("smbv1+nosigning (fake)", TCP, (WEAK, 10445), FakeSMB),   # 445 ต้อง root จึงใช้พอร์ตสูง
         start("rdp no-NLA (fake)", TCP, (WEAK, 3389), FakeRDP),
         start("camera onvif+snapshot (fake)", ThreadingHTTPServer, (WEAK, 8899), FakeCamera),
+        start("apple remote desktop (fake)", TCP, (WEAK, 3283), NoOp),
     ]
     if not any(servers):
         sys.exit(1)

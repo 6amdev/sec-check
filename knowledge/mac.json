@@ -1,0 +1,34 @@
+{
+  "mac.afp": {
+    "severity": "medium", "tag": "CWE-319 · Legacy", "level": 2,
+    "title": {"th": "เปิด AFP (แชร์ไฟล์แบบเก่าของ Apple)", "en": "AFP open (legacy Apple file sharing)"},
+    "what": {"th": "พอร์ต AFP (548) เปิดอยู่ — Apple Filing Protocol รุ่นเก่า Apple เลิกสนับสนุนแล้วและแนะนำให้ใช้ SMB แทน", "en": "The AFP port (548) is open — the legacy Apple Filing Protocol, which Apple has deprecated in favour of SMB."},
+    "attack": {"th": "AFP รุ่นเก่ามีการเข้ารหัส/ยืนยันตัวตนที่อ่อน และไม่ได้รับแพตช์แล้ว เปิดช่องให้ดักหรือเดารหัส", "en": "Legacy AFP has weak encryption/auth and is no longer patched, opening the door to sniffing or guessing."},
+    "fix": {"th": "ปิด AFP แล้วแชร์ผ่าน SMB แทน: System Settings → General → Sharing → File Sharing → Options → ใช้ SMB · จำกัดด้วย firewall", "en": "Turn off AFP and share over SMB instead: System Settings → General → Sharing → File Sharing → Options → use SMB; restrict with the firewall."},
+    "refs": []
+  },
+  "mac.ard": {
+    "severity": "medium", "tag": "Attack surface", "level": 2,
+    "title": {"th": "เปิด Apple Remote Desktop (ARD)", "en": "Apple Remote Desktop (ARD) open"},
+    "what": {"th": "พอร์ต ARD (3283) เปิดอยู่ — ใช้ควบคุม/จัดการ Mac จากระยะไกล", "en": "The ARD port (3283) is open — used to control/manage a Mac remotely."},
+    "attack": {"th": "ARD เคยมีช่องโหว่ยกสิทธิ์ (เช่น CVE-2017-13872 'root' bug ยุคนั้น) และเป็นช่องให้เดารหัส/คุมเครื่องถ้าเปิดกว้าง", "en": "ARD has had privilege bugs and is a vector for guessing or remote control if widely exposed."},
+    "fix": {"th": "ปิด Remote Management ถ้าไม่ใช้ (System Settings → General → Sharing) · ถ้าใช้ ให้จำกัดผู้ใช้/สิทธิ์และจำกัด IP ด้วย firewall หรือ VPN", "en": "Turn off Remote Management if unused (System Settings → General → Sharing); if used, limit users/privileges and restrict by IP via firewall or VPN."},
+    "refs": []
+  },
+  "mac.screen_sharing": {
+    "severity": "medium", "tag": "Attack surface", "level": 1,
+    "title": {"th": "เปิด Screen Sharing (VNC 5900)", "en": "Screen Sharing (VNC 5900) open"},
+    "what": {"th": "พอร์ต 5900 เปิดอยู่ — Screen Sharing ของ macOS ใช้โปรโตคอล VNC", "en": "Port 5900 is open — macOS Screen Sharing uses the VNC protocol."},
+    "attack": {"th": "VNC รหัสเก่าจำกัด 8 ตัวและเข้ารหัสอ่อน ถ้าเปิดกว้างถูกเดา/ดักได้ และเห็น/คุมหน้าจอได้", "en": "Classic VNC passwords are limited to 8 chars with weak crypto; exposed, they're guessable/sniffable and give full screen view and control."},
+    "fix": {"th": "เปิดเฉพาะเมื่อจำเป็น, ตั้งรหัสที่แข็งแรง, เข้าผ่าน VPN/SSH tunnel เท่านั้น, อย่า forward 5900 ออกเน็ต", "en": "Enable only when needed, set a strong password, reach it over a VPN/SSH tunnel only, never forward 5900 to the internet."},
+    "refs": []
+  },
+  "mac.manual_firewall": {
+    "severity": "check", "tag": "Checklist", "level": 1,
+    "title": {"th": "เปิด firewall ของ macOS แล้วหรือยัง", "en": "Is the macOS firewall on?"},
+    "what": {"th": "macOS มี firewall ในตัวแต่ปิดเป็นค่าเริ่มต้น — ตรวจสถานะจริงต้องดูที่เครื่อง", "en": "macOS has a built-in firewall but it's off by default — its real state is only visible on the machine."},
+    "attack": {"th": "ไม่มี firewall = ทุกบริการที่เปิด (แชร์ไฟล์, screen sharing) เข้าถึงได้จากเครือข่าย", "en": "No firewall means every enabled service (file sharing, screen sharing) is reachable from the network."},
+    "fix": {"th": "System Settings → Network → Firewall → เปิด · เปิด 'Block all incoming connections' ถ้าไม่ได้แชร์อะไร", "en": "System Settings → Network → Firewall → turn on; enable 'Block all incoming connections' if you share nothing."},
+    "refs": []
+  }
+}

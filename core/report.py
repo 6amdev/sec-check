@@ -13,7 +13,7 @@ from i18n import _, using
 
 E = html.escape
 SEV_TH = {"critical": "วิกฤต", "high": "สูง", "medium": "กลาง", "low": "ต่ำ", "info": "ข้อมูล", "check": "ตรวจเอง"}
-MODULE_TH = {"web": "เว็บไซต์", "lan": "เครือข่าย LAN", "host": "เครื่องนี้ (Linux)", "router": "เราเตอร์ / Wi-Fi", "wifi": "Wi-Fi", "tls": "TLS/SSL", "windows": "Windows", "camera": "กล้อง/NVR"}
+MODULE_TH = {"web": "เว็บไซต์", "lan": "เครือข่าย LAN", "host": "เครื่องนี้ (Linux)", "router": "เราเตอร์ / Wi-Fi", "wifi": "Wi-Fi", "tls": "TLS/SSL", "windows": "Windows", "camera": "กล้อง/NVR", "mac": "macOS"}
 
 CSS = """
 :root{--bg:#0b0f17;--card:#121826;--card2:#182033;--line:#243049;--fg:#e6ebf5;--mut:#8a97b1;

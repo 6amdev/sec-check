@@ -1,0 +1,10 @@
+{
+  "tools.external": {
+    "severity": "info", "tag": "External scanner", "level": 3,
+    "title": {"th": "ผลจากเครื่องมือภายนอก (nmap/nuclei/testssl/lynis)", "en": "Finding from an external scanner (nmap/nuclei/testssl/lynis)"},
+    "what": {"th": "sec-check รันเครื่องมือภายนอกที่คุณติดตั้งไว้กับเป้าหมายใน allow-list แล้วนำผลมารวมไว้ที่เดียว (ดูรายละเอียดในหลักฐาน)", "en": "sec-check ran an external tool you have installed against an allow-listed target and folded its result in here (see the evidence)."},
+    "attack": {"th": "แต่ละผลหมายถึงจุดที่เครื่องมือนั้นมองว่าเสี่ยง — ความร้ายแรงและวิธีแก้ขึ้นกับชนิดของช่องโหว่ที่ระบุ", "en": "Each item is something the tool flagged as risky — the severity and fix depend on the specific issue named."},
+    "fix": {"th": "อ่านรายละเอียดในหลักฐาน แล้วดูวิธีแก้จากเอกสารของเครื่องมือ/CVE ที่อ้างถึง · ยืนยันว่าไม่ใช่ false positive ก่อนลงมือ", "en": "Read the detail in the evidence and follow the fix from the tool's docs / the referenced CVE · confirm it isn't a false positive before acting."},
+    "refs": ["https://nmap.org/", "https://github.com/projectdiscovery/nuclei", "https://testssl.sh/", "https://cisofy.com/lynis/"]
+  }
+}

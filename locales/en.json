@@ -346,5 +346,20 @@
  "ไม่พบเวอร์ชันบริการที่ตรงกับ CVE ในตาราง": "No service versions matched a CVE in the table",
  "{n} banner": "{n} banners",
  "เทียบจากตาราง CVE ในเครื่อง (ชุดเล็ก) — เป็นการเดาจากเวอร์ชันใน banner · บาง distro backport แพตช์ ทำให้เวอร์ชันดูเก่าแต่แก้แล้ว ควรยืนยันอีกครั้ง · ไม่ได้ยิง exploit": "Compared against a small local CVE table — a guess from the banner version · some distros backport patches, so an old-looking version may already be fixed; verify · nothing was exploited",
- "จับคู่เวอร์ชันบริการกับช่องโหว่ที่รู้จัก (CVE, ออฟไลน์)": "Match service versions to known CVEs (offline)"
+ "จับคู่เวอร์ชันบริการกับช่องโหว่ที่รู้จัก (CVE, ออฟไลน์)": "Match service versions to known CVEs (offline)",
+ "nmap รันไม่สำเร็จ": "nmap failed to run",
+ "nmap -sV (พอร์ต/บริการ/เวอร์ชัน)": "nmap -sV (port/service/version)",
+ "nmap พบพอร์ตเปิด": "nmap open ports",
+ "nuclei [{s}] {n}": "nuclei [{s}] {n}",
+ "testssl [{s}] {i}: {f}": "testssl [{s}] {i}: {f}",
+ "lynis รันแล้วแต่อ่านรายงานไม่ได้ (ต้องใช้ root): ": "lynis ran but its report isn't readable (needs root): ",
+ "lynis warning: {d}": "lynis warning: {d}",
+ "lynis suggestions": "lynis suggestions",
+ "lynis ไม่พบ warning": "lynis found no warnings",
+ "ยังไม่ได้ติดตั้ง {t} — ติดตั้งเพื่อตรวจลึกขึ้น": "{t} not installed — install it for deeper checks",
+ "ยังไม่มีเครื่องมือภายนอกที่รองรับเลย — sec-check ยังทำงานได้ด้วยตัวเอง": "No supported external tools installed — sec-check still works on its own",
+ "โมดูลนี้ห่อเครื่องมือภายนอก รันเฉพาะเป้าหมายใน allow-list · การสแกนเป็นแบบไม่ทำลาย": "This module wraps external tools, runs only against allow-listed targets · scans are non-destructive",
+ "ห่อเครื่องมือภายนอก nmap/nuclei/testssl/lynis (ถ้าติดตั้งไว้)": "Wrap external tools nmap/nuclei/testssl/lynis (if installed)",
+ "เครื่องมือภายนอก": "External tools",
+ "ยังไม่ได้ติดตั้งเครื่องมือนี้ — ติดตั้งเพื่อตรวจลึกขึ้น": "This tool isn't installed — install it for deeper checks"
 }

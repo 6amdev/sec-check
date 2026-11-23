@@ -61,7 +61,13 @@ def _cmp(v, ref):
 def match(product, version):
     """คืนลิสต์ CVE ที่ตรงกับ product+version / list of matching CVE entries"""
     product = (product or "").lower()
-    product = PRODUCT_ALIASES.get(product, product)
+    if product in PRODUCT_ALIASES:
+        product = PRODUCT_ALIASES[product]
+    else:
+        for key, canon in PRODUCT_ALIASES.items():   # เช่น nmap ให้ 'apache httpd'
+            if key in product:
+                product = canon
+                break
     v = parse_version(version) if isinstance(version, str) else version
     if not product or not v:
         return []

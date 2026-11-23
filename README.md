@@ -25,7 +25,7 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 ## ✨ What it does
 
-Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **149 lessons** — list them with `./seccheck.py lessons`.
+Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **150 lessons** — list them with `./seccheck.py lessons`.
 
 | Module | Checks | Examples |
 |---|---|---|
@@ -42,6 +42,7 @@ Every finding in the report comes with three boxes: **What it is**, **How attack
 | 📺 **iot** | 3 | Passive checks of IoT / TV / smart-home devices: Chromecast/Cast & DIAL controllable without auth, Roku, Telnet (Mirai-class), MQTT, exposed device web pages, and a network-segmentation checklist. No play/stop commands, no settings changed, no guessing. |
 | 📧 **dns** | 7 | DNS & email security for your own domain (`./seccheck.py dns 6amdev.com`): SPF, DKIM (common selectors), DMARC (+ policy strength), DNSSEC and CAA. Read-only public DNS lookups (stdlib, like `dig`) — nothing touches the domain's servers. |
 | 🧬 **cve** | 2 | Matches service banners/versions (SSH, HTTP `Server`, FTP, SMTP) against a small **offline** CVE table (`./seccheck.py cve <host>`) and flags outdated, known-vulnerable or end-of-life software with the CVE id + NVD link. Version comparison only — no exploit, no network needed. |
+| 🧰 **tools** | 1 | Optional wrappers for **nmap** (-sV → ports/versions, fed into the CVE table), **nuclei**, **testssl.sh** and **lynis** (local host audit): if a tool is installed it runs against an allow-listed target and its output is parsed into findings; if not, it prints an install hint and carries on. Non-destructive, allow-list gated. |
 
 **Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
 

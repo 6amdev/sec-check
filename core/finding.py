@@ -93,7 +93,11 @@ class Result:
             f["evidence"] = str(f["evidence"])
         for p in d["passed"]:
             p["detail"] = str(p["detail"])
-        d["notes"] = [list(n) for n in self.notes]
+        d["notes"] = [[str(a) for a in n] for n in self.notes]
+        for t in d["tables"]:                      # ตารางอาจมี cell ที่เป็น T/ตัวเลข — ทำให้เป็น str
+            t["rows"] = [[str(c) for c in row] for row in t["rows"]]
+            t["cols"] = [str(c) for c in t["cols"]]
+            t["title"] = str(t["title"])
         return d
 
     @classmethod

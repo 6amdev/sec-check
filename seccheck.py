@@ -80,8 +80,8 @@ def finish(results, args, name):
 
 
 def run_module(mod, target, args):
-    from checks import camera, cve, dns, host, iot, lan, mac, router, tls, web, webapp, wifi, windows
-    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac, "webapp": webapp, "iot": iot, "dns": dns, "email": dns, "cve": cve}[mod]
+    from checks import camera, cve, dns, host, iot, lan, mac, router, tls, tools, web, webapp, wifi, windows
+    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac, "webapp": webapp, "iot": iot, "dns": dns, "email": dns, "cve": cve, "tools": tools}[mod]
     print(_("▶ กำลังตรวจ {m} {t}", m=_(report.MODULE_TH[mod]), t=target or ""), flush=True)
     return m.run(target, args)
 
@@ -192,6 +192,9 @@ def main(argv=None):
     cv = sub.add_parser("cve", help=_("จับคู่เวอร์ชันบริการกับช่องโหว่ที่รู้จัก (CVE, ออฟไลน์)"))
     cv.add_argument("target")
     cv.add_argument("--level", **lvl)
+    tl = sub.add_parser("tools", help=_("ห่อเครื่องมือภายนอก nmap/nuclei/testssl/lynis (ถ้าติดตั้งไว้)"))
+    tl.add_argument("target", nargs="?")
+    tl.add_argument("--level", **lvl)
     r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
     r.add_argument("target", nargs="?")
     r.add_argument("--timeout", type=float, default=1.5)

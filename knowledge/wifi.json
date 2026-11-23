@@ -1,0 +1,90 @@
+{
+  "wifi.open": {
+    "severity": "critical", "tag": "CWE-319", "level": 1,
+    "title": {"th": "Wi-Fi ไม่มีการเข้ารหัส (เปิดโล่ง)", "en": "Open Wi-Fi (no encryption)"},
+    "what": {"th": "เครือข่าย Wi-Fi ที่ใช้อยู่ไม่ได้เข้ารหัส — ใครก็ต่อเข้ามาและดักข้อมูลได้", "en": "The Wi-Fi you're on is unencrypted — anyone can join and sniff traffic."},
+    "attack": {"th": "คนที่อยู่ในระยะสัญญาณต่อเข้าวงได้ทันที และดักทุกอย่างที่ไม่ใช่ HTTPS (รหัสผ่าน, cookie) ด้วยเครื่องมือฟรี", "en": "Anyone in range joins instantly and captures everything that isn't HTTPS (passwords, cookies) with free tools."},
+    "fix": {"th": "ตั้งเราเตอร์เป็น WPA2-PSK (AES) หรือ WPA3 พร้อมรหัสยาว 12+ ตัว · ถ้าจำเป็นต้องใช้ Wi-Fi สาธารณะ ใช้ VPN", "en": "Set the router to WPA2-PSK (AES) or WPA3 with a 12+ character passphrase · use a VPN on public Wi-Fi."},
+    "refs": []
+  },
+  "wifi.wep": {
+    "severity": "critical", "tag": "CWE-327", "level": 1,
+    "title": {"th": "Wi-Fi ใช้ WEP (ถอดรหัสได้ในไม่กี่นาที)", "en": "Wi-Fi uses WEP"},
+    "what": {"th": "เครือข่ายใช้ WEP ซึ่งถูกเจาะได้ตั้งแต่ปี 2005", "en": "The network uses WEP, breakable since 2005."},
+    "attack": {"th": "aircrack-ng ถอดรหัส WEP ได้จากการดักแพ็กเก็ตไม่นาน เท่ากับไม่มีการป้องกัน", "en": "aircrack-ng recovers a WEP key from a short capture — effectively no protection."},
+    "fix": {"th": "เปลี่ยนเป็น WPA2/WPA3 ทันที · ถ้าเราเตอร์ไม่รองรับ ควรเปลี่ยนเครื่อง", "en": "Switch to WPA2/WPA3 now; replace the router if it can't."},
+    "refs": []
+  },
+  "wifi.wpa1": {
+    "severity": "high", "tag": "CWE-327", "level": 2,
+    "title": {"th": "Wi-Fi ใช้ WPA1/TKIP", "en": "Wi-Fi uses WPA1/TKIP"},
+    "what": {"th": "เครือข่ายใช้ WPA รุ่นแรก (TKIP) ซึ่งมีจุดอ่อนที่รู้จักแล้ว", "en": "The network uses original WPA (TKIP), which has known weaknesses."},
+    "attack": {"th": "TKIP ถูกโจมตีได้ และเปิดช่องให้ downgrade จาก WPA2", "en": "TKIP is attackable and enables downgrade from WPA2."},
+    "fix": {"th": "ตั้งเป็น WPA2-PSK (AES/CCMP) อย่างเดียว หรือ WPA2/WPA3", "en": "Use WPA2-PSK (AES/CCMP) only, or WPA2/WPA3."},
+    "refs": []
+  },
+  "wifi.wpa_mixed": {
+    "severity": "medium", "tag": "CWE-327", "level": 2,
+    "title": {"th": "Wi-Fi เปิดโหมดผสม WPA1+WPA2", "en": "Wi-Fi allows mixed WPA1+WPA2"},
+    "what": {"th": "เครือข่ายยอมรับทั้ง WPA1 และ WPA2 — อุปกรณ์เก่ายังใช้ TKIP ได้", "en": "The network accepts both WPA1 and WPA2, so old devices can still use TKIP."},
+    "attack": {"th": "ผู้โจมตีบังคับให้ลดไปใช้ WPA1/TKIP ที่อ่อนกว่าได้", "en": "An attacker can force a downgrade to the weaker WPA1/TKIP."},
+    "fix": {"th": "ปิดโหมดผสม ใช้ WPA2-AES หรือ WPA2/WPA3 เท่านั้น", "en": "Disable mixed mode; use WPA2-AES or WPA2/WPA3 only."},
+    "refs": []
+  },
+  "wifi.wpa2_suggest_wpa3": {
+    "severity": "info", "tag": "Hardening", "level": 3,
+    "title": {"th": "ใช้ WPA2 อยู่ — ถ้ารองรับ ลองเปิด WPA3", "en": "On WPA2 — enable WPA3 if supported"},
+    "what": {"th": "เครือข่ายใช้ WPA2 (ดีอยู่แล้ว) WPA3 เพิ่มการป้องกันการเดารหัสแบบ offline (SAE)", "en": "The network uses WPA2 (fine); WPA3 adds protection against offline password guessing (SAE)."},
+    "attack": {"th": "WPA2-PSK ถ้ารหัสสั้น ผู้โจมตีจับ handshake แล้วเดารหัสแบบ offline ได้ WPA3 (SAE) กันแบบนี้", "en": "With a short WPA2-PSK, an attacker captures the handshake and guesses offline; WPA3 (SAE) blocks that."},
+    "fix": {"th": "ถ้าเราเตอร์และอุปกรณ์รองรับ ตั้งเป็น WPA3 หรือ WPA2/WPA3 transition · และตั้งรหัสยาว", "en": "If the router and devices support it, set WPA3 or WPA2/WPA3 transition · and use a long passphrase."},
+    "refs": []
+  },
+  "wifi.weak_passphrase": {
+    "severity": "high", "tag": "CWE-521", "level": 1,
+    "title": {"th": "รหัส Wi-Fi อ่อน (เดา/ถอดได้)", "en": "Weak Wi-Fi passphrase"},
+    "what": {"th": "รหัสผ่าน Wi-Fi สั้นหรือเดาง่าย (ตรวจในเครื่อง ไม่ได้ส่งออกไปไหน ไม่แสดงตัวรหัส)", "en": "The Wi-Fi passphrase is short or guessable (checked locally; never transmitted or shown)."},
+    "attack": {"th": "ผู้โจมตีจับ 4-way handshake (รับแบบเฉยๆ ได้) แล้วลองรหัสจาก wordlist แบบ offline เร็วมาก รหัสสั้น/ติด wordlist จึงถูกถอดได้", "en": "An attacker captures the 4-way handshake (passively) and tries a wordlist offline, very fast; short or dictionary passphrases fall quickly."},
+    "fix": {"th": "ตั้งรหัส Wi-Fi ใหม่ให้ยาว 12–20 ตัว ผสมคำที่ไม่มีในพจนานุกรม (เช่น 4 คำสุ่ม) และเปิด WPA3 ถ้าได้", "en": "Set a new 12–20 character passphrase that isn't in any dictionary (e.g. 4 random words) and enable WPA3 if possible."},
+    "refs": ["https://www.useapassphrase.com/"]
+  },
+  "wifi.duplicate_ssid": {
+    "severity": "info", "tag": "Detection", "level": 3,
+    "title": {"th": "พบชื่อ Wi-Fi ซ้ำหลาย BSSID — ตรวจว่าเป็นของเราจริง", "en": "Same SSID on several BSSIDs — verify it's yours"},
+    "what": {"th": "ชื่อเครือข่ายเดียวกันออกอากาศจากหลายจุด (BSSID) ปกติคือ mesh/ตัวขยายสัญญาณของเราเอง แต่ก็อาจเป็น 'evil twin' ที่ปลอมชื่อ Wi-Fi เรา", "en": "The same network name is broadcast from several access points (BSSIDs). Usually that's your own mesh/extender — but it can be an 'evil twin' impersonating your Wi-Fi."},
+    "attack": {"th": "evil twin ตั้งชื่อเหมือน Wi-Fi เรา สัญญาณแรงกว่า หลอกให้อุปกรณ์มาเชื่อมต่อ แล้วดักข้อมูลหรือทำหน้า login ปลอม", "en": "An evil twin copies your SSID with a stronger signal, lures devices to connect, then sniffs traffic or shows a fake login page."},
+    "fix": {"th": "ตรวจว่า BSSID (MAC) ทุกตัวเป็นอุปกรณ์ของเราจริง · เปิด PMF/802.11w (management frame protection) · ใช้ WPA3 · ถ้าเจอ BSSID แปลกที่ไม่รู้จัก ให้ระวัง", "en": "Confirm every BSSID (MAC) is your own gear · enable PMF/802.11w (management-frame protection) · use WPA3 · be wary of an unknown BSSID."},
+    "refs": []
+  },
+  "wifi.manual_wps": {
+    "severity": "check", "tag": "Checklist", "level": 1,
+    "title": {"th": "ปิด WPS หรือยัง (ตรวจเองในหน้าเราเตอร์)", "en": "Is WPS disabled? (check in the router page)"},
+    "what": {"th": "WPS = ปุ่ม/PIN 8 หลักต่อ Wi-Fi ง่ายๆ · ตรวจสถานะจริงต้องดูในหน้า admin (เห็นจากการสแกนเฉยๆ ไม่ชัด)", "en": "WPS is the push-button / 8-digit PIN for easy joining; its real state is only clear in the admin page (a passive scan can't tell reliably)."},
+    "attack": {"th": "PIN ของ WPS ถูก brute-force ได้ในไม่กี่ชั่วโมง (Reaver/Pixie Dust) แม้รหัส Wi-Fi จะยาวแค่ไหน", "en": "The WPS PIN can be brute-forced in hours (Reaver/Pixie Dust), however strong the Wi-Fi password."},
+    "fix": {"th": "หน้า admin เราเตอร์ → Wireless → WPS → Disable", "en": "Router admin page → Wireless → WPS → Disable."},
+    "refs": []
+  },
+  "wifi.manual_pmf": {
+    "severity": "check", "tag": "Checklist", "level": 3,
+    "title": {"th": "เปิด PMF/802.11w (กัน deauth) หรือยัง", "en": "Is PMF/802.11w enabled? (deauth protection)"},
+    "what": {"th": "Protected Management Frames กันการส่งเฟรม 'ตัดการเชื่อมต่อ' ปลอม (deauth) ที่ใช้เตะอุปกรณ์หลุดและจับ handshake", "en": "Protected Management Frames block forged 'disconnect' (deauth) frames used to kick devices off and capture handshakes."},
+    "attack": {"th": "ไม่มี PMF → ผู้โจมตีส่ง deauth เตะอุปกรณ์เราหลุด แล้วจับ 4-way handshake ไปเดารหัส offline หรือทำ evil twin", "en": "Without PMF an attacker sends deauth to knock your devices off, then captures the 4-way handshake to guess offline or run an evil twin."},
+    "fix": {"th": "หน้า admin → Wireless security → เปิด PMF/802.11w (optional หรือ required) · WPA3 บังคับ PMF อยู่แล้ว", "en": "Admin page → Wireless security → enable PMF/802.11w (optional or required) · WPA3 requires it already."},
+    "refs": []
+  },
+  "wifi.manual_passphrase_test": {
+    "severity": "check", "tag": "Checklist", "level": 1,
+    "title": {"th": "ทดสอบความแข็งแรงของรหัส Wi-Fi ตัวเอง (แบบปลอดภัย)", "en": "Test your own Wi-Fi passphrase strength (the safe way)"},
+    "what": {"th": "อยากรู้ว่ารหัส Wi-Fi ตัวเอง 'ถอดได้ไหม' โดยไม่ต้องยิง deauth หรือจับ handshake: ให้ sec-check ตรวจความแข็งแรงของรหัสในเครื่องเลย", "en": "To learn whether your own Wi-Fi password is 'crackable' without any deauth or handshake capture, let sec-check check the passphrase strength locally."},
+    "attack": {"th": "วิธีที่ผู้โจมตีใช้คือจับ handshake แล้วเดา offline — ซึ่งแพ้ก็ต่อเมื่อรหัสอ่อน การตรวจความแข็งแรงตรงๆ จึงตอบคำถามเดียวกันโดยไม่ต้องโจมตี", "en": "The attack is capture-then-guess-offline, which only wins against a weak passphrase — so checking strength directly answers the same question without attacking anything."},
+    "fix": {"th": "รันในเครื่องตัวเอง: `./seccheck.py wifi --passphrase 'รหัสของคุณ'` (รหัสไม่ถูกบันทึกหรือส่งออก) · ถ้าจะทดสอบแบบจับ handshake จริงบนเครือข่ายของตัวเอง ใช้เครื่องมือมาตรฐาน (aircrack-ng/hcxtools) ใน Terminal ของคุณเอง — sec-check ไม่ยิง deauth และไม่ทำให้อุปกรณ์หลุดให้", "en": "Run locally: `./seccheck.py wifi --passphrase 'yourpass'` (the passphrase is never stored or sent) · to test by capturing a real handshake on your own network, use standard tools (aircrack-ng/hcxtools) in your own terminal — sec-check does not send deauth or knock devices offline for you."},
+    "refs": ["https://www.useapassphrase.com/"]
+  },
+  "wifi.manual_admin": {
+    "severity": "check", "tag": "Checklist", "level": 1,
+    "title": {"th": "เปลี่ยนรหัส admin ของเราเตอร์/AP แล้วหรือยัง", "en": "Changed the router/AP admin password?"},
+    "what": {"th": "รหัส admin ของตัวกระจาย Wi-Fi ที่ยังเป็นค่าโรงงาน = ใครต่อ Wi-Fi ได้ก็เข้าไปเปลี่ยนการตั้งค่าได้", "en": "A factory admin password on the AP means anyone on the Wi-Fi can change its settings."},
+    "attack": {"th": "รหัส default หาได้ในเน็ต ต่อ Wi-Fi แล้วเข้า http://<gateway> เปลี่ยน DNS/เปิดพอร์ต/ดูรหัส Wi-Fi ได้", "en": "Default passwords are online; on the Wi-Fi an attacker opens http://<gateway> and changes DNS, opens ports, or reads the Wi-Fi key."},
+    "fix": {"th": "ตรวจเราเตอร์เพิ่มด้วย `./seccheck.py router` และเปลี่ยนรหัส admin เป็นรหัสยาวไม่ซ้ำ", "en": "Also run `./seccheck.py router` and set a long unique admin password."},
+    "refs": []
+  }
+}

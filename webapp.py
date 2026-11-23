@@ -33,7 +33,7 @@ from core import VERSION, db, kb, netmap, report, scope
 from core.finding import Result, SEVERITIES, grade, score
 
 E = html.escape
-MODULES = {"host": "เครื่องนี้ (Linux)", "lan": "เครือข่าย LAN", "web": "เว็บไซต์", "router": "เราเตอร์ / Wi-Fi"}
+MODULES = {"host": "เครื่องนี้ (Linux)", "lan": "เครือข่าย LAN", "web": "เว็บไซต์", "router": "เราเตอร์ / Wi-Fi", "wifi": "Wi-Fi"}
 JOBS = {}                      # job_id -> dict(status, log, scan_id, error, module, target)
 SCAN_LOCK = threading.Lock()   # สแกนทีละงาน / one scan at a time
 SESSIONS = set()
@@ -203,6 +203,7 @@ def scan_form(lang):
 <form method="post" action="/scan?lang={lang}">
 <p><label>{E(_("เลือกเป้าหมาย"))}:<br><select name="pick">
 <option value="host">{E(_("เครื่องนี้ (Linux) — host audit"))}</option>
+<option value="wifi">{E(_("Wi-Fi ที่ต่ออยู่ (passive)"))}</option>
 <option value="lan:">{E(_("วงแลนของเครื่องนี้ (อัตโนมัติ)"))}</option>
 {lantargets}{webtargets}
 </select></label></p>
@@ -224,11 +225,14 @@ def run_job(job_id, pick, creds, level=5):
         job["status"] = "running"
         buf = io.StringIO()
         try:
-            from checks import host, lan, web
-            opts = argparse.Namespace(delay=0.1, timeout=0.8, max_hosts=1024, default_creds=creds)
+            from checks import host, lan, web, wifi
+            opts = argparse.Namespace(delay=0.1, timeout=0.8, max_hosts=1024, default_creds=creds,
+                                      passphrase=None, ssid=None)
             with contextlib.redirect_stdout(buf):
                 if pick == "host":
                     results = [host.run(None, opts)]
+                elif pick == "wifi":
+                    results = [wifi.run(None, opts)]
                 elif pick.startswith("lan:"):
                     results = [lan.run(pick[4:] or None, opts)]
                 elif pick.startswith("web:"):

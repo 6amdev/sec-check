@@ -25,7 +25,7 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 ## ✨ What it does
 
-Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **98 lessons** — list them with `./seccheck.py lessons`.
+Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **109 lessons** — list them with `./seccheck.py lessons`.
 
 | Module | Checks | Examples |
 |---|---|---|
@@ -33,8 +33,11 @@ Every finding in the report comes with three boxes: **What it is**, **How attack
 | 🖧 **lan** | 26 | Host discovery without root, device-type guess, ~40 common ports per host, plus read-only probes: Redis with no auth, VNC with no password, open Docker API, Elasticsearch, memcached, Telnet, FTP, SMB, RDP, databases, MQTT, **IP cameras with unauthenticated RTSP**, **HTTP Basic auth over plain HTTP**, **opt-in default-credential check**, printers, NFS, TR-069 |
 | 🐧 **host** | 27 | Services listening on the network, ufw firewall, sshd config (root login, passwords), **UID-0 & sudo accounts, empty passwords, password hashing & pwquality, world-writable files, SUID binaries**, pending security updates, unattended-upgrades, reboot needed, `/etc/shadow` & `~/.ssh` permissions, keys without a passphrase, ASLR, disk encryption, auto-login, screen lock, Samba guest shares |
 | 📶 **router** | 9 + 6 checklist | Open ports on the router, admin page over HTTP, UPnP, Wi-Fi encryption (open/WEP/WPA1/WPA2/WPA3), DNS in use, plus a hand-check list: admin password, WPS, firmware, remote management, guest/IoT network, port forwards |
+| 📡 **wifi** | 7 + 4 checklist | Passive audit of the Wi-Fi you're on: encryption (Open/WEP/WPA1/mixed/WPA2/WPA3), rogue/evil-twin (same SSID on another BSSID), plus a local **passphrase-strength** check (`--passphrase`, never stored or shown) and a checklist for WPS, PMF, and router admin. **Passive only — it never deauths, captures handshakes, or cracks anything** (see note below). |
 
 **Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
+
+**On Wi-Fi specifically:** the `wifi` module only *listens* — it reads what nearby access points already broadcast (via `nmcli`, the same thing your OS Wi-Fi menu shows) and flags the network you're on. It never sends deauthentication frames, never captures handshakes, and never brute-forces anything, because deauth is a denial-of-service technique and sec-check doesn't ship attack tooling. To answer "is my Wi-Fi password crackable?", it checks the **strength** of a passphrase you give it, locally (`./seccheck.py wifi --passphrase '…'`) — length, character variety, and common-password membership — which is the same thing an offline crack would test, without attacking the air. If you want to test by capturing a real handshake on *your own* network, use standard tools (aircrack-ng/hcxtools) in your own terminal.
 
 The one exception, **off by default**, is `--default-creds`: when you pass it, the LAN module tries a tiny list of well-known factory passwords (admin/admin …) **against allow-listed targets only**, using HTTP **Basic auth** (a read-only `GET` — nothing is changed), one credential at a time, rate-limited, stopping at the first that works. It never touches form-based logins (a form `POST` could lock an account), and needs root for nothing. This is for auditing **your own** routers, cameras and NAS.
 

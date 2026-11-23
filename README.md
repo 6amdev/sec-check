@@ -25,7 +25,7 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 ## ✨ What it does
 
-Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **134 lessons** — list them with `./seccheck.py lessons`.
+Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **137 lessons** — list them with `./seccheck.py lessons`.
 
 | Module | Checks | Examples |
 |---|---|---|
@@ -38,10 +38,13 @@ Every finding in the report comes with three boxes: **What it is**, **How attack
 | 🪟 **windows** | 6 | Non-destructive SMB/RDP checks of a Windows host on your LAN: **SMBv1 enabled** (EternalBlue/WannaCry class), **SMB signing not required** (NTLM relay), NetBIOS exposure, RDP exposure and **RDP without NLA**. Protocol negotiation only — no login, no guessing, no exploit. |
 | 📷 **camera** | 4 | Non-destructive checks of an IP camera / NVR: **ONVIF** present and whether it returns device info **without authentication**, **RTSP** streams with no auth, exposed **snapshot/MJPEG** URLs viewable without login, and a default-web-password checklist. Read-only requests only — no settings changed, no footage saved. |
 | 🍎 **mac** | 4 | Non-destructive checks of a Mac on your LAN: Screen Sharing (VNC 5900, incl. no-password), AFP (legacy file sharing), Apple Remote Desktop (3283), SMB signing (shared with the windows module), and SSH — plus a firewall checklist. Protocol negotiation only. |
+| 🧪 **webapp** | 3 | Light SQLi/XSS/CSRF checks for **practice targets** (DVWA/Juice Shop on localhost) or your own sites in the allow-list. Non-destructive: a single `'` to surface a SQL error, a harmless marker to detect unencoded reflection, and a form check for CSRF tokens — GET params only, never submits a POST form, never reads or changes data. See note below. |
 
 **Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
 
 **On Wi-Fi specifically:** the `wifi` module only *listens* — it reads what nearby access points already broadcast (via `nmcli`, the same thing your OS Wi-Fi menu shows) and flags the network you're on. It never sends deauthentication frames, never captures handshakes, and never brute-forces anything, because deauth is a denial-of-service technique and sec-check doesn't ship attack tooling. To answer "is my Wi-Fi password crackable?", it checks the **strength** of a passphrase you give it, locally (`./seccheck.py wifi --passphrase '…'`) — length, character variety, and common-password membership — which is the same thing an offline crack would test, without attacking the air. If you want to test by capturing a real handshake on *your own* network, use standard tools (aircrack-ng/hcxtools) in your own terminal.
+
+**The `webapp` module is the one module that sends test input** (a `'` to surface SQL errors, a benign marker to check output encoding). It stays non-destructive — no `OR 1=1`/`UNION`, no POST submissions, no data read or changed — and is meant for local practice targets like DVWA or Juice Shop, or your own sites you've added to the allow-list. Point it at a practice container first.
 
 The one exception, **off by default**, is `--default-creds`: when you pass it, the LAN module tries a tiny list of well-known factory passwords (admin/admin …) **against allow-listed targets only**, using HTTP **Basic auth** (a read-only `GET` — nothing is changed), one credential at a time, rate-limited, stopping at the first that works. It never touches form-based logins (a form `POST` could lock an account), and needs root for nothing. This is for auditing **your own** routers, cameras and NAS.
 

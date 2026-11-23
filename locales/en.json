@@ -303,5 +303,16 @@
  "ระบุ IP ของเครื่อง Mac เช่น ./seccheck.py mac 192.168.1.40": "Give the Mac's IP, e.g. ./seccheck.py mac 192.168.1.40",
  "บริการที่เปิดบนเครื่อง Mac": "Services open on the Mac",
  "ไม่พบบริการแชร์/รีโมตของ Mac ที่เปิดอยู่บนเป้าหมายนี้": "No Mac sharing/remote services open on this target",
- "ตรวจเครื่อง Mac ในวง (Screen Sharing/AFP/SMB)": "Audit a Mac on the LAN (Screen Sharing/AFP/SMB)"
+ "ตรวจเครื่อง Mac ในวง (Screen Sharing/AFP/SMB)": "Audit a Mac on the LAN (Screen Sharing/AFP/SMB)",
+ "เชื่อมต่อเว็บแอปไม่ได้": "Could not connect to the web app",
+ "พารามิเตอร์ที่ทดสอบ (เฉพาะ GET)": "Parameters tested (GET only)",
+ "ใส่ ' แล้วเจอ error ของฐานข้อมูล": "a ' produced a database error",
+ "ค่าสะท้อนกลับแบบไม่ encode ({x})": "value reflected unencoded ({x})",
+ "ไม่พบสัญญาณ SQL error จากการใส่ '": "No SQL-error signal from a ' probe",
+ "ค่าที่ทดสอบถูก encode ก่อนแสดง (ไม่พบ reflected XSS)": "Test value was encoded before output (no reflected XSS)",
+ "ฟอร์ม POST มี CSRF token": "POST form has a CSRF token",
+ "cookie ไม่มี SameSite (เสริมการกัน CSRF ได้)": "cookie has no SameSite (would help against CSRF)",
+ "ทดสอบแบบไม่ทำลาย: ใส่ ' ดู error, ใส่เครื่องหมายทดสอบดูการ encode, ตรวจ CSRF token — ไม่ใช้ OR 1=1/UNION, ไม่ส่งฟอร์ม POST, ไม่ดึง/แก้ข้อมูล · ใช้กับเป้าฝึกหรือเว็บของตัวเองเท่านั้น": "Non-destructive: a ' to surface errors, a marker to check encoding, a CSRF-token check — no OR 1=1/UNION, no POST submits, no data read or changed · practice targets or your own sites only",
+ "ตรวจช่องโหว่เว็บแอป SQLi/XSS/CSRF (เป้าฝึก/เว็บตัวเอง)": "Web-app SQLi/XSS/CSRF checks (practice targets / your own sites)",
+ "เว็บแอป": "Web app"
 }

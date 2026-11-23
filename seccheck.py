@@ -72,8 +72,8 @@ def finish(results, args, name):
 
 
 def run_module(mod, target, args):
-    from checks import camera, host, lan, mac, router, tls, web, wifi, windows
-    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac}[mod]
+    from checks import camera, host, lan, mac, router, tls, web, webapp, wifi, windows
+    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac, "webapp": webapp}[mod]
     print(_("▶ กำลังตรวจ {m} {t}", m=_(report.MODULE_TH[mod]), t=target or ""), flush=True)
     return m.run(target, args)
 
@@ -166,6 +166,10 @@ def main(argv=None):
     mc = sub.add_parser("mac", help=_("ตรวจเครื่อง Mac ในวง (Screen Sharing/AFP/SMB)"))
     mc.add_argument("target")
     mc.add_argument("--level", **lvl)
+    wa = sub.add_parser("webapp", help=_("ตรวจช่องโหว่เว็บแอป SQLi/XSS/CSRF (เป้าฝึก/เว็บตัวเอง)"))
+    wa.add_argument("target")
+    wa.add_argument("--delay", type=float, default=0.2)
+    wa.add_argument("--level", **lvl)
     r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
     r.add_argument("target", nargs="?")
     r.add_argument("--timeout", type=float, default=1.5)

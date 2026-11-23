@@ -246,6 +246,74 @@ def recv_nbss_req(sock, timeout=4):
         return None
 
 
+class WebappWeak(BaseHTTPRequestHandler):
+    """เว็บแอปฝึก (มีช่องโหว่ตั้งใจ): สะท้อน input ดิบ (XSS) + โชว์ SQL error เมื่อมี ' (SQLi) + ฟอร์มไม่มี CSRF token
+    Practice app (intentionally vulnerable): reflects input raw (XSS), shows a SQL error on ' (SQLi),
+    form without CSRF token. For testing the webapp module against localhost only."""
+    server_version = "LabApp"
+    sys_version = ""
+
+    def log_message(self, *a):
+        pass
+
+    def do_GET(self):
+        import urllib.parse as up
+        q = up.parse_qs(up.urlsplit(self.path).query)
+        name = (q.get("name", [""])[0])
+        idv = (q.get("id", [""])[0])
+        err = ""
+        if "'" in idv or '"' in idv:                 # ❌ error-based SQLi
+            err = (f"<pre>Database error: You have an error in your SQL syntax; check the manual near "
+                   f"'{name}{idv}' at line 1 (mysql_fetch_array)</pre>")
+        body = (f"<html><head><title>Lab Shop Search</title></head><body>"
+                f"<h1>Results for {name}</h1>"                     # ❌ reflected XSS (ไม่ encode)
+                f"{err}"
+                f"<form method='post' action='/login'>"           # ❌ POST แต่ไม่มี CSRF token
+                f"<input name='user'><input name='pass' type='password'><button>Login</button></form>"
+                f"</body></html>")
+        data = body.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Set-Cookie", "sid=lab123; path=/")       # ❌ ไม่มี SameSite/HttpOnly
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(data)
+
+    do_HEAD = do_GET
+
+
+class WebappSafe(BaseHTTPRequestHandler):
+    """เว็บแอปฝึกแบบแก้แล้ว: encode output, ไม่โชว์ SQL error, ฟอร์มมี CSRF token, cookie ปลอดภัย"""
+    server_version = "LabApp"
+    sys_version = ""
+
+    def log_message(self, *a):
+        pass
+
+    def do_GET(self):
+        import html as _h
+        import urllib.parse as up
+        q = up.parse_qs(up.urlsplit(self.path).query)
+        name = _h.escape(q.get("name", [""])[0])        # ✅ encode
+        body = (f"<html><head><title>Lab Shop Search</title></head><body>"
+                f"<h1>Results for {name}</h1>"
+                f"<form method='post' action='/login'>"
+                f"<input type='hidden' name='csrf_token' value='r4nd0m'>"     # ✅ CSRF token
+                f"<input name='user'><input name='pass' type='password'><button>Login</button></form>"
+                f"</body></html>")
+        data = body.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Set-Cookie", "sid=lab123; Path=/; HttpOnly; Secure; SameSite=Lax")
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(data)
+
+    do_HEAD = do_GET
+
+
 class FakeCamera(BaseHTTPRequestHandler):
     """กล้องปลอม: ONVIF ตอบ GetDeviceInformation โดยไม่ต้องล็อกอิน + snapshot เปิดดูได้ (ทดสอบโมดูล camera)"""
     server_version = "Camera"
@@ -376,6 +444,8 @@ def main():
         start("rdp no-NLA (fake)", TCP, (WEAK, 3389), FakeRDP),
         start("camera onvif+snapshot (fake)", ThreadingHTTPServer, (WEAK, 8899), FakeCamera),
         start("apple remote desktop (fake)", TCP, (WEAK, 3283), NoOp),
+        start("webapp practice (vulnerable)", ThreadingHTTPServer, (WEAK, 8810), WebappWeak),
+        start("webapp practice (hardened)", ThreadingHTTPServer, (SAFE, 8810), WebappSafe),
     ]
     if not any(servers):
         sys.exit(1)

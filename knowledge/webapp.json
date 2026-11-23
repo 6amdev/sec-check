@@ -1,0 +1,26 @@
+{
+  "webapp.sqli_error": {
+    "severity": "critical", "tag": "OWASP A03 · CWE-89", "level": 4,
+    "title": {"th": "อาจมีช่องโหว่ SQL Injection (error-based)", "en": "Possible SQL injection (error-based)"},
+    "what": {"th": "เมื่อใส่เครื่องหมาย ' ลงในพารามิเตอร์ เว็บตอบกลับด้วยข้อความ error ของฐานข้อมูล — สัญญาณว่า input ถูกต่อเข้ากับคำสั่ง SQL ตรงๆ", "en": "Adding a ' to a parameter makes the app return a database error — a sign the input is concatenated straight into an SQL query."},
+    "attack": {"th": "ผู้โจมตีใส่คำสั่ง SQL ผ่านช่องกรอกเพื่อดึงฐานข้อมูลทั้งหมด (ชื่อ/รหัสผ่าน/ข้อมูลลูกค้า), ข้ามการล็อกอิน, หรือบางครั้งสั่งงานเซิร์ฟเวอร์ · เป็นช่องโหว่เว็บที่ร้ายแรงที่สุดอันหนึ่ง", "en": "An attacker injects SQL through the input to dump the whole database (names, passwords, customer data), bypass login, or sometimes run commands — one of the most serious web flaws."},
+    "fix": {"th": "ใช้ parameterized query / prepared statement เสมอ (อย่าต่อสตริง SQL เอง) · ตรวจสอบชนิดข้อมูล input · ปิดการแสดง error ของฐานข้อมูลบน production (sec-check ตรวจแค่สัญญาณ error ไม่ได้ดึงข้อมูล)", "en": "Always use parameterized queries / prepared statements (never build SQL by string concatenation) · validate input types · hide database errors in production (sec-check only looks for the error signal; it never extracts data)."},
+    "refs": ["https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"]
+  },
+  "webapp.xss_reflected": {
+    "severity": "high", "tag": "OWASP A03 · CWE-79", "level": 4,
+    "title": {"th": "อาจมีช่องโหว่ Reflected XSS", "en": "Possible reflected XSS"},
+    "what": {"th": "ค่าที่ส่งเข้าไปถูกเอาไปแสดงในหน้าเว็บแบบดิบ (ไม่ encode) — ตัวอักษร < > สะท้อนกลับมาเป็น HTML", "en": "A submitted value is reflected into the page raw (not encoded) — characters like < > come back as HTML."},
+    "attack": {"th": "ผู้โจมตีสร้างลิงก์ที่ฝัง JavaScript เมื่อเหยื่อกด สคริปต์รันบนเบราว์เซอร์เหยื่อ ขโมย cookie/session หรือทำรายการแทนเหยื่อได้ (sec-check ใช้แค่เครื่องหมายทดสอบที่ไม่เป็นอันตราย ไม่ได้ยิงสคริปต์จริง)", "en": "An attacker crafts a link embedding JavaScript; when the victim clicks it, the script runs in their browser and steals cookies/sessions or acts as them (sec-check uses only a harmless marker, not a real script)."},
+    "fix": {"th": "encode/escape ทุกค่าก่อนแสดงผล (HTML entity encoding) ตามบริบท · ตั้ง Content-Security-Policy เป็นเกราะชั้นสอง · ใช้เฟรมเวิร์กที่ escape ให้อัตโนมัติ", "en": "Encode/escape every value before output (HTML-entity encoding) per context · set a Content-Security-Policy as a second layer · use a framework that auto-escapes."},
+    "refs": ["https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html"]
+  },
+  "webapp.no_csrf_token": {
+    "severity": "medium", "tag": "OWASP A01 · CWE-352", "level": 4,
+    "title": {"th": "ฟอร์มไม่มี CSRF token", "en": "Form without a CSRF token"},
+    "what": {"th": "ฟอร์มที่ส่งข้อมูล (POST) ไม่มีช่องซ่อน token กันการปลอมคำขอข้ามเว็บ", "en": "A data-submitting (POST) form has no hidden anti-CSRF token."},
+    "attack": {"th": "เว็บของผู้โจมตีสั่งให้เบราว์เซอร์เหยื่อที่ล็อกอินอยู่ ส่งฟอร์มบนเว็บเราโดยเหยื่อไม่รู้ตัว (เช่น เปลี่ยนอีเมล/รหัส/โอนเงิน) — เรียกว่า CSRF", "en": "An attacker's site makes a logged-in victim's browser submit your form without their knowledge (e.g. change email/password, transfer funds) — a CSRF attack."},
+    "fix": {"th": "ใส่ CSRF token ที่สุ่มต่อ session ในทุกฟอร์มที่เปลี่ยนข้อมูล และตรวจฝั่งเซิร์ฟเวอร์ · ตั้ง cookie เป็น SameSite=Lax/Strict เป็นเกราะเสริม", "en": "Add a per-session random CSRF token to every state-changing form and verify it server-side · set cookies to SameSite=Lax/Strict as a backup."},
+    "refs": ["https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"]
+  }
+}

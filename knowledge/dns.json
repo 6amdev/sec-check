@@ -1,0 +1,58 @@
+{
+  "dns.no_spf": {
+    "severity": "medium", "tag": "Email · CWE-290", "level": 2,
+    "title": {"th": "โดเมนไม่มี SPF", "en": "Domain has no SPF record"},
+    "what": {"th": "ไม่มีเรคคอร์ด SPF (TXT v=spf1) ที่บอกว่าเซิร์ฟเวอร์ใดส่งอีเมลแทนโดเมนนี้ได้", "en": "No SPF record (TXT v=spf1) saying which servers may send mail for this domain."},
+    "attack": {"th": "ใครก็ปลอมที่อยู่ผู้ส่ง @โดเมนคุณส่งอีเมลหลอก (phishing) ไปหาลูกค้า/พนักงานได้ โดยอีเมลผ่านการตรวจง่ายขึ้น", "en": "Anyone can spoof the from-address @your-domain to phish your customers/staff, and the mail passes basic checks more easily."},
+    "fix": {"th": "เพิ่ม TXT record ที่โดเมน เช่น `v=spf1 include:_spf.ผู้ให้บริการอีเมล.com -all` (ระบุเฉพาะเซิร์ฟเวอร์ที่ส่งจริง แล้วปิดท้าย -all)", "en": "Add a TXT record at the domain, e.g. `v=spf1 include:_spf.your-mail-provider.com -all` (list only your real senders, end with -all)."},
+    "refs": ["https://dmarc.org/", "https://datatracker.ietf.org/doc/html/rfc7208"]
+  },
+  "dns.spf_weak": {
+    "severity": "low", "tag": "Email", "level": 3,
+    "title": {"th": "SPF อ่อน (ลงท้าย +all หรือ ?all)", "en": "Weak SPF (+all or ?all)"},
+    "what": {"th": "SPF ลงท้ายด้วย +all (อนุญาตทุกเซิร์ฟเวอร์) หรือ ?all (ไม่ตัดสิน) เท่ากับแทบไม่ป้องกัน", "en": "The SPF ends in +all (allow any server) or ?all (neutral), which barely protects anything."},
+    "attack": {"th": "+all ทำให้ใครส่งแทนโดเมนก็ผ่าน SPF — เหมือนไม่มี SPF", "en": "+all lets anyone pass SPF as your domain — as good as having none."},
+    "fix": {"th": "เปลี่ยนให้ลงท้าย `-all` (ปฏิเสธที่เหลือ) หรืออย่างน้อย `~all` (softfail)", "en": "End it with `-all` (reject the rest) or at least `~all` (softfail)."},
+    "refs": []
+  },
+  "dns.no_dmarc": {
+    "severity": "medium", "tag": "Email · CWE-290", "level": 2,
+    "title": {"th": "โดเมนไม่มี DMARC", "en": "Domain has no DMARC record"},
+    "what": {"th": "ไม่มีเรคคอร์ด DMARC (TXT v=DMARC1 ที่ _dmarc.โดเมน) ที่บอกให้ทำอย่างไรกับอีเมลปลอม และส่งรายงานกลับ", "en": "No DMARC record (TXT v=DMARC1 at _dmarc.<domain>) telling receivers what to do with spoofed mail and where to report."},
+    "attack": {"th": "ถ้าไม่มี DMARC แม้จะมี SPF/DKIM ผู้รับก็ไม่รู้จะปฏิเสธอีเมลปลอมหรือเปล่า และคุณไม่เห็นว่ามีใครปลอมโดเมนคุณอยู่", "en": "Without DMARC, even with SPF/DKIM, receivers aren't told to reject spoofs, and you never see who is impersonating your domain."},
+    "fix": {"th": "เพิ่ม TXT ที่ `_dmarc.โดเมน` เริ่มจาก `v=DMARC1; p=none; rua=mailto:you@โดเมน` (เก็บรายงานก่อน) แล้วค่อยเลื่อนเป็น `p=quarantine` → `p=reject`", "en": "Add a TXT at `_dmarc.<domain>` starting with `v=DMARC1; p=none; rua=mailto:you@domain` (collect reports first), then move to `p=quarantine` → `p=reject`."},
+    "refs": ["https://dmarc.org/overview/"]
+  },
+  "dns.dmarc_weak": {
+    "severity": "low", "tag": "Email", "level": 3,
+    "title": {"th": "DMARC ยังเป็น p=none (ไม่บังคับ)", "en": "DMARC policy is p=none"},
+    "what": {"th": "มี DMARC แต่ตั้ง p=none — แค่เฝ้าดู/รับรายงาน ยังไม่สั่งปฏิเสธอีเมลปลอม", "en": "DMARC exists but p=none — it only monitors/reports and doesn't yet reject spoofed mail."},
+    "attack": {"th": "อีเมลปลอมโดเมนคุณยังส่งถึงกล่องขาเข้าได้ เพราะยังไม่สั่งให้ปฏิเสธ", "en": "Spoofed mail from your domain still reaches inboxes because nothing is told to reject it."},
+    "fix": {"th": "หลังดูรายงาน (rua) ว่าของจริงผ่านหมดแล้ว เลื่อนเป็น `p=quarantine` แล้ว `p=reject`", "en": "After the reports (rua) show your real mail passes, move to `p=quarantine`, then `p=reject`."},
+    "refs": []
+  },
+  "dns.no_dkim": {
+    "severity": "low", "tag": "Email", "level": 3,
+    "title": {"th": "ไม่พบ DKIM (จาก selector ยอดนิยม)", "en": "No DKIM found (common selectors)"},
+    "what": {"th": "ลอง selector ยอดนิยมแล้วไม่พบเรคคอร์ด DKIM (v=DKIM1) — DKIM เซ็นอีเมลด้วยกุญแจเพื่อยืนยันว่ามาจากโดเมนจริง", "en": "No DKIM record (v=DKIM1) found at common selectors — DKIM cryptographically signs mail to prove it's really from the domain."},
+    "attack": {"th": "ไม่มี DKIM ทำให้ยืนยันความแท้ของอีเมลได้ยากขึ้น และ DMARC จะพึ่ง SPF อย่างเดียว (เปราะกว่าเมื่อส่งต่อ/forward)", "en": "Without DKIM, message authenticity is harder to prove and DMARC leans on SPF alone (which breaks on forwarding)."},
+    "fix": {"th": "เปิด DKIM ที่ผู้ให้บริการอีเมลของคุณ แล้วเพิ่มเรคคอร์ด public key ตามที่ผู้ให้บริการบอก (sec-check ลองแค่ selector ยอดนิยม อาจมี selector อื่นอยู่)", "en": "Enable DKIM at your mail provider and add the public-key record they give you (sec-check only tries common selectors; yours may differ)."},
+    "refs": []
+  },
+  "dns.no_dnssec": {
+    "severity": "low", "tag": "DNS · CWE-350", "level": 3,
+    "title": {"th": "โดเมนไม่ได้เปิด DNSSEC", "en": "Domain is not DNSSEC-signed"},
+    "what": {"th": "ไม่พบเรคคอร์ด DNSKEY — DNSSEC เซ็นข้อมูล DNS เพื่อกันการปลอมคำตอบ (DNS spoofing/cache poisoning)", "en": "No DNSKEY record — DNSSEC signs DNS data to prevent forged answers (DNS spoofing/cache poisoning)."},
+    "attack": {"th": "ไม่มี DNSSEC เปิดช่องให้ผู้โจมตีปลอมคำตอบ DNS ชี้ลูกค้าไปเซิร์ฟเวอร์/เว็บปลอมได้", "en": "Without DNSSEC an attacker can forge DNS answers and point your customers to fake servers/sites."},
+    "fix": {"th": "เปิด DNSSEC ที่ผู้ให้บริการ DNS/โดเมน (ผู้ให้บริการใหญ่ๆ มักเปิดได้ด้วยคลิกเดียว) แล้วตรวจว่า DS record อยู่ที่ registrar", "en": "Enable DNSSEC at your DNS/domain provider (big providers often do it in one click), then make sure the DS record is set at the registrar."},
+    "refs": []
+  },
+  "dns.no_caa": {
+    "severity": "info", "tag": "DNS", "level": 3,
+    "title": {"th": "โดเมนไม่มี CAA record", "en": "Domain has no CAA record"},
+    "what": {"th": "ไม่มี CAA ที่ระบุว่า CA เจ้าไหนออกใบรับรอง HTTPS ให้โดเมนนี้ได้", "en": "No CAA record stating which certificate authorities may issue HTTPS certs for this domain."},
+    "attack": {"th": "ไม่ใช่ช่องโหว่โดยตรง แต่ CAA ช่วยกัน CA ที่ถูกหลอก/ผิดพลาดออกใบรับรองปลอมให้โดเมนคุณ", "en": "Not a direct vulnerability, but CAA helps stop a tricked/misbehaving CA from issuing a rogue cert for your domain."},
+    "fix": {"th": "เพิ่ม CAA record เช่น `0 issue \"letsencrypt.org\"` ให้เฉพาะ CA ที่คุณใช้จริง", "en": "Add a CAA record such as `0 issue \"letsencrypt.org\"` for the CA you actually use."},
+    "refs": []
+  }
+}

@@ -72,8 +72,8 @@ def finish(results, args, name):
 
 
 def run_module(mod, target, args):
-    from checks import camera, host, iot, lan, mac, router, tls, web, webapp, wifi, windows
-    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac, "webapp": webapp, "iot": iot}[mod]
+    from checks import camera, dns, host, iot, lan, mac, router, tls, web, webapp, wifi, windows
+    m = {"web": web, "lan": lan, "host": host, "router": router, "wifi": wifi, "tls": tls, "windows": windows, "camera": camera, "mac": mac, "webapp": webapp, "iot": iot, "dns": dns, "email": dns}[mod]
     print(_("▶ กำลังตรวจ {m} {t}", m=_(report.MODULE_TH[mod]), t=target or ""), flush=True)
     return m.run(target, args)
 
@@ -173,6 +173,12 @@ def main(argv=None):
     io = sub.add_parser("iot", help=_("ตรวจอุปกรณ์ IoT/ทีวี/สมาร์ตโฮม ในวง (passive)"))
     io.add_argument("target")
     io.add_argument("--level", **lvl)
+    dn = sub.add_parser("dns", help=_("ตรวจ DNS/อีเมลของโดเมน (SPF/DKIM/DMARC/DNSSEC)"))
+    dn.add_argument("target")
+    dn.add_argument("--level", **lvl)
+    em = sub.add_parser("email", help=_("ตรวจความปลอดภัยอีเมลของโดเมน (SPF/DKIM/DMARC)"))
+    em.add_argument("target")
+    em.add_argument("--level", **lvl)
     r = sub.add_parser("router", help=_("ตรวจเราเตอร์และ Wi-Fi"))
     r.add_argument("target", nargs="?")
     r.add_argument("--timeout", type=float, default=1.5)

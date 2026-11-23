@@ -321,5 +321,19 @@
  "ไม่พบพอร์ต IoT/ทีวีที่คุ้นเปิดบนเป้าหมายนี้": "No familiar IoT/TV ports open on this target",
  "ตรวจแบบ passive — ไม่สั่งเล่น/หยุด ไม่เปลี่ยนค่า ไม่เดารหัส": "Passive — no play/stop commands, no settings changed, no password guessing",
  "ตรวจอุปกรณ์ IoT/ทีวี/สมาร์ตโฮม ในวง (passive)": "Audit IoT/TV/smart-home devices on the LAN (passive)",
- "IoT/ทีวี": "IoT/TV"
+ "IoT/ทีวี": "IoT/TV",
+ "ระบุชื่อโดเมน เช่น ./seccheck.py dns example.com": "Give a domain, e.g. ./seccheck.py dns example.com",
+ "ค้น DNS ไม่ได้ (เครือข่าย/รีโซลเวอร์มีปัญหา?)": "DNS lookup failed (network/resolver problem?)",
+ "ข้อมูลโดเมน": "Domain info",
+ "มี SPF": "SPF present",
+ "มี DMARC": "DMARC present",
+ "พบ DKIM": "DKIM found",
+ "เปิด DNSSEC (มี DNSKEY)": "DNSSEC enabled (DNSKEY present)",
+ "มี CAA (จำกัด CA ที่ออกใบรับรองได้)": "CAA present (limits which CA can issue certs)",
+ "ลอง {n} selector ยอดนิยมแล้วไม่พบ": "tried {n} common selectors, none found",
+ "ตรวจจากการค้น DNS สาธารณะอย่างเดียว ไม่ได้แตะเซิร์ฟเวอร์ของโดเมน · DKIM ลองเฉพาะ selector ยอดนิยม": "Public DNS lookups only, no contact with the domain's servers · DKIM tries common selectors only",
+ "ตรวจ DNS/อีเมลของโดเมน (SPF/DKIM/DMARC/DNSSEC)": "Check a domain's DNS/email (SPF/DKIM/DMARC/DNSSEC)",
+ "ตรวจความปลอดภัยอีเมลของโดเมน (SPF/DKIM/DMARC)": "Check a domain's email security (SPF/DKIM/DMARC)",
+ "DNS/อีเมล": "DNS/email",
+ "DMARC บังคับจริง": "DMARC enforced"
 }

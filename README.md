@@ -25,7 +25,7 @@ A non-destructive self-audit for your website, home/office LAN, Linux machine an
 
 ## ✨ What it does
 
-Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **140 lessons** — list them with `./seccheck.py lessons`.
+Every finding in the report comes with three boxes: **What it is**, **How attackers use it**, and **How to fix it** (with the exact config line or command), plus OWASP/CWE tags and references. Each one has a "Fixed" checkbox so you can work through the list. There are **147 lessons** — list them with `./seccheck.py lessons`.
 
 | Module | Checks | Examples |
 |---|---|---|
@@ -40,6 +40,7 @@ Every finding in the report comes with three boxes: **What it is**, **How attack
 | 🍎 **mac** | 4 | Non-destructive checks of a Mac on your LAN: Screen Sharing (VNC 5900, incl. no-password), AFP (legacy file sharing), Apple Remote Desktop (3283), SMB signing (shared with the windows module), and SSH — plus a firewall checklist. Protocol negotiation only. |
 | 🧪 **webapp** | 3 | Light SQLi/XSS/CSRF checks for **practice targets** (DVWA/Juice Shop on localhost) or your own sites in the allow-list. Non-destructive: a single `'` to surface a SQL error, a harmless marker to detect unencoded reflection, and a form check for CSRF tokens — GET params only, never submits a POST form, never reads or changes data. See note below. |
 | 📺 **iot** | 3 | Passive checks of IoT / TV / smart-home devices: Chromecast/Cast & DIAL controllable without auth, Roku, Telnet (Mirai-class), MQTT, exposed device web pages, and a network-segmentation checklist. No play/stop commands, no settings changed, no guessing. |
+| 📧 **dns** | 7 | DNS & email security for your own domain (`./seccheck.py dns 6amdev.com`): SPF, DKIM (common selectors), DMARC (+ policy strength), DNSSEC and CAA. Read-only public DNS lookups (stdlib, like `dig`) — nothing touches the domain's servers. |
 
 **Safe by design:** it only connects, reads banners and sends normal `GET`/`HEAD`/`OPTIONS` requests. It **never** sends attack payloads (no SQLi/XSS strings), never submits forms, and never writes or deletes anything on a target. Secrets it stumbles on are redacted: for an exposed `.env` the report shows variable names only.
 

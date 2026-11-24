@@ -507,8 +507,8 @@
       "en": "Camera/NVR streams without authentication"
     },
     "what": {
-      "th": "ส่ง RTSP OPTIONS แล้วกล้องตอบ 200 OK โดยไม่ขอรหัสผ่าน — ดูภาพได้โดยไม่ต้องล็อกอิน",
-      "en": "An RTSP OPTIONS got 200 OK with no auth challenge — the stream is viewable without login."
+      "th": "ส่ง RTSP DESCRIBE แล้วกล้องตอบ 200 OK (มี SDP) โดยไม่ขอรหัสผ่าน — ดูภาพได้โดยไม่ต้องล็อกอิน",
+      "en": "An RTSP DESCRIBE got 200 OK (with SDP) and no auth challenge — the stream is viewable without login."
     },
     "attack": {
       "th": "ใครในวง (หรือคนนอกถ้า forward พอร์ตไว้) เปิดดูภาพกล้องได้ มีเว็บรวมกล้องเปิดทั่วโลก; ลองด้วย VLC เปิด rtsp://ip:554/ ก็เห็น",

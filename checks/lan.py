@@ -89,17 +89,21 @@ def scan_host(ip, timeout):
 
 
 def rtsp_needs_auth(ip, port, timeout=3):
-    """ส่ง RTSP OPTIONS — กล้องที่ปลอดภัยจะตอบ 401 ขอ auth / does the camera challenge for auth?
-    คืน (ตอบไหม, ต้อง auth ไหม, บรรทัดแรก) — ไม่ส่งรหัสผ่าน ไม่ขอสตรีม"""
-    req = (f"OPTIONS rtsp://{ip}:{port}/ RTSP/1.0\r\nCSeq: 1\r\n"
-           f"User-Agent: {net.UA}\r\n\r\n").encode()
+    """ใช้ RTSP DESCRIBE (ไม่ใช่ OPTIONS) เพื่อดูว่าดูภาพได้โดยไม่ต้องรหัสจริงไหม
+    OPTIONS กล้องส่วนใหญ่ตอบ 200 โดยไม่ต้องรหัสตามสเปก — ต้องใช้ DESCRIBE ถึงจะรู้ว่าสตรีมต้อง auth ไหม
+    Uses RTSP DESCRIBE (not OPTIONS) to tell if the stream is really viewable without a password:
+    most cameras answer OPTIONS with 200 unauthenticated per spec, so only DESCRIBE reveals stream auth.
+    คืน (ตอบไหม, ต้อง auth ไหม, บรรทัดแรก) — ไม่ส่งรหัสผ่าน ไม่บันทึกภาพ"""
+    req = (f"DESCRIBE rtsp://{ip}:{port}/ RTSP/1.0\r\nCSeq: 1\r\n"
+           f"Accept: application/sdp\r\nUser-Agent: {net.UA}\r\n\r\n").encode()
     b = net.banner(ip, port, send=req, timeout=timeout) or b""
     if not b.startswith(b"RTSP/"):
         return False, True, ""
     text = b.decode("latin-1", "replace")
     line0 = text.splitlines()[0] if text else ""
     code = line0.split()[1] if len(line0.split()) > 1 else ""
-    needs = code in ("401", "403") or "www-authenticate" in text.lower()
+    # ต้อง auth ถ้าตอบ 401/403 หรือมี WWW-Authenticate · "ไม่ต้อง" เฉพาะเมื่อ DESCRIBE คืน 200 (+ SDP)
+    needs = code != "200" or "www-authenticate" in text.lower()
     return True, needs, line0
 
 

@@ -39,7 +39,13 @@ def split_target(target):
     return u.hostname, (u.port or 443)
 
 
-WEAK_CIPHER_RE = re.compile(r"RC4|3DES|DES-CBC(?!3)|_DES_|-DES-|NULL|EXPORT|MD5|RC2|IDEA", re.I)
+# ชื่อ cipher ที่อ่อน (DES ครอบทั้ง single-DES และ 3DES/DES-CBC3 · ไม่มี cipher แข็งตัวใดมีคำว่า DES)
+WEAK_CIPHER_RE = re.compile(r"RC4|DES|NULL|EXPORT|EXP-|MD5|RC2|IDEA|-ANON|ADH", re.I)
+
+
+def key_weak(bits, keytype):
+    """กุญแจอ่อนไหม — เกณฑ์ต่างกันตามชนิด: RSA/DSA <2048, EC(DSA) <256 / weak-key rule by key type"""
+    return bool(bits) and bits < (256 if keytype == "ec" else 2048)
 
 
 def accepts_cipher(host, port, cipher, timeout=5):
@@ -184,10 +190,8 @@ def run(target, opts):
     info = openssl_cert_info(host, port)
     bits, keytype = info.get("bits"), info.get("keytype", "rsa")
     if bits:
-        # เกณฑ์ต่างกันตามชนิดกุญแจ: RSA/DSA อ่อนถ้า <2048 · EC(DSA) อ่อนถ้า <256 (256-bit EC แข็งเทียบเท่า RSA 3072)
-        weak = bits < (256 if keytype == "ec" else 2048)
         label = f"{keytype.upper()} {bits}-bit"
-        if weak:
+        if key_weak(bits, keytype):
             res.add("tls.weak_key", f"{host}:{port}", label)
         else:
             res.ok("ขนาดกุญแจเพียงพอ", f"{host}:{port}", label)

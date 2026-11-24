@@ -17,12 +17,13 @@ import subprocess
 import time
 import urllib.parse
 
-from core import net, scope
+from core import cvedb, net, scope
 from core.finding import Result, T
 from i18n import _
 
-ROUTER_PORTS = {21: "FTP", 22: "SSH", 23: "Telnet", 53: "DNS", 80: "HTTP", 443: "HTTPS", 1900: "UPnP",
-                5000: "UPnP/HTTP", 7547: "TR-069", 8080: "HTTP-alt", 8443: "HTTPS-alt", 49152: "UPnP"}
+ROUTER_PORTS = {21: "FTP", 22: "SSH", 23: "Telnet", 53: "DNS", 80: "HTTP", 139: "NetBIOS", 443: "HTTPS",
+                445: "SMB", 1900: "UPnP", 5000: "UPnP/HTTP", 7547: "TR-069", 8080: "HTTP-alt",
+                8443: "HTTPS-alt", 49152: "UPnP"}
 MANUAL = ["router.manual_admin_password", "router.manual_wps", "router.manual_firmware",
           "router.manual_remote_admin", "router.manual_guest_iot", "router.manual_port_forward"]
 
@@ -101,20 +102,31 @@ def run(target, opts):
         res.add("router.tr069", f"{gw}:7547")
     if 22 in open_ports:
         res.add("router.ssh", f"{gw}:22", (net.banner(gw, 22) or b"").decode("latin-1").strip()[:80])
+    if 445 in open_ports or 139 in open_ports:    # แชร์ไฟล์บนเราเตอร์ = ผิดปกติ ควรปิด
+        res.add("lan.smb", f"{gw}:{445 if 445 in open_ports else 139}",
+                T("เปิดแชร์ไฟล์ (SMB/NetBIOS) บนตัวเราเตอร์ — ผิดปกติ ปิดถ้าไม่ได้ใช้"))
 
     # admin page
     if 80 in open_ports or 8080 in open_ports:
         port = 80 if 80 in open_ports else 8080
         h = net.request(f"http://{gw}:{port}/", timeout=5, max_bytes=16384)
         title = re.search(rb"<title[^>]*>(.*?)</title>", h.body, re.I | re.S)
-        info = (title.group(1).decode("utf-8", "replace").strip()[:80] if title else "") or h.h("server")
+        server = h.h("server")
+        titletxt = title.group(1).decode("utf-8", "replace").strip()[:80] if title else ""
+        info = " · ".join(x for x in (titletxt, server) if x) or f"HTTP {h.status}"
         to_https = h.status in (301, 302, 307, 308) and h.h("location").startswith("https://")
         if to_https:
             res.ok("หน้า admin เปลี่ยนไปใช้ HTTPS", f"http://{gw}:{port}/", h.h("location"))
         elif 443 in open_ports or 8443 in open_ports:
-            res.add("router.admin_http", f"http://{gw}:{port}/", info + " · " + T("มี HTTPS แต่ไม่บังคับใช้"), "low")
+            res.add("router.admin_http", f"http://{gw}:{port}/", info + " · " + str(T("มี HTTPS แต่ไม่บังคับใช้")), "low")
         else:
             res.add("router.admin_http", f"http://{gw}:{port}/", info)
+        # เฟิร์มแวร์/เว็บเซิร์ฟเวอร์เก่าบนเราเตอร์ → เทียบ CVE / old router web server → CVE match
+        prod, ver = cvedb.from_banner(server)
+        for e in cvedb.match(prod, ver):
+            from checks.cve import Desc
+            kid = "cve.eol_software" if e.get("eol") else "cve.known_vuln"
+            res.add(kid, f"http://{gw}:{port}/", Desc(f"{prod} {ver}", e.get("cve", ""), e["th"], e["en"]), e["sev"])
         res.note("รุ่น/หน้า admin ที่เห็น", info)
 
     # UPnP

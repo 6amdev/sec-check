@@ -39,18 +39,25 @@ def split_target(target):
     return u.hostname, (u.port or 443)
 
 
+WEAK_CIPHER_RE = re.compile(r"RC4|3DES|DES-CBC(?!3)|_DES_|-DES-|NULL|EXPORT|MD5|RC2|IDEA", re.I)
+
+
 def accepts_cipher(host, port, cipher, timeout=5):
     try:
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
+        # สำคัญ: TLS 1.3 ไม่สน cipher list ที่ตั้ง — ต้องจำกัดที่ TLS 1.2 ไม่งั้นจะ false positive
+        # (เซิร์ฟเวอร์ตกไปใช้ TLS 1.3 cipher แข็งแต่ handshake สำเร็จ ทำให้ดูเหมือน cipher อ่อนผ่าน)
+        ctx.maximum_version = ssl.TLSVersion.TLSv1_2
         ctx.set_ciphers(cipher + ":@SECLEVEL=0")
     except (ValueError, ssl.SSLError):
         return None                     # OpenSSL ของเราไม่มี cipher ชุดนี้ให้ลอง
     try:
         with socket.create_connection((host, port), timeout=timeout) as raw:
-            with ctx.wrap_socket(raw, server_hostname=host):
-                return True
+            with ctx.wrap_socket(raw, server_hostname=host) as s:
+                neg = (s.cipher() or ("",))[0]
+                return bool(WEAK_CIPHER_RE.search(neg))   # ยืนยันว่า cipher ที่เจรจาได้อ่อนจริงๆ
     except ssl.SSLError:
         return False
     except OSError:
@@ -103,6 +110,10 @@ def openssl_cert_info(host, port):
     m = re.search(r"Public-Key:\s*\((\d+) bit\)", out)
     if m:
         info["bits"] = int(m.group(1))
+    if re.search(r"id-ecPublicKey|ecPublicKey|Public Key Algorithm:\s*id-ec", out):
+        info["keytype"] = "ec"            # ECDSA/ECC — 256 บิตถือว่าแข็ง (ไม่ใช่เกณฑ์ RSA)
+    elif "rsaEncryption" in out:
+        info["keytype"] = "rsa"
     return info
 
 
@@ -171,10 +182,15 @@ def run(target, opts):
                 pass
 
     info = openssl_cert_info(host, port)
-    if info.get("bits") and info["bits"] < 2048:
-        res.add("tls.weak_key", f"{host}:{port}", f"{info['bits']}-bit")
-    elif info.get("bits"):
-        res.ok("ขนาดกุญแจเพียงพอ", f"{host}:{port}", f"{info['bits']}-bit")
+    bits, keytype = info.get("bits"), info.get("keytype", "rsa")
+    if bits:
+        # เกณฑ์ต่างกันตามชนิดกุญแจ: RSA/DSA อ่อนถ้า <2048 · EC(DSA) อ่อนถ้า <256 (256-bit EC แข็งเทียบเท่า RSA 3072)
+        weak = bits < (256 if keytype == "ec" else 2048)
+        label = f"{keytype.upper()} {bits}-bit"
+        if weak:
+            res.add("tls.weak_key", f"{host}:{port}", label)
+        else:
+            res.ok("ขนาดกุญแจเพียงพอ", f"{host}:{port}", label)
     if info.get("sig") and "sha1" in info["sig"].lower():
         res.add("tls.sha1_sig", f"{host}:{port}", info["sig"])
 

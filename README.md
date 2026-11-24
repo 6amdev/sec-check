@@ -169,6 +169,8 @@ Want to go deeper than the scanner and actually learn to hack (your own stuff)? 
 
 Ready-to-run **real** vulnerable targets (DVWA + OWASP Juice Shop) are in [`lab/pentest/`](lab/pentest/) — `docker compose up -d`, bound to localhost only.
 
+A detailed **challenge catalog** (60+ hands-on tasks, beginner→advanced, each tagged with what you learn and what environment it needs) is in **[docs/CHALLENGES.md](docs/CHALLENGES.md)**.
+
 ## 🚩 CTF attack lab
 
 Defending is only half the fun. `sec-check` ships a **CTF attack lab** — deliberately-vulnerable targets you exploit *for real* (SQL injection, command injection, path traversal, IDOR, reflected XSS, auth bypass, exposed secrets) to capture flags:

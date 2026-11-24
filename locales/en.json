@@ -364,5 +364,6 @@
  "ยังไม่ได้ติดตั้งเครื่องมือนี้ — ติดตั้งเพื่อตรวจลึกขึ้น": "This tool isn't installed — install it for deeper checks",
  "เปิด MCP server (stdio) ให้ AI สั่งสแกนได้": "Start the MCP server (stdio) so an AI can drive scans",
  "เปิด REST API ที่ /api/* (ต้องส่ง header X-API-Key)": "Enable the REST API at /api/* (send an X-API-Key header)",
- "เปิดสนามเจาะ CTF (เป้าฝึกบน localhost)": "Open the CTF attack lab (practice targets on localhost)"
+ "เปิดสนามเจาะ CTF (เป้าฝึกบน localhost)": "Open the CTF attack lab (practice targets on localhost)",
+ "เปิดเมนูโต้ตอบในเทอร์มินอล (workbench)": "Open the interactive terminal menu (workbench)"
 }

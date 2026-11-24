@@ -220,6 +220,7 @@ def main(argv=None):
     sv.add_argument("--api-key", default=os.environ.get("SECCHECK_API_KEY"))
     sub.add_parser("mcp", help=_("เปิด MCP server (stdio) ให้ AI สั่งสแกนได้"))
     sub.add_parser("ctf", help=_("เปิดสนามเจาะ CTF (เป้าฝึกบน localhost)"))
+    sub.add_parser("menu", help=_("เปิดเมนูโต้ตอบในเทอร์มินอล (workbench)"))
 
     args = p.parse_args(argv)
     i18n.set_default(args.lang)
@@ -243,6 +244,8 @@ def main(argv=None):
             mcpserver.main()
         elif args.cmd == "ctf":
             sys.path.insert(0, str(HERE / "lab")); import ctf; ctf.main()
+        elif args.cmd == "menu":
+            import workbench; workbench.main()
         elif args.cmd == "serve":
             import webapp
             webapp.main(["--host", args.host, "--port", str(args.port), "--lang", args.lang]

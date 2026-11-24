@@ -141,6 +141,14 @@ Example entry for an MCP client config (e.g. Claude Desktop / Claude Code):
   "args": ["/path/to/sec-check/seccheck.py", "mcp"] } } }
 ```
 
+### Terminal workbench
+
+Don't want to remember every command? Run the interactive menu — scans, labs/CTF, tool checks, the Learn pages and the allow-list, all from one place:
+
+```bash
+./sc            # or ./seccheck.py menu
+```
+
 ### Learn
 
 ```bash

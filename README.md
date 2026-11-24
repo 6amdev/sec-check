@@ -163,6 +163,16 @@ Example entry for an MCP client config (e.g. Claude Desktop / Claude Code):
 
 <img src="docs/screenshots/hardened-en.png" width="60%" alt="Hardened lab site">
 
+## 🚩 CTF attack lab
+
+Defending is only half the fun. `sec-check` ships a **CTF attack lab** — deliberately-vulnerable targets you exploit *for real* (SQL injection, command injection, path traversal, IDOR, reflected XSS, auth bypass, exposed secrets) to capture flags:
+
+```bash
+./ctf.sh        # or ./seccheck.py ctf   →  http://127.0.0.1:8900
+```
+
+It binds to loopback only and uses a fake in-memory database, filesystem and shell with fake flags, so the **techniques are authentic but the blast radius is zero** — you can't touch the real host, and of course you only ever attack targets you own. Each challenge maps to a Learn-page level; solve it, then read *what / why / how to fix*. Step-by-step walkthrough (with spoilers) in [docs/CTF.md](docs/CTF.md).
+
 ## 🔒 Safety model
 
 - **Allow-list (`scope.json`, git-ignored).** Every web/LAN/router check calls `scope.check()` first. Targets are added only through `scope add`, which asks you to type `yes`. Loopback (`127.0.0.0/8`, `::1`, `localhost`) is always allowed. The host module audits only the local machine.

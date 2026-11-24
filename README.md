@@ -163,6 +163,12 @@ Example entry for an MCP client config (e.g. Claude Desktop / Claude Code):
 
 <img src="docs/screenshots/hardened-en.png" width="60%" alt="Hardened lab site">
 
+## 🎓 Learning offensive security
+
+Want to go deeper than the scanner and actually learn to hack (your own stuff)? See the full, structured path from beginner to advanced — recon, web app (OWASP Top 10), network/service exploitation, password & crypto attacks, privilege escalation, Active Directory, wireless, binary exploitation and more — in **[docs/LEARN-PENTEST.md](docs/LEARN-PENTEST.md)**, with the practice targets and tools for each stage.
+
+Ready-to-run **real** vulnerable targets (DVWA + OWASP Juice Shop) are in [`lab/pentest/`](lab/pentest/) — `docker compose up -d`, bound to localhost only.
+
 ## 🚩 CTF attack lab
 
 Defending is only half the fun. `sec-check` ships a **CTF attack lab** — deliberately-vulnerable targets you exploit *for real* (SQL injection, command injection, path traversal, IDOR, reflected XSS, auth bypass, exposed secrets) to capture flags:
